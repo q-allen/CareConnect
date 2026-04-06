@@ -1,0 +1,423 @@
+"use client";
+
+import { ReactNode, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Activity,
+  Home,
+  Calendar,
+  CalendarDays,
+  MessageCircle,
+  FileText,
+  User,
+  Bell,
+  LogOut,
+  Menu,
+  X,
+  Search,
+  Settings,
+  Users,
+  Clock,
+  Pill,
+  Trash2,
+  FlaskConical,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
+import { useAuthStore, useUIStore, useNotificationStore } from '@/store';
+import { authService } from '@/services/authService';
+import { notificationService } from '@/services/notificationService';
+import { useToast } from '@/hooks/use-toast';
+import { UserRole } from '@/types';
+
+interface NavItem {
+  label: string;
+  href: string;
+  icon: React.ElementType;
+  badge?: number;
+}
+
+const navItems: Record<Exclude<UserRole, 'admin'>, NavItem[]> = {
+  patient: [
+    { label: 'Dashboard', href: '/patient', icon: Home },
+    { label: 'Find Doctors', href: '/patient/doctors', icon: Search },
+    { label: 'Appointments', href: '/patient/appointments', icon: Calendar },
+    { label: 'Messages', href: '/patient/messages', icon: MessageCircle },
+    { label: 'My Files', href: '/patient/records', icon: FileText },
+    { label: 'Pharmacy', href: '/patient/pharmacy', icon: Pill },
+  ],
+  doctor: [
+    { label: 'Dashboard',    href: '/doctor',               icon: Home },
+    { label: 'Queue',        href: '/doctor/queue',          icon: Clock },
+    { label: 'Appointments', href: '/doctor/appointments',   icon: Calendar },
+    { label: 'My Schedule',  href: '/doctor/schedule',       icon: CalendarDays },
+    { label: 'Patients',     href: '/doctor/patients',       icon: Users },
+    { label: 'Messages',     href: '/doctor/messages',       icon: MessageCircle },
+    { label: 'Prescriptions',href: '/doctor/prescriptions',  icon: FileText },
+    { label: 'Lab Results',   href: '/doctor/lab-results',    icon: FlaskConical },
+  ],
+};
+
+interface DashboardLayoutProps {
+  children: ReactNode;
+}
+
+export default function DashboardLayout({ children }: DashboardLayoutProps) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { toast } = useToast();
+  const { user, logout: logoutStore } = useAuthStore();
+  const { sidebarOpen, mobileMenuOpen, setSidebarOpen, setMobileMenuOpen } = useUIStore();
+  const { unreadCount, notifications, markAsRead, clearBadge, removeNotification } = useNotificationStore();
+
+  useEffect(() => {
+    if (!user) {
+      router.push('/login');
+    }
+  }, [user, router]);
+
+  if (!user) return null;
+
+  const currentNavItems = user.role !== 'admin' ? (navItems[user.role] ?? []) : [];
+
+  const handleLogout = async () => {
+    await authService.logout();
+    logoutStore();
+    toast({
+      title: 'Logged out',
+      description: 'See you next time!',
+    });
+    router.push('/');
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const getNotificationUrl = (n: import('@/types').Notification): string | null => {
+    const data = (n.data ?? {}) as Record<string, unknown>;
+    const role = user.role;
+
+    // Invitation
+    const invitationId = data.invitation_id ?? data.invitationId;
+    if (invitationId && role === 'patient') return `/patient/invitations/${invitationId}`;
+
+    switch (n.type) {
+      case 'appointment': {
+        const id = data.appointment_id ?? data.appointmentId;
+        if (id) {
+          const isReview = /review|completed|rate/i.test(n.title + ' ' + n.message);
+          return `/${role}/appointments/${id}${isReview ? '?review=1' : ''}`;
+        }
+        return `/${role}/appointments`;
+      }
+      case 'queue':
+        return role === 'doctor' ? '/doctor/queue' : '/patient/appointments';
+      case 'message': {
+        const convId = data.conversation_id ?? data.conversationId;
+        return convId ? `/${role}/messages?conversation=${convId}` : `/${role}/messages`;
+      }
+      case 'prescription':
+        return role === 'patient' ? '/patient/records' : '/doctor/prescriptions';
+      case 'lab-result':
+        return role === 'patient' ? '/patient/records' : '/doctor/lab-results';
+      case 'pharmacy':
+        return '/patient/pharmacy?orders=1';
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Sidebar - Desktop */}
+      <aside
+        className={cn(
+          'fixed left-0 top-0 z-40 h-screen bg-card border-r border-border transition-all duration-300 hidden lg:block',
+          sidebarOpen ? 'w-64' : 'w-20'
+        )}
+      >
+        <div className="flex h-full flex-col">
+          {/* Logo */}
+          <div className="flex h-16 items-center justify-between px-4 border-b border-border">
+            <Link href="/" className="flex items-center gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary">
+                <Activity className="h-6 w-6 text-primary-foreground" />
+              </div>
+              {sidebarOpen && (
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-xl font-bold text-foreground"
+                >
+                  CareConnect
+                </motion.span>
+              )}
+            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="hidden lg:flex"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex-1 overflow-y-auto py-4">
+            <ul className="space-y-1 px-3">
+              {currentNavItems.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className={cn(
+                        'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                        isActive
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                      )}
+                    >
+                      <item.icon className="h-5 w-5 flex-shrink-0" />
+                      {sidebarOpen && (
+                        <motion.span
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="flex-1"
+                        >
+                          {item.label}
+                        </motion.span>
+                      )}
+                      {sidebarOpen && item.badge && (
+                        <Badge variant="secondary" className="h-5 px-1.5 text-xs">
+                          {item.badge}
+                        </Badge>
+                      )}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+
+          {/* User Info */}
+          <div className="border-t border-border p-4">
+            <div className={cn('flex items-center gap-3', !sidebarOpen && 'justify-center')}>
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={user.avatar} />
+                <AvatarFallback>{user?.name?.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+              </Avatar>
+              {sidebarOpen && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
+                  <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
+                </motion.div>
+              )}
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileMenuOpen(false)}
+              className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+            />
+            <motion.aside
+              initial={{ x: -280 }}
+              animate={{ x: 0 }}
+              exit={{ x: -280 }}
+              transition={{ type: 'spring', damping: 20 }}
+              className="fixed left-0 top-0 z-50 h-screen w-72 bg-card border-r border-border lg:hidden"
+            >
+              <div className="flex h-full flex-col">
+                <div className="flex h-16 items-center justify-between px-4 border-b border-border">
+                  <Link href="/" className="flex items-center gap-2">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary">
+                      <Activity className="h-6 w-6 text-primary-foreground" />
+                    </div>
+                    <span className="text-xl font-bold text-foreground">CareConnect</span>
+                  </Link>
+                  <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)}>
+                    <X className="h-5 w-5" />
+                  </Button>
+                </div>
+
+                <nav className="flex-1 overflow-y-auto py-4">
+                  <ul className="space-y-1 px-3">
+                    {currentNavItems.map((item) => {
+                      const isActive = pathname === item.href;
+                      return (
+                        <li key={item.href}>
+                          <Link
+                            href={item.href}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className={cn(
+                              'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                              isActive
+                                ? 'bg-primary text-primary-foreground'
+                                : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                            )}
+                          >
+                            <item.icon className="h-5 w-5" />
+                            <span className="flex-1">{item.label}</span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </nav>
+
+                <div className="border-t border-border p-4">
+                  <Button variant="ghost" className="w-full justify-start gap-3" onClick={handleLogout}>
+                    <LogOut className="h-5 w-5" />
+                    Logout
+                  </Button>
+                </div>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Main Content */}
+      <div className={cn('transition-all duration-300', sidebarOpen ? 'lg:ml-64' : 'lg:ml-20')}>
+        {/* Header */}
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-card/80 backdrop-blur px-4 sm:px-6">
+          <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(true)} className="lg:hidden">
+            <Menu className="h-5 w-5" />
+          </Button>
+
+          <div className="flex-1" />
+
+          <div className="flex items-center gap-2">
+            {/* Notifications */}
+            <DropdownMenu onOpenChange={(open) => { if (open && unreadCount > 0) { clearBadge(); notificationService.markAllAsRead(''); } }}>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative">
+                  <Bell className="h-5 w-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center">
+                      {unreadCount}
+                    </span>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80 p-0">
+                <div className="px-3 py-2 border-b border-border">
+                  <span className="text-sm font-semibold">Notifications</span>
+                </div>
+                <div className="max-h-80 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <div className="py-4 px-3 text-sm text-muted-foreground text-center">
+                      No new notifications
+                    </div>
+                  ) : (
+                    notifications.map((n) => (
+                      <div
+                        key={n.id}
+                        className={cn(
+                          'group flex items-start gap-2 px-3 py-2.5 border-b border-border/50 last:border-0 transition-colors cursor-pointer',
+                          !n.isRead ? 'bg-primary/5 hover:bg-primary/10' : 'hover:bg-secondary/50'
+                        )}
+                        onClick={() => {
+                          if (!n.isRead) {
+                            markAsRead(n.id);
+                            notificationService.markAsRead(n.id);
+                          }
+                          const url = getNotificationUrl(n);
+                          if (url) router.push(url);
+                        }}
+                      >
+                        <span className={cn('h-2 w-2 rounded-full mt-1.5 shrink-0', !n.isRead ? 'bg-primary' : 'bg-transparent')} />
+                        <div className="flex-1 cursor-pointer min-w-0">
+                          <p className={cn('text-xs text-foreground', !n.isRead ? 'font-semibold' : 'font-normal')}>{n.title}</p>
+                          <p className="text-xs text-muted-foreground">{n.message}</p>
+                        </div>
+                        <button
+                          type="button"
+                          title="Dismiss notification"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:text-destructive shrink-0 cursor-pointer"
+                          onClick={(e) => { e.stopPropagation(); removeNotification(n.id); notificationService.deleteNotification(n.id); }}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* User Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user.avatar} />
+                    <AvatarFallback>{user?.name?.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div>
+                    <p className="font-medium">{user.name}</p>
+                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => router.push(`/${user.role}/profile`)}>
+                  <User className="mr-2 h-4 w-4" />
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <main className="p-4 sm:p-6 lg:p-8">
+          <motion.div
+            key={pathname}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {children}
+          </motion.div>
+        </main>
+      </div>
+    </div>
+  );
+}

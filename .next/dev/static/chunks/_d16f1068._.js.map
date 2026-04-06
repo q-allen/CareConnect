@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/CAPSTONE%202/CareConnectWeb/app/pharmacy/orders/success/page.tsx"],"sourcesContent":["\"use client\";\nimport { useEffect } from \"react\";\nimport { useSearchParams, useRouter } from \"next/navigation\";\n\nexport default function PharmacySuccessRedirect() {\n  const searchParams = useSearchParams();\n  const router = useRouter();\n\n  useEffect(() => {\n    const ref = searchParams.get(\"ref\");\n    router.replace(`/patient/pharmacy/orders/success${ref ? `?ref=${ref}` : \"\"}`);\n  }, [searchParams, router]);\n\n  return null;\n}\n"],"names":[],"mappings":";;;;AACA;AACA;;AAFA;;;AAIe,SAAS;;IACtB,MAAM,eAAe,IAAA,wJAAe;IACpC,MAAM,SAAS,IAAA,kJAAS;IAExB,IAAA,0KAAS;6CAAC;YACR,MAAM,MAAM,aAAa,GAAG,CAAC;YAC7B,OAAO,OAAO,CAAC,CAAC,gCAAgC,EAAE,MAAM,CAAC,KAAK,EAAE,KAAK,GAAG,IAAI;QAC9E;4CAAG;QAAC;QAAc;KAAO;IAEzB,OAAO;AACT;GAVwB;;QACD,wJAAe;QACrB,kJAAS;;;KAFF"}},
+    {"offset": {"line": 44, "column": 0}, "map": {"version":3,"sources":["file:///C:/CAPSTONE%202/CareConnectWeb/node_modules/next/navigation.js"],"sourcesContent":["module.exports = require('./dist/client/components/navigation')\n"],"names":[],"mappings":"AAAA,OAAO,OAAO","ignoreList":[0]}}]
+}

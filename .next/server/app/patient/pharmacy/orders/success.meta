@@ -1,0 +1,19 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/(patient)/layout,_N_T_/(patient)/patient/layout,_N_T_/(patient)/patient/pharmacy/layout,_N_T_/(patient)/patient/pharmacy/orders/layout,_N_T_/(patient)/patient/pharmacy/orders/success/layout,_N_T_/(patient)/patient/pharmacy/orders/success/page,_N_T_/patient/pharmacy/orders/success"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/!KHBhdGllbnQp/patient/pharmacy/orders/success/__PAGE__",
+    "/!KHBhdGllbnQp/patient/pharmacy/orders/success",
+    "/!KHBhdGllbnQp/patient/pharmacy/orders",
+    "/!KHBhdGllbnQp/patient/pharmacy",
+    "/!KHBhdGllbnQp/patient",
+    "/!KHBhdGllbnQp",
+    "/_index",
+    "/_head"
+  ]
+}

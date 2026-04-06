@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/CAPSTONE%202/CareConnectWeb/app/%28patient%29/layout.tsx"],"sourcesContent":["\"use client\";\n\nimport { ReactNode, useEffect } from 'react';\nimport { useRouter } from 'next/navigation';\nimport { useAuthStore } from '@/store';\n\ninterface PatientLayoutProps {\n  children: ReactNode;\n}\n\nexport default function PatientLayout({ children }: PatientLayoutProps) {\n  const router = useRouter();\n  const user = useAuthStore((s) => s.user);\n  const isLoading = useAuthStore((s) => s.isLoading);\n\n  useEffect(() => {\n    if (!isLoading && !user) router.replace('/signin');\n  }, [isLoading, user, router]);\n\n  if (isLoading || !user) return null;\n\n  return children;\n}\n"],"names":[],"mappings":";;;;AAEA;AACA;AACA;;AAJA;;;;AAUe,SAAS,cAAc,EAAE,QAAQ,EAAsB;;IACpE,MAAM,SAAS,IAAA,kJAAS;IACxB,MAAM,OAAO,IAAA,wIAAY;4CAAC,CAAC,IAAM,EAAE,IAAI;;IACvC,MAAM,YAAY,IAAA,wIAAY;iDAAC,CAAC,IAAM,EAAE,SAAS;;IAEjD,IAAA,0KAAS;mCAAC;YACR,IAAI,CAAC,aAAa,CAAC,MAAM,OAAO,OAAO,CAAC;QAC1C;kCAAG;QAAC;QAAW;QAAM;KAAO;IAE5B,IAAI,aAAa,CAAC,MAAM,OAAO;IAE/B,OAAO;AACT;GAZwB;;QACP,kJAAS;QACX,wIAAY;QACP,wIAAY;;;KAHR"}},
+    {"offset": {"line": 53, "column": 0}, "map": {"version":3,"sources":["file:///C:/CAPSTONE%202/CareConnectWeb/node_modules/next/navigation.js"],"sourcesContent":["module.exports = require('./dist/client/components/navigation')\n"],"names":[],"mappings":"AAAA,OAAO,OAAO","ignoreList":[0]}}]
+}

@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["file:///C:/CAPSTONE%202/CareConnectWeb/src/components/video/JitsiMeeting.module.css"],"sourcesContent":[".iframe {\n  min-height: calc(100vh - 56px);\n}\n"],"names":[],"mappings":"AAAA"}}]
+}

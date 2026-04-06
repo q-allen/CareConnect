@@ -1,0 +1,3 @@
+{
+  "/(patient)/patient/teleconsult/[appointmentId]/page": "app/(patient)/patient/teleconsult/[appointmentId]/page.js"
+}

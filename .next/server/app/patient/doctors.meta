@@ -1,0 +1,17 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/(patient)/layout,_N_T_/(patient)/patient/layout,_N_T_/(patient)/patient/doctors/layout,_N_T_/(patient)/patient/doctors/page,_N_T_/patient/doctors"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/!KHBhdGllbnQp/patient/doctors/__PAGE__",
+    "/!KHBhdGllbnQp/patient/doctors",
+    "/!KHBhdGllbnQp/patient",
+    "/!KHBhdGllbnQp",
+    "/_index",
+    "/_head"
+  ]
+}

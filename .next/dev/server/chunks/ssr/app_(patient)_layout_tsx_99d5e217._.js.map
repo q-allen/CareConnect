@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/CAPSTONE%202/CareConnectWeb/app/%28patient%29/layout.tsx"],"sourcesContent":["\"use client\";\n\nimport { ReactNode } from 'react';\n\ninterface PatientLayoutProps {\n  children: ReactNode;\n}\n\nexport default function PatientLayout({ children }: PatientLayoutProps) {\n  return children;\n}\n"],"names":[],"mappings":";;;;AAAA;AAQe,SAAS,cAAc,EAAE,QAAQ,EAAsB;IACpE,OAAO;AACT"}}]
+}
