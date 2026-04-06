@@ -29,6 +29,20 @@ import LabRequestForm from "@/components/records/LabRequestForm";
  * 
  * UX Improvements:
  * - Prominent patient information card at the top (avatar, name, age, sex, contact)\n * - Clear reason for consultation display\n * - Visual status timeline\n * - Payment status with clear badges\n * - Video consultation controls with live indicators\n * - Document sharing section\n * - Consultation notes editor\n * - Quick action buttons (Message, Mark No-Show, Refund)\n */
+function getJitsiUrl(videoRoomUrl: string, displayName: string): string {
+  const domain = process.env.NEXT_PUBLIC_JITSI_DOMAIN ?? "meet.jit.si";
+  const roomName = videoRoomUrl.split("#")[0].split("/").pop() ?? videoRoomUrl;
+  const encodedName = encodeURIComponent(displayName);
+  return (
+    `https://${domain}/${roomName}` +
+    `#userInfo.displayName="${encodedName}"` +
+    `&config.prejoinPageEnabled=false` +
+    `&config.startWithAudioMuted=false` +
+    `&config.startWithVideoMuted=false` +
+    `&config.disableDeepLinking=true`
+  );
+}
+
 export default function DoctorAppointmentDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -430,7 +444,7 @@ export default function DoctorAppointmentDetailPage() {
                 </div>
 
                 {videoRoomUrl && (
-                  <a href={videoRoomUrl} target="_blank" rel="noopener noreferrer" className="block">
+                  <a href={getJitsiUrl(videoRoomUrl, user?.name ?? "Doctor")} target="_blank" rel="noopener noreferrer" className="block">
                     <Button className="w-full gap-2 bg-primary hover:bg-primary/90 h-11">
                       <Video className="h-4 w-4" />
                       Join Video Room (opens in new tab)
