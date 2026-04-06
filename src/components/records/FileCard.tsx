@@ -78,14 +78,23 @@ export default function FileCard({
     }
   };
 
-  const handlePrint = (e: React.MouseEvent) => {
+  const handlePrint = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!effectiveUrl) {
       toast({ title: 'No printable file', description: 'File not available for printing.', variant: 'destructive' });
       return;
     }
-    const win = window.open(resolveUrl(effectiveUrl), '_blank');
-    if (!win) toast({ title: 'Popup blocked', description: 'Allow popups for this site to print.', variant: 'destructive' });
+    try {
+      const res = await fetch(resolveUrl(effectiveUrl), { credentials: 'include' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const win = window.open(blobUrl, '_blank');
+      if (!win) toast({ title: 'Popup blocked', description: 'Allow popups for this site to print.', variant: 'destructive' });
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+    } catch {
+      toast({ title: 'Print failed', description: 'Could not load the file. Try downloading instead.', variant: 'destructive' });
+    }
   };
 
   const handleShare = async (e: React.MouseEvent) => {

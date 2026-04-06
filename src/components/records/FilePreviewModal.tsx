@@ -135,31 +135,24 @@ export default function FilePreviewModal({
     }
   }, [resolvedFileUrl, toast]);
 
-  const handlePrint = () => {
-    if (resolvedFileUrl) {
-      const win = window.open(resolveUrl(resolvedFileUrl), '_blank');
+  const handlePrint = async () => {
+    if (!resolvedFileUrl) {
+      window.print();
+      return;
+    }
+    try {
+      const resolved = resolveUrl(resolvedFileUrl);
+      const res = await fetch(resolved, { credentials: 'include' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const win = window.open(blobUrl, '_blank');
       if (!win) {
         toast({ title: 'Popup blocked', description: 'Allow popups for this site to print the document.', variant: 'destructive' });
-        return;
       }
-      try {
-        const timer = window.setInterval(() => {
-          try {
-            if (win.document?.readyState === 'complete') {
-              win.focus();
-              win.print();
-              window.clearInterval(timer);
-            }
-          } catch {
-            window.clearInterval(timer);
-          }
-        }, 500);
-      } catch {
-        toast({ title: 'Print ready', description: 'Use your browser print dialog.' });
-      }
-    } else {
-      // No PDF — print the visible modal content
-      window.print();
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+    } catch {
+      toast({ title: 'Could not open PDF', description: 'Try downloading instead.', variant: 'destructive' });
     }
   };
 

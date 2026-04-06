@@ -184,25 +184,33 @@ export default function DoctorPrescriptionsPage() {
     setIssueOpen(true);
   };
 
-  const handlePrint = () => {
-    if (!selected?.pdfUrl) {
-      toast({ title: 'No PDF available', description: 'PDF has not been generated for this prescription.', variant: 'destructive' });
+  const handlePrint = async () => {
+    if (!selected?.id) {
+      toast({ title: 'No prescription selected', variant: 'destructive' });
       return;
     }
-    const win = window.open(selected.pdfUrl, '_blank');
-    if (!win) {
-      toast({ title: 'Popup blocked', description: 'Allow popups to print this document.', variant: 'destructive' });
-      return;
+    try {
+      const { getBaseUrl } = await import('@/services/api');
+      const res = await fetch(
+        `${getBaseUrl()}/api/records/prescriptions/${selected.id}/pdf/`,
+        { credentials: 'include' }
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const win = window.open(url, '_blank');
+      if (!win) {
+        toast({ title: 'Popup blocked', description: 'Allow popups to print this document.', variant: 'destructive' });
+      }
+      // Revoke after a short delay to allow the tab to load
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (err) {
+      toast({
+        title: 'Could not load PDF',
+        description: err instanceof Error ? err.message : 'Please try again.',
+        variant: 'destructive',
+      });
     }
-    const timer = window.setInterval(() => {
-      try {
-        if (win.document?.readyState === 'complete') {
-          win.focus();
-          win.print();
-          window.clearInterval(timer);
-        }
-      } catch { window.clearInterval(timer); }
-    }, 500);
   };
 
   return (
