@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -41,6 +41,7 @@ import { authService } from '@/services/authService';
 import { notificationService } from '@/services/notificationService';
 import { useToast } from '@/hooks/use-toast';
 import { UserRole } from '@/types';
+import { PageLoader } from '@/components/ui/page-loader';
 
 interface NavItem {
   label: string;
@@ -76,6 +77,16 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname();
+  const [routeLoading, setRouteLoading] = useState(false);
+  const prevPath = useState(pathname);
+
+  useEffect(() => {
+    if (pathname === prevPath[0]) return;
+    prevPath[1](pathname);
+    setRouteLoading(true);
+    const t = setTimeout(() => setRouteLoading(false), 400);
+    return () => clearTimeout(t);
+  }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
   const router = useRouter();
   const { toast } = useToast();
   const { user, logout: logoutStore } = useAuthStore();
@@ -407,7 +418,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </header>
 
         {/* Page Content */}
-        <main className="p-4 sm:p-6 lg:p-8">
+        <main className="p-4 sm:p-6 lg:p-8 relative">
+          {routeLoading && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/70 backdrop-blur-sm">
+              <div className="h-10 w-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+            </div>
+          )}
           <motion.div
             key={pathname}
             initial={{ opacity: 0, y: 10 }}

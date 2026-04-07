@@ -4,6 +4,7 @@ import { ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store';
 import { useNotifications } from '@/hooks/useNotifications';
+import { PageLoader } from '@/components/ui/page-loader';
 
 interface PatientLayoutProps {
   children: ReactNode;
@@ -20,7 +21,8 @@ export default function PatientLayout({ children }: PatientLayoutProps) {
     if (!isLoading && !user) router.replace('/signin');
   }, [isLoading, user, router]);
 
-  if (isLoading || !user) return null;
+  if (isLoading) return <PageLoader />;
+  if (!user) return null;
 
   return children;
 }

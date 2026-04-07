@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuthStore } from '@/store';
 import { useNotifications } from '@/hooks/useNotifications';
+import { PageLoader } from '@/components/ui/page-loader';
 
 interface DoctorLayoutProps {
   children: ReactNode;
@@ -21,7 +22,8 @@ export default function DoctorLayout({ children }: DoctorLayoutProps) {
     if (!isLoading && !user) router.replace('/signin');
   }, [isLoading, user, router]);
 
-  if (isLoading || !user) return null;
+  if (isLoading) return <PageLoader />;
+  if (!user) return null;
 
   return <DashboardLayout>{children}</DashboardLayout>;
 }
