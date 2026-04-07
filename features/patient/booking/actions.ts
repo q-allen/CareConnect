@@ -48,7 +48,7 @@ export async function createPaymongoCheckoutSession(
   const body = {
     data: {
       attributes: {
-        payment_method_types: ["gcash", "card", "paymaya"],
+        payment_method_types: input.method === "gcash" ? ["gcash"] : ["card"],
         line_items: [
           {
             name: `Consultation with ${input.doctorName}`,
