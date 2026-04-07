@@ -191,6 +191,7 @@ export const API_ENDPOINTS = {
   // Records
   PRESCRIPTIONS:        "/api/records/prescriptions",
   PRESCRIPTION_DETAIL:  (id: number | string) => `/api/records/prescriptions/${id}`,
+  PRESCRIPTION_PDF:     (id: number | string) => `/api/records/prescriptions/${id}/pdf/`,
   LAB_RESULTS:          "/api/records/labs",
   LAB_DETAIL:           (id: number | string) => `/api/records/labs/${id}`,
   CERTIFICATES:         "/api/records/certificates",

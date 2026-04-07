@@ -43,22 +43,7 @@ export default function FilePreviewModal({
     null;
   const [resolvedFileUrl, setResolvedFileUrl] = useState<string | null>(fileUrl ?? null);
 
-  const resolveUrl = (url: string) => {
-    if (url.startsWith('http')) return url;
-    const base = getBaseUrl();
-    if (base) {
-      const trimmedBase = base.replace(/\/$/, '');
-      const path = url.startsWith('/') ? url : `/${url}`;
-      return `${trimmedBase}${path}`;
-    }
-    if (typeof window !== 'undefined') {
-      const path = url.startsWith('/') ? url : `/${url}`;
-      return `${window.location.origin}${path}`;
-    }
-    return url;
-  };
-
-  useEffect(() => {
+useEffect(() => {
     setResolvedFileUrl(fileUrl ?? null);
     if (!open || fileUrl) return;
 
@@ -96,17 +81,21 @@ export default function FilePreviewModal({
   };
 
   const handleDownload = useCallback(async () => {
-    if (!resolvedFileUrl) {
-      // No PDF yet — fall back to printing the rendered content
-      toast({ title: 'PDF not ready', description: 'Printing the document instead.' });
-      window.print();
-      return;
-    }
     setDownloading(true);
     let blobUrl: string | null = null;
     try {
-      const resolved = resolveUrl(resolvedFileUrl);
-      const res = await fetch(resolved, { credentials: 'include' });
+      const base = getBaseUrl();
+      let res: Response;
+      if (type === 'prescription' && prescription?.id) {
+        res = await fetch(`${base}${API_ENDPOINTS.PRESCRIPTION_PDF(prescription.id)}`, { credentials: 'include' });
+      } else if (resolvedFileUrl) {
+        const url = resolvedFileUrl.startsWith('http') ? resolvedFileUrl : `${base}${resolvedFileUrl}`;
+        res = await fetch(url);
+      } else {
+        toast({ title: 'PDF not ready', description: 'Printing the document instead.' });
+        window.print();
+        return;
+      }
       if (res.status === 401) throw new Error('Your session has expired. Please log in again.');
       if (res.status === 403) throw new Error('You do not have permission to download this file.');
       if (res.status === 404) throw new Error('File not found. It may have been removed.');
@@ -115,34 +104,33 @@ export default function FilePreviewModal({
       blobUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = blobUrl;
-      a.download = resolved.split('/').pop() ?? 'document.pdf';
+      a.download = `${type}-${prescription?.id ?? labResult?.id ?? certificate?.id}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       toast({ title: 'Download started', description: 'Your file is downloading.' });
     } catch (err) {
-      // Fallback: open in a new tab so the user can save from the browser
       const message = err instanceof Error ? err.message : 'Could not download the file. Try again.';
       toast({ title: 'Download failed', description: message, variant: 'destructive' });
-      try {
-        window.open(resolveUrl(resolvedFileUrl), '_blank');
-      } catch {
-        // ignore
-      }
     } finally {
       setDownloading(false);
       if (blobUrl) setTimeout(() => URL.revokeObjectURL(blobUrl!), 10000);
     }
-  }, [resolvedFileUrl, toast]);
+  }, [type, prescription?.id, labResult?.id, certificate?.id, resolvedFileUrl, toast]);
 
   const handlePrint = async () => {
-    if (!resolvedFileUrl) {
-      window.print();
-      return;
-    }
     try {
-      const resolved = resolveUrl(resolvedFileUrl);
-      const res = await fetch(resolved, { credentials: 'include' });
+      const base = getBaseUrl();
+      let res: Response;
+      if (type === 'prescription' && prescription?.id) {
+        res = await fetch(`${base}${API_ENDPOINTS.PRESCRIPTION_PDF(prescription.id)}`, { credentials: 'include' });
+      } else if (resolvedFileUrl) {
+        const url = resolvedFileUrl.startsWith('http') ? resolvedFileUrl : `${base}${resolvedFileUrl}`;
+        res = await fetch(url);
+      } else {
+        window.print();
+        return;
+      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const blob = await res.blob();
       const blobUrl = URL.createObjectURL(blob);
@@ -157,7 +145,12 @@ export default function FilePreviewModal({
   };
 
   const handleShare = async () => {
-    const shareUrl = resolvedFileUrl ? resolveUrl(resolvedFileUrl) : window.location.href;
+    const base = getBaseUrl();
+    const shareUrl = type === 'prescription' && prescription?.id
+      ? `${base}${API_ENDPOINTS.PRESCRIPTION_PDF(prescription.id)}`
+      : resolvedFileUrl
+        ? (resolvedFileUrl.startsWith('http') ? resolvedFileUrl : `${base}${resolvedFileUrl}`)
+        : window.location.href;
     try {
       if (navigator.share) {
         await navigator.share({ title: 'CareConnect Document', url: shareUrl });
