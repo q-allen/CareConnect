@@ -91,7 +91,11 @@ export default function DoctorAppointmentDetailPage() {
       try {
         const payload = JSON.parse(e.data);
         if (payload.type === "status.changed") {
-          setAppointment((prev) => prev ? { ...prev, status: payload.status } : prev);
+          setAppointment((prev) => prev ? {
+            ...prev,
+            status: payload.status,
+            ...(payload.payment_status && { paymentStatus: payload.payment_status }),
+          } : prev);
         }
       } catch { /* ignore */ }
     };
@@ -104,14 +108,20 @@ export default function DoctorAppointmentDetailPage() {
     try {
       const res = await appointmentService.requestRefund(appointment.id, refundReason);
       if (res.success) {
-        const refundData = res.data as Appointment & { refund_issued?: boolean; refund_note?: string };
+        const refundData = res.data as Appointment & { refund_issued?: boolean; refund_note?: string; needs_manual_refund?: boolean };
         const refundIssued = refundData.refund_issued ?? false;
+        const needsManual = refundData.needs_manual_refund ?? false;
         const refundNote = refundData.refund_note ?? "Appointment cancelled";
         setAppointment(res.data);
         setRefundOpen(false);
         toast({
-          title: refundIssued ? "Refund processed & appointment cancelled" : "Appointment cancelled",
+          title: refundIssued
+            ? "Refund processed & appointment cancelled"
+            : needsManual
+            ? "⚠️ Manual refund required"
+            : "Appointment cancelled",
           description: refundNote,
+          variant: needsManual ? "destructive" : "default",
         });
       }
     } catch (err) {
@@ -563,6 +573,32 @@ export default function DoctorAppointmentDetailPage() {
               patientId={appointment.patientId}
               appointmentId={appointment.id}
             />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Manual Refund Required warning — shown when cancelled but payment still "paid" */}
+      {isCancelled && appointment.paymentStatus === "paid" && (
+        <Card className="border-amber-400/60 bg-amber-50/60 dark:bg-amber-900/20">
+          <CardContent className="p-4 space-y-3">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Manual Refund Required</p>
+                <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                  The automatic refund could not be processed (insufficient payout balance). Please manually refund the patient via your{" "}
+                  <a
+                    href="https://dashboard.paymongo.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline font-medium"
+                  >
+                    PayMongo dashboard
+                  </a>
+                  . Reference: <span className="font-mono font-semibold">APT-{appointment.id.slice(-8).toUpperCase()}</span>
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       )}

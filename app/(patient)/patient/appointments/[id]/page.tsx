@@ -396,12 +396,29 @@ export default function PatientAppointmentDetailPage() {
         }
 
         if (payload.type === "status.changed") {
-          setAppointment((prev) => prev ? { ...prev, status: payload.status } : prev);
+          setAppointment((prev) => prev ? {
+            ...prev,
+            status: payload.status,
+            ...(payload.payment_status && { paymentStatus: payload.payment_status }),
+          } : prev);
           if (payload.status === "completed") {
             setInCall(false);
             toast({
               title: "Consultation completed ✅",
               description: "How was your experience? Leave a review below.",
+            });
+          }
+          if (payload.status === "cancelled" && payload.refund_issued) {
+            toast({
+              title: "Appointment cancelled & refunded",
+              description: "Your refund has been processed. GCash/Maya: typically instant. Cards: 3–7 business days.",
+            });
+          }
+          if (payload.status === "cancelled" && payload.needs_manual_refund) {
+            toast({
+              title: "Appointment cancelled — Refund pending",
+              description: "Your payment could not be automatically refunded. Your doctor has been notified and will process it manually.",
+              variant: "destructive",
             });
           }
         }
@@ -714,6 +731,17 @@ export default function PatientAppointmentDetailPage() {
                   <div>
                     <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">Refund Processed</p>
                     <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">GCash/Maya: typically instant · Cards: 3–7 business days</p>
+                  </div>
+                </div>
+              )}
+              {isCancelled && appointment.paymentStatus === "paid" && (
+                <div className="rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-3 flex items-start gap-2.5">
+                  <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs font-semibold text-amber-700 dark:text-amber-300">Refund Pending</p>
+                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
+                      Your payment could not be automatically refunded. Your doctor has been notified and will process it manually. Please contact your doctor if you don&apos;t receive your refund within 3–5 business days.
+                    </p>
                   </div>
                 </div>
               )}
