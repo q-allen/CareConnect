@@ -54,15 +54,15 @@ export function useNotifications() {
         }
       };
 
-      ws.onclose = () => {
-        if (shouldReconnectRef.current) {
-          const delay = Math.min(10000, 1000 * 2 ** retryRef.current);
+      ws.onclose = (event) => {
+        if (shouldReconnectRef.current && retryRef.current < 5 && event.code !== 1000 && event.code !== 1001) {
+          const delay = Math.min(30000, 1000 * 2 ** retryRef.current);
           retryRef.current += 1;
           reconnectTimerRef.current = setTimeout(connect, delay);
         }
       };
 
-      ws.onerror = () => { try { ws.close(); } catch { /* ignore */ } };
+      ws.onerror = () => { ws.close(); };
     };
 
     connect();

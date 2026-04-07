@@ -88,11 +88,21 @@ async function request<T>(path: string, init: RequestInit = {}, _retry = true): 
     let message = res.statusText;
     try {
       const body = await res.json();
-      if (body.detail) message = body.detail;
-      else if (body.non_field_errors) message = body.non_field_errors[0];
-      else {
-        const first = Object.values(body)[0];
-        if (Array.isArray(first)) message = first[0] as string;
+      if (body.detail) {
+        message = body.detail;
+      } else if (body.non_field_errors) {
+        message = Array.isArray(body.non_field_errors) ? body.non_field_errors[0] : body.non_field_errors;
+      } else {
+        // Collect all field-level errors into a readable message
+        const fieldErrors: string[] = [];
+        for (const [field, errors] of Object.entries(body)) {
+          if (Array.isArray(errors)) {
+            fieldErrors.push(`${field}: ${errors[0]}`);
+          } else if (typeof errors === "string") {
+            fieldErrors.push(`${field}: ${errors}`);
+          }
+        }
+        if (fieldErrors.length > 0) message = fieldErrors.join("; ");
       }
     } catch {
       // use default status text
@@ -123,7 +133,18 @@ async function upload<T>(path: string, body: FormData, method = "POST", _retry =
     let message = res.statusText;
     try {
       const b = await res.json();
-      if (b.detail) message = b.detail;
+      if (b.detail) {
+        message = b.detail;
+      } else if (b.non_field_errors) {
+        message = Array.isArray(b.non_field_errors) ? b.non_field_errors[0] : b.non_field_errors;
+      } else {
+        const fieldErrors: string[] = [];
+        for (const [field, errors] of Object.entries(b)) {
+          if (Array.isArray(errors)) fieldErrors.push(`${field}: ${errors[0]}`);
+          else if (typeof errors === "string") fieldErrors.push(`${field}: ${errors}`);
+        }
+        if (fieldErrors.length > 0) message = fieldErrors.join("; ");
+      }
     } catch {
       // use default status text
     }

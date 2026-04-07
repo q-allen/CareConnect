@@ -228,7 +228,20 @@ export const doctorService = {
         });
         if (!fetchRes.ok) {
           const err = await fetchRes.json().catch(() => ({}));
-          throw new Error(err.detail ?? "Failed to save profile.");
+          let errMsg = err.detail ?? "Failed to save profile.";
+          if (!err.detail) {
+            if (err.non_field_errors) {
+              errMsg = Array.isArray(err.non_field_errors) ? err.non_field_errors[0] : err.non_field_errors;
+            } else {
+              const fieldErrors: string[] = [];
+              for (const [field, errors] of Object.entries(err)) {
+                if (Array.isArray(errors)) fieldErrors.push(`${field}: ${errors[0]}`);
+                else if (typeof errors === "string") fieldErrors.push(`${field}: ${errors}`);
+              }
+              if (fieldErrors.length > 0) errMsg = fieldErrors.join("; ");
+            }
+          }
+          throw new Error(errMsg);
         }
         res = await fetchRes.json();
       } else {
@@ -239,7 +252,12 @@ export const doctorService = {
       }
       return { data: res, success: true };
     } catch (err: unknown) {
-      return { data: null as unknown as DoctorProfileCompletionResponse, success: false, error: (err as Error)?.message ?? "Failed to save profile." };
+      let errorMsg = (err as Error)?.message ?? "Failed to save profile.";
+      // If the error is an ApiError with a JSON body, try to extract field errors
+      if (err instanceof ApiError) {
+        errorMsg = err.message;
+      }
+      return { data: null as unknown as DoctorProfileCompletionResponse, success: false, error: errorMsg };
     }
   },
 };
