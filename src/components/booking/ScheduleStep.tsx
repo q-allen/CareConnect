@@ -159,14 +159,17 @@ export default function ScheduleStep({ onValidationChange }: ScheduleStepProps) 
       const doctorUserId = selectedDoctor.userId ?? selectedDoctor.id;
       const res = await appointmentService.getAvailableSlots(doctorUserId, selectedDate);
       if (res.success) {
-        // If today is selected, hide slots whose time has already passed
-        const selectedDateObj = parseISO(selectedDate);
+        // If today is selected, hide slots whose time has already passed.
+        // Use new Date(y, m, d) to avoid parseISO treating the string as UTC
+        // which causes isToday() to return false in UTC+ timezones (e.g. Asia/Manila).
+        const [y, mo, d] = selectedDate.split('-').map(Number);
+        const selectedDateObj = new Date(y, mo - 1, d);
+        const now = new Date();
         const slots = isToday(selectedDateObj)
           ? res.data.filter((s) => {
               const [h, m] = s.startTime.split(':').map(Number);
-              const slotDate = new Date();
-              slotDate.setHours(h, m, 0, 0);
-              return slotDate > new Date();
+              const slotTime = new Date(y, mo - 1, d, h, m, 0, 0);
+              return slotTime > now;
             })
           : res.data;
         setAvailableSlots(slots);
