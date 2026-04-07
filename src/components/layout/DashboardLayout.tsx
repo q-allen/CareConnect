@@ -92,7 +92,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
   const router = useRouter();
   const { toast } = useToast();
-  const { user, logout: logoutStore } = useAuthStore();
+  const { user, setUser, logout: logoutStore } = useAuthStore();
   const { sidebarOpen, mobileMenuOpen, setSidebarOpen, setMobileMenuOpen } = useUIStore();
   const { unreadCount, notifications, markAsRead, clearBadge, removeNotification } = useNotificationStore();
 
