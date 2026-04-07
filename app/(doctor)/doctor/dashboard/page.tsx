@@ -13,7 +13,6 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { useAuthStore } from '@/store';
 import { doctorService } from '@/services/doctorService';
@@ -81,8 +80,6 @@ export default function DoctorDashboardPage() {
     fetchData();
   }, [doctorId]);
 
-  const onDemand = doctor?.isOnDemand ?? false;
-
   const todayAppointments = useMemo(
     () => appointments.filter((apt) => {
       const date = new Date(apt.date);
@@ -114,18 +111,6 @@ export default function DoctorDashboardPage() {
       ? `₱${value.toLocaleString('en-PH', { maximumFractionDigits: 0 })}`
       : '—';
 
-  const handleOnDemand = async (value: boolean) => {
-    if (!doctor) return;
-    const res = await doctorService.updateOnDemand(doctor.id, value);
-    if (res.success) {
-      setUser({ ...doctor, isOnDemand: value } as Doctor);
-      toast({
-        title: value ? 'On-demand enabled' : 'On-demand paused',
-        description: value ? 'Patients can consult you instantly.' : 'You are hidden from Consult Now.',
-      });
-    }
-  };
-
   const handleMarkDone = async () => {
     if (!nowServing) return;
     await appointmentService.completeAppointment(nowServing.id);
@@ -156,18 +141,6 @@ export default function DoctorDashboardPage() {
             <p className="text-primary-foreground/90 mt-2 text-base">
               {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur rounded-full px-4 py-2">
-              <Switch checked={onDemand} onCheckedChange={handleOnDemand} id="doctor-on-demand" />
-              <label htmlFor="doctor-on-demand" className="text-sm font-medium text-primary-foreground cursor-pointer">
-                On-Demand
-              </label>
-            </div>
-            <Badge className={onDemand ? 'bg-success/20 text-success border-success/30' : 'bg-white/10 text-primary-foreground border-white/20'}>
-              <span className={`mr-1.5 h-2 w-2 rounded-full ${onDemand ? 'bg-success animate-pulse' : 'bg-white/40'}`} />
-              {onDemand ? 'Live' : 'Offline'}
-            </Badge>
           </div>
         </div>
       </motion.div>
@@ -297,7 +270,7 @@ export default function DoctorDashboardPage() {
                   <p className="font-semibold text-foreground">No queue right now</p>
                   <p className="text-sm text-muted-foreground mt-1">Turn on on-demand to accept instant consults</p>
                 </div>
-                <Button className="gap-2 mt-4" onClick={() => handleOnDemand(true)}>
+                <Button className="gap-2 mt-4" onClick={() => router.push('/doctor/schedule')}>
                   <Zap className="h-4 w-4" />
                   Go On-Demand
                 </Button>

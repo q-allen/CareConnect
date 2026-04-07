@@ -23,6 +23,7 @@ import {
   Pill,
   Trash2,
   FlaskConical,
+  Zap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -36,11 +37,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { useAuthStore, useUIStore, useNotificationStore } from '@/store';
 import { authService } from '@/services/authService';
+import { doctorService } from '@/services/doctorService';
 import { notificationService } from '@/services/notificationService';
 import { useToast } from '@/hooks/use-toast';
-import { UserRole } from '@/types';
+import { UserRole, Doctor } from '@/types';
 import { PageLoader } from '@/components/ui/page-loader';
 
 interface NavItem {
@@ -92,6 +95,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, logout: logoutStore } = useAuthStore();
   const { sidebarOpen, mobileMenuOpen, setSidebarOpen, setMobileMenuOpen } = useUIStore();
   const { unreadCount, notifications, markAsRead, clearBadge, removeNotification } = useNotificationStore();
+
+  const handleOnDemandToggle = async (value: boolean) => {
+    if (!user || user.role !== 'doctor') return;
+    const doctor = user as Doctor;
+    const res = await doctorService.updateOnDemand(doctor.id, value);
+    if (res.success) {
+      setUser({ ...doctor, isOnDemand: value } as Doctor);
+      toast({
+        title: value ? 'On-demand enabled' : 'On-demand paused',
+        description: value ? 'Patients can consult you instantly.' : 'You are hidden from Consult Now.',
+      });
+    }
+  };
 
   useEffect(() => {
     if (!user) {
@@ -327,6 +343,22 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="flex-1" />
 
           <div className="flex items-center gap-2">
+            {/* On-Demand Toggle — doctors only */}
+            {user.role === 'doctor' && (
+              <div className="flex items-center gap-2 rounded-full bg-secondary/60 px-3 py-1.5">
+                <Switch
+                  checked={(user as Doctor).isOnDemand ?? false}
+                  onCheckedChange={handleOnDemandToggle}
+                  id="header-on-demand"
+                />
+                <label htmlFor="header-on-demand" className="text-xs font-medium cursor-pointer hidden sm:block">
+                  On-Demand
+                </label>
+                <span className={`h-2 w-2 rounded-full shrink-0 ${
+                  (user as Doctor).isOnDemand ? 'bg-success animate-pulse' : 'bg-muted-foreground/50'
+                }`} />
+              </div>
+            )}
             {/* Notifications */}
             <DropdownMenu onOpenChange={(open) => { if (open && unreadCount > 0) { clearBadge(); notificationService.markAllAsRead(''); } }}>
               <DropdownMenuTrigger asChild>

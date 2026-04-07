@@ -31,7 +31,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
 import VideoConsultModal from '@/components/doctor/VideoConsultModal';
 import { useRecordsStore } from '@/store/recordsStore';
 import { sendPrescription, sendLabRequest, sendMedicalCertificate } from '../../../../features/doctor/consult/actions';
@@ -81,7 +80,6 @@ export default function DoctorPatientsPage() {
   } = useRecordsStore();
 
   const doctor = user as Doctor | null;
-  const onDemand = doctor?.isOnDemand ?? false;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMode, setFilterMode] = useState<FilterMode>('active');
@@ -184,18 +182,6 @@ export default function DoctorPatientsPage() {
     return convRes.success ? convRes.data.id : null;
   };
 
-  const handleOnDemand = async (value: boolean) => {
-    if (!doctor) return;
-    const res = await doctorService.updateOnDemand(doctor.id, value);
-    if (res.success) {
-      setUser({ ...doctor, isOnDemand: value } as Doctor);
-      toast({
-        title: value ? 'On-demand enabled' : 'On-demand paused',
-        description: value ? 'Patients can consult you instantly.' : 'You are hidden from Consult Now.',
-      });
-    }
-  };
-
   const handleStartVideo = async (summary: PatientSummary) => {
     const apt = appointments.find(
       (a) => a.patientId === summary.patient.id && a.type === 'online' && isActiveAppointment(a)
@@ -262,18 +248,6 @@ export default function DoctorPatientsPage() {
             <Badge variant="secondary">{patientSummaries.filter((p) => p.isActive).length} active</Badge>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 rounded-full bg-secondary/60 px-3 py-1.5">
-            <Switch checked={onDemand} onCheckedChange={handleOnDemand} id="doctor-on-demand-patients" />
-            <label htmlFor="doctor-on-demand-patients" className="text-xs text-muted-foreground">
-              On-Demand: {onDemand ? 'Available' : 'Paused'}
-            </label>
-          </div>
-          <Badge className={onDemand ? 'bg-success/15 text-success border-success/30' : 'bg-muted text-muted-foreground border-border'}>
-            <span className={`mr-1 h-2 w-2 rounded-full ${onDemand ? 'bg-success animate-pulse' : 'bg-muted-foreground/50'}`} />
-            {onDemand ? 'Live' : 'Offline'}
-          </Badge>
-        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row lg:items-center gap-4">
@@ -321,7 +295,7 @@ export default function DoctorPatientsPage() {
           description="Stay on-demand or view the queue to start seeing patients."
           action={
             <div className="flex flex-wrap gap-2 justify-center">
-              <Button size="sm" className="gap-2" onClick={() => handleOnDemand(true)}>
+              <Button size="sm" className="gap-2" onClick={() => router.push('/doctor/schedule')}>
                 <Zap className="h-4 w-4" />
                 Go On-Demand
               </Button>

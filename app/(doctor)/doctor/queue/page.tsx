@@ -19,7 +19,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import VideoConsultModal from '@/components/doctor/VideoConsultModal';
 import { useRecordsStore } from '@/store/recordsStore';
@@ -67,7 +66,6 @@ export default function DoctorQueuePage() {
 
   const doctor = user as Doctor | null;
   const doctorId = doctor?.userId ?? doctor?.id;
-  const onDemand = doctor?.isOnDemand ?? false;
 
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -180,18 +178,6 @@ export default function DoctorQueuePage() {
     if (!user) return null;
     const convRes = await chatService.createConversation(appointment.patientId, user.id, 'doctor');
     return convRes.success ? convRes.data.id : null;
-  };
-
-  const handleOnDemand = async (value: boolean) => {
-    if (!doctor) return;
-    const res = await doctorService.updateOnDemand(doctor.id, value);
-    if (res.success) {
-      setUser({ ...doctor, isOnDemand: value } as Doctor);
-      toast({
-        title: value ? 'On-demand enabled' : 'On-demand paused',
-        description: value ? 'Patients can consult you instantly.' : 'You are hidden from Consult Now.',
-      });
-    }
   };
 
   const updateAppointment = (id: string, data: Partial<Appointment>) => {
@@ -370,16 +356,6 @@ export default function DoctorQueuePage() {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 rounded-full bg-secondary/60 px-4 py-2">
-            <Switch checked={onDemand} onCheckedChange={handleOnDemand} id="doctor-on-demand-queue" />
-            <label htmlFor="doctor-on-demand-queue" className="text-sm font-medium">
-              On-Demand
-            </label>
-          </div>
-          <Badge className={onDemand ? 'bg-success/15 text-success border-success/30' : 'bg-muted text-muted-foreground border-border'}>
-            <span className={`mr-1.5 h-2 w-2 rounded-full ${onDemand ? 'bg-success animate-pulse' : 'bg-muted-foreground/50'}`} />
-            {onDemand ? 'Live' : 'Offline'}
-          </Badge>
           <Button variant="outline" size="sm" className="gap-2" onClick={loadQueue}>
             <RefreshCw className="h-4 w-4" />
             Refresh
@@ -504,7 +480,7 @@ export default function DoctorQueuePage() {
                     <p className="font-semibold text-foreground">Queue is empty</p>
                     <p className="text-sm text-muted-foreground mt-1">Enable on-demand to receive instant consultations</p>
                   </div>
-                  <Button size="lg" className="gap-2" onClick={() => handleOnDemand(true)}>
+                  <Button size="lg" className="gap-2" onClick={() => router.push('/doctor/schedule')}>
                     <Zap className="h-5 w-5" />
                     Go On-Demand
                   </Button>

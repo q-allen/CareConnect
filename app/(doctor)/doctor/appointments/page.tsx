@@ -53,7 +53,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Switch } from '@/components/ui/switch';
 import DocumentComposer from '@/components/doctor/DocumentComposer';
 import VideoConsultModal from '@/components/doctor/VideoConsultModal';
 import { useRecordsStore } from '@/store/recordsStore';
@@ -126,7 +125,6 @@ export default function DoctorAppointmentsPage() {
   const { appointments, setAppointments, updateAppointment, isLoading, setLoading } = useAppointmentStore();
 
   const doctor = user as Doctor | null;
-  const onDemand = doctor?.isOnDemand ?? false;
 
   const [activeTab, setActiveTab] = useState('upcoming');
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
@@ -266,18 +264,6 @@ export default function DoctorAppointmentsPage() {
     toast({ title: 'Document sent', description: 'Patient file updated.' });
   };
 
-  const handleOnDemand = async (value: boolean) => {
-    if (!doctor) return;
-    const res = await doctorService.updateOnDemand(doctor.id, value);
-    if (res.success) {
-      setUser({ ...doctor, isOnDemand: value } as Doctor);
-      toast({
-        title: value ? 'On-demand enabled' : 'On-demand paused',
-        description: value ? 'Patients can consult you instantly.' : 'You are hidden from Consult Now.',
-      });
-    }
-  };
-
   const handleApprove = async (apt: Appointment) => {
     const updated = await acceptAppointment(apt.id);
     updateAppointment(apt.id, {
@@ -407,16 +393,6 @@ export default function DoctorAppointmentsPage() {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 rounded-full bg-secondary/60 px-3 py-1.5">
-            <Switch checked={onDemand} onCheckedChange={handleOnDemand} id="doctor-on-demand-appointments" />
-            <label htmlFor="doctor-on-demand-appointments" className="text-xs text-muted-foreground">
-              On-Demand: {onDemand ? 'Available' : 'Paused'}
-            </label>
-          </div>
-          <Badge className={onDemand ? 'bg-success/15 text-success border-success/30' : 'bg-muted text-muted-foreground border-border'}>
-            <span className={`mr-1 h-2 w-2 rounded-full ${onDemand ? 'bg-success animate-pulse' : 'bg-muted-foreground/50'}`} />
-            {onDemand ? 'Live' : 'Offline'}
-          </Badge>
           <Button variant="outline" size="sm" onClick={fetchAppointments} className="gap-1.5">
             <RefreshCw className="h-4 w-4" />Refresh
           </Button>
@@ -517,7 +493,7 @@ export default function DoctorAppointmentsPage() {
                 upcoming,
                 'No upcoming appointments',
                 'New bookings will appear here once confirmed.',
-                <Button size="sm" className="gap-2" onClick={() => handleOnDemand(true)}>
+                <Button size="sm" className="gap-2" onClick={() => router.push('/doctor/schedule')}>
                   <Zap className="h-4 w-4" />
                   Go On-Demand
                 </Button>
@@ -528,7 +504,7 @@ export default function DoctorAppointmentsPage() {
                 today,
                 'No appointments today',
                 'Stay on-demand to receive instant consults.',
-                <Button size="sm" className="gap-2" onClick={() => handleOnDemand(true)}>
+                <Button size="sm" className="gap-2" onClick={() => router.push('/doctor/schedule')}>
                   <Zap className="h-4 w-4" />
                   Go On-Demand
                 </Button>
