@@ -82,21 +82,6 @@ export const authService = {
           familyMembers: mapFamilyMembers(res.user.family_members ?? []),
         };
       }
-      // If we have a role hint cookie, try a silent refresh once and re-fetch.
-      if (typeof document !== "undefined" && document.cookie.includes("user_role=")) {
-        try {
-          await api.post(API_ENDPOINTS.REFRESH, {});
-          const retry = await api.get<{ user: BackendUser | null }>(API_ENDPOINTS.ME);
-          if (retry.user) {
-            return {
-              user: toFrontendUser(retry.user),
-              familyMembers: mapFamilyMembers(retry.user.family_members ?? []),
-            };
-          }
-        } catch {
-          // fall through to null
-        }
-      }
       return null;
     } catch {
       return null;

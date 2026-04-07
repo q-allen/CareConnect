@@ -16,18 +16,19 @@ function AuthRehydrator() {
     if (user) return;
     setLoading(true);
     authService.refresh()
-      .catch(() => {})
-      .finally(() => {
-        authService.getMe().then((result) => {
-          if (result) {
-            setUser(result.user);
-            setFamilyMembers(result.familyMembers);
-          } else {
-            setUser(null);
-          }
-          setLoading(false);
-        });
-      });
+      .then(() => authService.getMe())
+      .then((result) => {
+        if (result) {
+          setUser(result.user);
+          setFamilyMembers(result.familyMembers);
+        } else {
+          setUser(null);
+        }
+      })
+      .catch(() => {
+        setUser(null);
+      })
+      .finally(() => setLoading(false));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Proactive silent refresh every 13 min (access token lifetime is 15 min)
