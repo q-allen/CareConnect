@@ -11,7 +11,6 @@ import {
   CheckCircle2,
   ArrowRight,
   Activity,
-  Building2,
   CreditCard,
   Video,
   UserCheck,
@@ -23,39 +22,38 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { topSpecialties, hospitals as partnerHospitals } from '@/data/specialtiesData';
+import { topSpecialties } from '@/data/specialtiesData';
 
 const features = [
   {
     icon: Calendar,
-    title: 'Easy Appointment Booking',
-    description: 'Book appointments with top doctors in just a few taps. Choose between online or in-clinic consultations.',
+    title: 'Online Appointment Booking',
+    description: 'Book in-clinic or teleconsultation appointments with your doctor anytime — no phone calls needed.',
   },
   {
     icon: Clock,
     title: 'Real-Time Queue Tracking',
-    description: 'Know your queue position in real-time. No more waiting in crowded clinics.',
+    description: 'Monitor your live queue position and get notified when it is almost your turn, so you never have to wait in line.',
   },
   {
     icon: Video,
     title: 'Teleconsultation',
-    description: 'Consult with doctors from anywhere via secure video calls. Invite family members to join.',
+    description: 'Consult your doctor via secure video call from the comfort of your home. Family members can be invited to join.',
   },
   {
     icon: FileText,
     title: 'Digital Prescriptions',
-    description: 'Receive and access your prescriptions digitally. Never lose a prescription again.',
+    description: 'Receive e-prescriptions after every consultation. Access and share them anytime from your health records.',
   },
   {
     icon: Shield,
     title: 'Secure Health Records',
-    description: 'Your medical records are encrypted and securely stored. Access them anytime, anywhere.',
+    description: 'All your consultation history, prescriptions, and medical documents are securely stored and accessible anytime.',
   },
   {
     icon: Smartphone,
-    title: 'Medicine Delivery',
-    description: 'Order medicines directly from your prescriptions and get them delivered to your doorstep.',
+    title: 'Email Notifications',
+    description: 'Get real-time updates on your appointment status, queue position, and consultation confirmations via email.',
   },
 ];
 
@@ -63,24 +61,24 @@ const stats = [
   { value: 'Book', label: 'Appointments Online' },
   { value: 'Track', label: 'Your Queue Live' },
   { value: 'Consult', label: 'via Video Call' },
-  { value: 'Order', label: 'Medicine Delivery' },
+  { value: 'Pay', label: 'via GCash or Card' },
 ];
 
 const whyCareConnect = [
   {
     icon: Calendar,
-    title: 'Book Anytime',
-    content: 'Schedule appointments 24/7 without calling the clinic. Choose in-clinic or teleconsultation.',
+    title: 'Book Anytime, Anywhere',
+    content: 'Schedule in-clinic or teleconsultation appointments 24/7 without calling the clinic. Pick your preferred doctor, date, and time slot.',
   },
   {
     icon: Clock,
-    title: 'No More Long Waits',
-    content: 'Track your real-time queue position and arrive at the clinic just in time for your turn.',
+    title: 'Skip the Waiting Room',
+    content: 'Track your real-time queue position and arrive at the clinic just in time for your turn. Get notified via email.',
   },
   {
     icon: Video,
     title: 'Consult from Home',
-    content: 'Connect with your doctor via secure video call. Invite family members to join the consultation.',
+    content: 'Connect with your doctor via secure video call. Invite family members to join and receive your e-prescription right after.',
   },
 ];
 
@@ -95,31 +93,31 @@ const bookingSteps = [
     step: 1,
     icon: UserCheck,
     title: 'Select a Doctor',
-    description: 'Choose from your list of doctors or find a new doctor.',
+    description: 'Browse by specialty or search for a specific doctor. View their schedule, clinic, and consultation type.',
   },
   {
     step: 2,
     icon: ClipboardList,
-    title: 'Fill up Form',
-    description: 'Select whether you are new or existing patient, choose schedule, and fill out all the details.',
+    title: 'Fill Up the Form',
+    description: 'Indicate if you are a new or returning patient, select your preferred schedule, and complete the appointment form.',
   },
   {
     step: 3,
     icon: KeyRound,
-    title: 'Enter OTP',
-    description: 'A one-time-pin will be sent to your mobile number to verify your account.',
+    title: 'Verify via OTP',
+    description: 'A one-time PIN will be sent to your registered email address to confirm your identity.',
   },
   {
     step: 4,
     icon: Wallet,
-    title: 'Booking Fees',
-    description: "Payment can be done through different payment channels or during consult, depending on the doctor's preference.",
+    title: 'Pay Booking Fee',
+    description: "Pay via GCash, credit/debit card, or cash on clinic — depending on the doctor's accepted payment methods.",
   },
   {
     step: 5,
     icon: Bell,
-    title: 'Wait for Confirmation',
-    description: "Consultation Status will be updated once your request has been confirmed. You'll also be notified through SMS or Email.",
+    title: 'Await Confirmation',
+    description: 'Your appointment status will be updated once confirmed by the clinic. You will be notified via email.',
   },
 ];
 
@@ -140,9 +138,6 @@ export default function LandingPage() {
             <div className="hidden md:flex items-center gap-6">
               <a href="#specialties" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                 Specialties
-              </a>
-              <a href="#hospitals" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-                Hospitals
               </a>
               <a href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                 Features
@@ -184,7 +179,7 @@ export default function LandingPage() {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
                 <CheckCircle2 className="h-4 w-4" />
-                <span>Your all-in-one healthcare platform</span>
+                <span>Online appointment booking for Filipino patients</span>
               </div>
               
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
@@ -193,7 +188,7 @@ export default function LandingPage() {
               </h1>
               
               <p className="text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-8">
-                Book appointments, consult with doctors, manage prescriptions, and access your health records — all in one app.
+                Book in-clinic or teleconsultation appointments, track your queue in real time, and receive digital prescriptions — all in one platform.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -293,7 +288,7 @@ export default function LandingPage() {
               Top Specialties
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Find doctors across all major medical specialties
+              Browse and book appointments with doctors across all major medical specialties
             </p>
           </motion.div>
 
@@ -332,55 +327,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Hospitals Section */}
-      <section id="hospitals" className="py-20">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              Partner Hospitals
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Access doctors from top hospitals and clinics nationwide
-            </p>
-          </motion.div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {partnerHospitals.map((hospital, index) => (
-              <motion.div
-                key={hospital.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
-              >
-                <Card className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="h-12 w-12 rounded-xl bg-secondary flex items-center justify-center shrink-0">
-                        <Building2 className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground">{hospital.name}</h3>
-                        <p className="text-sm text-muted-foreground">{hospital.location}</p>
-                        <Badge variant="secondary" className="mt-2">
-                          {hospital.doctorCount} doctors
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Booking Instructions Section */}
       <section id="how-it-works" className="py-20 bg-secondary/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -395,7 +341,7 @@ export default function LandingPage() {
               Booking Instructions
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Book your appointment in just a few simple steps
+              Follow these simple steps to book your consultation on CareConnect
             </p>
           </motion.div>
 
@@ -461,10 +407,10 @@ export default function LandingPage() {
             className="text-center mb-16"
           >
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              Everything You Need for Your Health
+              Everything You Need in One Platform
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              A comprehensive healthcare platform designed to make your medical journey seamless and stress-free.
+              CareConnect brings together appointment booking, queue tracking, teleconsultation, and digital prescriptions in one seamless experience.
             </p>
           </motion.div>
 
@@ -498,7 +444,7 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
             <h3 className="text-lg font-semibold text-foreground mb-2">Accepted Payment Methods</h3>
-            <p className="text-muted-foreground">Pay conveniently with your preferred payment method</p>
+            <p className="text-muted-foreground">Pay your booking fee conveniently through any of these channels</p>
           </div>
           <div className="flex flex-wrap justify-center gap-6">
             {paymentMethods.map((method) => (
@@ -525,7 +471,7 @@ export default function LandingPage() {
               Why Choose CareConnect?
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Everything you need for a seamless healthcare experience, built for patients and doctors alike.
+              Designed for Filipino patients and doctors — making healthcare access faster, simpler, and more convenient.
             </p>
           </motion.div>
 
@@ -563,10 +509,10 @@ export default function LandingPage() {
             <div className="absolute inset-0 bg-grid-white/10" />
             <div className="relative">
               <h2 className="text-3xl sm:text-4xl font-bold text-primary-foreground mb-4">
-                Ready to Transform Your Healthcare Experience?
+                Ready to Take Control of Your Health?
               </h2>
               <p className="text-lg text-primary-foreground/80 max-w-2xl mx-auto mb-8">
-                Join CareConnect today — book appointments, consult doctors, and manage your health all in one place.
+                Join CareConnect — book appointments, track your queue, consult via video, and manage your health records all in one place.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/signup">
