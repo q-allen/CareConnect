@@ -20,10 +20,6 @@ interface CreateCheckoutSessionResult {
 }
 
 const PAYMONGO_API_BASE = "https://api.paymongo.com/v1";
-// PayMongo checkout session supports: gcash, card, paymaya, brankas_bdo,
-// brankas_landbank, brankas_metrobank (brankas requires separate activation).
-// For test mode, use "card" as the bank-transfer equivalent.
-const BANK_METHODS = ["card"];
 
 const getAuthHeader = () => {
   const secretKey = process.env.PAYMONGO_SECRET_KEY;
@@ -52,7 +48,7 @@ export async function createPaymongoCheckoutSession(
   const body = {
     data: {
       attributes: {
-        payment_method_types: input.method === "gcash" ? ["gcash"] : BANK_METHODS,
+        payment_method_types: ["gcash", "card", "paymaya"],
         line_items: [
           {
             name: `Consultation with ${input.doctorName}`,
