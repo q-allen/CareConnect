@@ -462,7 +462,7 @@ export default function LandingPage() {
                   </Button>
                 </Link>
                 <Link href="/signin">
-                  <Button size="lg" variant="outline" className="text-lg px-8 h-12 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 w-full sm:w-auto">
+                  <Button size="lg" variant="outline" className="text-lg px-8 h-12 border-primary-foreground/60 text-primary-foreground bg-primary-foreground/10 hover:bg-primary-foreground/20 w-full sm:w-auto">
                     <Users className="mr-2 h-5 w-5" />
                     Sign In
                   </Button>
