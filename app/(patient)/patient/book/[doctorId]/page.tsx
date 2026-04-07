@@ -102,6 +102,7 @@ function BookingContent() {
   const { toast } = useToast();
   const { user } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
+  const [isFinalizing, setIsFinalizing] = useState(false);
   const finalizingRef = useRef(false);
   
   // Validation state for each step
@@ -226,11 +227,13 @@ function BookingContent() {
   const finalizeFromCheckout = useCallback(async () => {
     if (finalizingRef.current) return;
     finalizingRef.current = true;
+    setIsFinalizing(true);
 
     const storedDraft      = sessionStorage.getItem(bookingDraftKey);
     const storedCheckoutId = sessionStorage.getItem(checkoutKey) || checkoutId;
     if (!storedDraft || !storedCheckoutId) {
       finalizingRef.current = false;
+      setIsFinalizing(false);
       setPaymentStatus('failed');
       toast({ title: 'Payment Verification Failed', description: 'Missing booking data. Please try again.', variant: 'destructive' });
       return;
@@ -341,10 +344,12 @@ function BookingContent() {
       setAppointmentId(appointmentRes.data.id);
       setTransactionId(storedCheckoutId);
       setPaymentStatus('success');
+      setIsFinalizing(false);
       goToStep(4);
       sessionStorage.removeItem(bookingDraftKey);
       sessionStorage.removeItem(checkoutKey);
     } catch (error) {
+      setIsFinalizing(false);
       setPaymentStatus('failed');
       toast({ title: 'Payment Verification Failed', description: error instanceof Error ? error.message : 'Unable to verify payment.', variant: 'destructive' });
     }
@@ -507,6 +512,18 @@ function BookingContent() {
   const handleRetryPayment = () => { setPaymentStatus('idle'); clearCheckout(); };
   const handleViewAppointment = () => { resetBooking(); router.push('/patient/appointments'); };
   const handleBookAnother     = () => { resetBooking(); router.push('/patient/doctors'); };
+
+  if (isFinalizing) {
+    return (
+      <DashboardLayout>
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+          <div className="animate-spin rounded-full h-14 w-14 border-b-2 border-primary" />
+          <p className="text-lg font-semibold text-foreground">Confirming your payment…</p>
+          <p className="text-sm text-muted-foreground">Please wait, do not close this page.</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   if (isLoading) {
     return (
