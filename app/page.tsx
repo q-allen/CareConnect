@@ -64,24 +64,6 @@ const stats = [
   { value: 'Pay', label: 'via GCash or Card' },
 ];
 
-const whyCareConnect = [
-  {
-    icon: Calendar,
-    title: 'Book Anytime, Anywhere',
-    content: 'Schedule in-clinic or teleconsultation appointments 24/7 without calling the clinic. Pick your preferred doctor, date, and time slot.',
-  },
-  {
-    icon: Clock,
-    title: 'Skip the Waiting Room',
-    content: 'Track your real-time queue position and arrive at the clinic just in time for your turn. Get notified via email.',
-  },
-  {
-    icon: Video,
-    title: 'Consult from Home',
-    content: 'Connect with your doctor via secure video call. Invite family members to join and receive your e-prescription right after.',
-  },
-];
-
 const paymentMethods = [
   { name: 'Cash on Clinic', icon: Wallet },
   { name: 'GCash', icon: Smartphone },
@@ -141,9 +123,6 @@ export default function LandingPage() {
               </a>
               <a href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                 Features
-              </a>
-              <a href="#testimonials" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-                Testimonials
               </a>
             </div>
 
@@ -452,45 +431,6 @@ export default function LandingPage() {
                 <method.icon className="h-5 w-5 text-primary" />
                 <span className="font-medium">{method.name}</span>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Why CareConnect Section */}
-      <section id="testimonials" className="py-20 bg-secondary/30">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              Why Choose CareConnect?
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Designed for Filipino patients and doctors — making healthcare access faster, simpler, and more convenient.
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {whyCareConnect.map((item, index) => (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="bg-card rounded-2xl p-6 shadow-md border border-border"
-              >
-                <div className="h-12 w-12 rounded-xl gradient-primary flex items-center justify-center mb-4">
-                  <item.icon className="h-6 w-6 text-primary-foreground" />
-                </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">{item.title}</h3>
-                <p className="text-muted-foreground">{item.content}</p>
-              </motion.div>
             ))}
           </div>
         </div>
