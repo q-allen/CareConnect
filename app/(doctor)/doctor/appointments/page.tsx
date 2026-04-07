@@ -393,11 +393,6 @@ export default function DoctorAppointmentsPage() {
             }}
             onMarkComplete={() => handleMarkComplete(apt)}
             onViewQueue={() => router.push('/doctor/queue')}
-            onRefundCancel={() => {
-              setSelected(apt);
-              setRefundReason('');
-              setRefundDialogOpen(true);
-            }}
           />
         ))}
       </div>
