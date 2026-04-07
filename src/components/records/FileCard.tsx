@@ -42,7 +42,7 @@ const typeConfig: Record<FileType, { icon: React.ElementType; bg: string; iconCo
 };
 
 export default function FileCard({
-  type, title, description, doctorName, doctorSpecialty, doctorAvatar,
+  id, type, title, description, doctorName, doctorSpecialty, doctorAvatar,
   date, isNew, statusBadge, hasPrescriptionMeds, pdfUrl, fileUrl, index = 0, onClick,
 }: FileCardProps) {
   const { icon: Icon, bg, iconColor, label } = typeConfig[type];
