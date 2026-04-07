@@ -135,6 +135,9 @@ export default function DoctorAppointmentsPage() {
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
+  const [refundDialogOpen, setRefundDialogOpen] = useState(false);
+  const [refundReason, setRefundReason] = useState('');
+  const [isRefunding, setIsRefunding] = useState(false);
 
   const fetchAppointments = async () => {
     if (!user) return;
@@ -321,6 +324,27 @@ export default function DoctorAppointmentsPage() {
     }
   };
 
+  const handleRefundAndCancel = async (apt: Appointment) => {
+    setIsRefunding(true);
+    try {
+      const res = await appointmentService.requestRefund(apt.id, refundReason);
+      if (res.success) {
+        const refundData = res.data as Appointment & { refund_issued?: boolean; refund_note?: string };
+        updateAppointment(apt.id, { status: 'cancelled', paymentStatus: refundData.refund_issued ? 'refunded' : apt.paymentStatus });
+        setRefundDialogOpen(false);
+        setRefundReason('');
+        toast({
+          title: refundData.refund_issued ? 'Refund processed & appointment cancelled' : 'Appointment cancelled',
+          description: refundData.refund_note ?? 'Appointment has been cancelled.',
+        });
+      }
+    } catch (err) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Unknown error', variant: 'destructive' });
+    } finally {
+      setIsRefunding(false);
+    }
+  };
+
   const handleMarkComplete = async (apt: Appointment) => {
     const updated = await markComplete(apt.id);
     updateAppointment(apt.id, { status: updated?.status ?? 'completed', paymentStatus: updated?.paymentStatus ?? 'paid' });
@@ -361,12 +385,19 @@ export default function DoctorAppointmentsPage() {
               setSelected(apt);
               setShowDocuments(true);
             }}
-            onViewDetails={() => {
+            onViewDetails={() => router.push(`/doctor/appointments/${apt.id}`)}
+            onRefundCancel={() => {
               setSelected(apt);
-              setDetailDialogOpen(true);
+              setRefundReason('');
+              setRefundDialogOpen(true);
             }}
             onMarkComplete={() => handleMarkComplete(apt)}
             onViewQueue={() => router.push('/doctor/queue')}
+            onRefundCancel={() => {
+              setSelected(apt);
+              setRefundReason('');
+              setRefundDialogOpen(true);
+            }}
           />
         ))}
       </div>
@@ -634,6 +665,36 @@ export default function DoctorAppointmentsPage() {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={refundDialogOpen} onOpenChange={setRefundDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Refund &amp; Cancel Appointment</DialogTitle>
+            <DialogDescription>
+              This will cancel the appointment and issue a full refund to the patient&apos;s original payment method. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Reason (optional)</label>
+            <Input
+              placeholder="Reason for cancellation..."
+              value={refundReason}
+              onChange={(e) => setRefundReason(e.target.value)}
+            />
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setRefundDialogOpen(false)} disabled={isRefunding}>Go Back</Button>
+            <Button
+              variant="destructive"
+              onClick={() => { if (selected) handleRefundAndCancel(selected); }}
+              disabled={isRefunding}
+            >
+              {isRefunding && <RefreshCw className="h-4 w-4 mr-2 animate-spin" />}
+              Confirm Refund &amp; Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <VideoConsultModal
         open={showVideo}
         appointment={selected}
@@ -689,6 +750,7 @@ interface AppointmentCardProps {
   onViewDetails: () => void;
   onMarkComplete: () => void;
   onViewQueue: () => void;
+  onRefundCancel: () => void;
 }
 
 function AppointmentCard({
@@ -702,6 +764,7 @@ function AppointmentCard({
   onViewDetails,
   onMarkComplete,
   onViewQueue,
+  onRefundCancel,
 }: AppointmentCardProps) {
   const canJoin = isJoinable(appointment);
   const canStart = isStartable(appointment);
@@ -712,6 +775,7 @@ function AppointmentCard({
   const isActiveStatus = ['pending', 'confirmed', 'in_progress', 'in-progress'].includes(appointment.status);
   const isFutureOrToday = !isBefore(new Date(appointment.date), new Date()) || isToday(new Date(appointment.date));
   const canCancel = isActiveStatus && isFutureOrToday;
+  const canRefund = appointment.status === 'confirmed' && isFutureOrToday;
   const canSendDoc = appointment.status === 'in_progress' || appointment.status === 'in-progress';
   const canMarkComplete = canSendDoc || (appointment.status === 'confirmed' && isToday(new Date(appointment.date)));
 
@@ -810,7 +874,15 @@ function AppointmentCard({
                       <CheckCircle className="h-4 w-4 mr-2" />Mark Complete
                     </DropdownMenuItem>
                   )}
-                  {canCancel && (
+                  {canRefund && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={onRefundCancel} className="text-destructive focus:text-destructive">
+                        <RefreshCw className="h-4 w-4 mr-2" />Refund &amp; Cancel
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  {canCancel && !canRefund && (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={onDecline} className="text-destructive focus:text-destructive">
