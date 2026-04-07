@@ -476,7 +476,8 @@ function BookingContent() {
           doctorId:        selectedDoctor.userId ?? selectedDoctor.id,
           patientId:       user.id,
           consultationType,
-          // Pass booked-for name in metadata so PayMongo receipt is descriptive
+          date:            selectedDate,
+          time:            selectedTimeSlot.startTime,
           bookedForName:   patientDetails.isForSelf ? '' : patientDetails.fullName,
         },
       });
