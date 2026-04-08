@@ -130,7 +130,7 @@ export default function DoctorDashboardPage() {
   }, []);
 
   return (
-    <div className="space-y-6 max-w-none w-full">
+    <div className="space-y-6">
       {/* Welcome Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
