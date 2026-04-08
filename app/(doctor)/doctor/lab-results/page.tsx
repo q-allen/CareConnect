@@ -19,8 +19,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuthStore } from "@/store";
 import { medicalRecordsService } from "@/services/medicalRecordsService";
 import { LabResult } from "@/types";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-
 export default function DoctorLabResultsPage() {
   const { user } = useAuthStore();
   const { toast } = useToast();
@@ -92,8 +90,7 @@ export default function DoctorLabResultsPage() {
   };
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6 max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>
@@ -185,8 +182,6 @@ export default function DoctorLabResultsPage() {
             ))}
           </div>
         )}
-      </div>
-
       {/* Upload Dialog */}
       <Dialog open={uploadOpen} onOpenChange={(v) => { if (!uploading) setUploadOpen(v); }}>
         <DialogContent className="max-w-md">
@@ -247,6 +242,6 @@ export default function DoctorLabResultsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </DashboardLayout>
+    </div>
   );
 }

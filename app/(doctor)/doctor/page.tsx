@@ -140,7 +140,7 @@ export default function DoctorDashboardPage() {
   const firstName = doctor?.name?.split(' ')[1] ?? doctor?.name ?? 'Doctor';
 
   return (
-    <div className="space-y-8 max-w-6xl">
+    <div className="space-y-8 max-w-6xl mx-auto">
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}

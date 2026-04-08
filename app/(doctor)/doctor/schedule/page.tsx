@@ -286,7 +286,7 @@ export default function SchedulePage() {
   // ── Loading skeleton ───────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="space-y-6 max-w-5xl mx-auto pb-20">
         <Skeleton className="h-10 w-56 rounded-xl" />
         <Skeleton className="h-20 w-full rounded-2xl" />
         <div className="grid lg:grid-cols-3 gap-6">
@@ -305,7 +305,7 @@ export default function SchedulePage() {
   }
 
   return (
-    <div className="space-y-6 max-w-5xl pb-20">
+    <div className="space-y-6 max-w-5xl mx-auto pb-20">
       {/* ── Page header ─────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>

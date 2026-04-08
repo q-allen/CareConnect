@@ -331,7 +331,7 @@ export default function DoctorQueuePage() {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -8 }}

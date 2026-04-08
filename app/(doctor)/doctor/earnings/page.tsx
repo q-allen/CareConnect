@@ -84,7 +84,7 @@ export default function EarningsPage() {
     : (summary?.breakdown ?? []).slice(0, 5);
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 max-w-6xl mx-auto">
+    <div className="space-y-6 max-w-6xl mx-auto">
 
       {/* ── Header ── */}
       <motion.div

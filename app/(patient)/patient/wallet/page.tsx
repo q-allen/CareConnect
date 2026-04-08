@@ -210,7 +210,7 @@ export default function PaymentHistoryPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 max-w-3xl">
+      <div className="space-y-6 max-w-3xl mx-auto">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>

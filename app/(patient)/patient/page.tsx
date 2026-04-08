@@ -43,17 +43,13 @@ const specialtyChips = [
 export default function PatientDashboard() {
   const router = useRouter();
   const { user } = useAuthStore();
+  const userId = user?.id;
   const [topDoctors, setTopDoctors] = useState<Doctor[]>([]);
   const [upcomingAppointments, setUpcomingAppointments] = useState<Appointment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const userId = user?.id;
+  const [isLoading, setIsLoading] = useState(!!userId);
 
   useEffect(() => {
-    if (!userId) {
-      setIsLoading(false);
-      return;
-    }
+    if (!userId) return;
     const fetchData = async () => {
       const [doctorsRes, appointmentsRes] = await Promise.all([
         doctorService.getTopDoctors(4),
@@ -70,7 +66,7 @@ export default function PatientDashboard() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8 max-w-6xl">
+      <div className="space-y-8 max-w-6xl mx-auto">
         {/* Welcome Banner */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
