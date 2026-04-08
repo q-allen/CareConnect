@@ -339,7 +339,7 @@ export default function DoctorQueuePage() {
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
       >
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Queue Management</h1>
+          <h1 className="text-2xl font-bold text-foreground">Queue Management</h1>
           <p className="text-sm text-muted-foreground mt-1">{format(new Date(), 'EEEE, MMMM d, yyyy')}</p>
           <div className="flex flex-wrap items-center gap-2 mt-3">
             <Badge className="bg-primary/10 text-primary border-primary/20 text-sm px-3 py-1">
