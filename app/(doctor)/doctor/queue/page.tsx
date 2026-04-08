@@ -336,7 +336,7 @@ export default function DoctorQueuePage() {
       <motion.div
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col xl:flex-row xl:items-center justify-between gap-4"
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
       >
         <div>
           <h1 className="text-3xl font-bold text-foreground">Queue Management</h1>
