@@ -16,10 +16,9 @@
  */
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowLeft, Wallet, Info, CheckCircle2, AlertCircle } from "lucide-react";
+import { ArrowLeft, Wallet, Info, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,17 +47,9 @@ const fmt = (val: string | number | undefined) => {
   return `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 
-const METHOD_LABELS: Record<PayoutMethod, string> = {
-  gcash:         "GCash",
-  bank_transfer: "Bank Transfer",
-  maya:          "Maya",
-  other:         "Other",
-};
-
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function PayoutRequestPage() {
-  const router  = useRouter();
   const { toast } = useToast();
 
   const [summary, setSummary]       = useState<EarningsSummary | null>(null);
@@ -403,7 +394,7 @@ export default function PayoutRequestPage() {
               className="w-full gap-2 bg-teal-600 hover:bg-teal-700 text-white h-11"
             >
               {isSubmitting ? (
-                <><RefreshCwIcon className="h-4 w-4 animate-spin" /> Submitting...</>
+                <><Loader2 className="h-4 w-4 animate-spin" /> Submitting...</>
               ) : (
                 <><Wallet className="h-4 w-4" /> Submit Payout Request</>
               )}
@@ -415,7 +406,4 @@ export default function PayoutRequestPage() {
   );
 }
 
-// Inline spinner icon to avoid extra import
-function RefreshCwIcon({ className }: { className?: string }) {
-  return <RefreshCw className={className} />;
-}
+
