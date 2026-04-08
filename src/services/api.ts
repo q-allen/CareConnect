@@ -246,4 +246,12 @@ export const API_ENDPOINTS = {
   MY_DOCTORS:           "/api/patients/my-doctors/",
   FAMILY_MEMBERS:       "/api/patients/family-members/",
   FAMILY_MEMBER_DETAIL: (id: number | string) => `/api/patients/family-members/${id}/`,
+  // Payouts
+  PAYOUTS:              "/api/payouts/",
+  PAYOUT_REQUEST:       "/api/payouts/request/",
+  PAYOUT_EARNINGS:      "/api/payouts/earnings/",
+  PAYOUT_DETAIL:        (id: number | string) => `/api/payouts/${id}/`,
+  PAYOUT_APPROVE:       (id: number | string) => `/api/payouts/${id}/approve/`,
+  PAYOUT_REJECT:        (id: number | string) => `/api/payouts/${id}/reject/`,
+  ADMIN_REVENUE:        "/api/payouts/admin/revenue/",
 } as const;

@@ -66,6 +66,71 @@ export interface DoctorEarnings {
   pendingAmount: number;
 }
 
+// ── Payout types ──────────────────────────────────────────────────────────────
+
+export type PayoutStatus = "pending" | "approved" | "rejected" | "paid";
+export type PayoutMethod = "gcash" | "bank_transfer" | "maya" | "other";
+
+export interface Payout {
+  id: number;
+  doctor: number;
+  doctor_name: string;
+  amount: string;          // Decimal comes as string from DRF
+  method: PayoutMethod;
+  account_name: string;
+  account_number: string;
+  bank_name: string;
+  status: PayoutStatus;
+  reviewed_by: number | null;
+  reviewed_by_name: string | null;
+  reviewed_at: string | null;
+  rejection_reason: string;
+  payout_reference: string;
+  admin_notes: string;
+  period_start: string | null;
+  period_end: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EarningsSummary {
+  total_gross: string;
+  total_commission: string;
+  total_earnings: string;
+  available_earnings: string;
+  paid_out: string;
+  pending_payout: string;
+  completed_count: number;
+  commission_rate: string;
+  week_earnings: string;
+  week_commission: string;
+  week_consults: number;
+  today_earnings: string;
+  today_commission: string;
+  today_consults: number;
+  breakdown: EarningsBreakdownItem[];
+}
+
+export interface EarningsBreakdownItem {
+  id: number;
+  date: string;
+  type: string;
+  fee: string;
+  platform_commission: string;
+  doctor_earnings: string;
+  payment_status: string;
+}
+
+export interface PayoutRequestPayload {
+  amount: string;
+  method: PayoutMethod;
+  account_name: string;
+  account_number: string;
+  bank_name?: string;
+  period_start?: string;
+  period_end?: string;
+}
+
 export const doctorService = {
   async getDoctors(
     filters?: DoctorSearchFilters,
@@ -188,6 +253,42 @@ export const doctorService = {
       };
     } catch {
       return { data: null as unknown as DoctorEarnings, success: false };
+    }
+  },
+
+  // ── Payout methods ──────────────────────────────────────────────────────────────
+
+  /** GET /api/payouts/earnings/ — full earnings summary for doctor dashboard */
+  async getEarningsSummary(): Promise<ApiResponse<EarningsSummary>> {
+    try {
+      const data = await api.get<EarningsSummary>(API_ENDPOINTS.PAYOUT_EARNINGS);
+      return { data, success: true };
+    } catch {
+      return { data: null as unknown as EarningsSummary, success: false };
+    }
+  },
+
+  /** GET /api/payouts/ — doctor's own payout history */
+  async getPayouts(): Promise<ApiResponse<Payout[]>> {
+    try {
+      const data = await api.get<Payout[]>(API_ENDPOINTS.PAYOUTS);
+      return { data, success: true };
+    } catch {
+      return { data: [], success: false };
+    }
+  },
+
+  /** POST /api/payouts/request/ — submit a payout request */
+  async requestPayout(payload: PayoutRequestPayload): Promise<ApiResponse<Payout>> {
+    try {
+      const data = await api.post<Payout>(API_ENDPOINTS.PAYOUT_REQUEST, payload);
+      return { data, success: true };
+    } catch (err) {
+      return {
+        data: null as unknown as Payout,
+        success: false,
+        error: (err as Error)?.message ?? "Failed to submit payout request.",
+      };
     }
   },
 

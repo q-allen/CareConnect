@@ -24,6 +24,7 @@ import {
   Trash2,
   FlaskConical,
   Zap,
+  TrendingUp,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -71,6 +72,7 @@ const navItems: Record<Exclude<UserRole, 'admin'>, NavItem[]> = {
     { label: 'Messages',     href: '/doctor/messages',       icon: MessageCircle },
     { label: 'Prescriptions',href: '/doctor/prescriptions',  icon: FileText },
     { label: 'Lab Results',   href: '/doctor/lab-results',    icon: FlaskConical },
+    { label: 'Earnings',      href: '/doctor/earnings',       icon: TrendingUp },
   ],
 };
 
