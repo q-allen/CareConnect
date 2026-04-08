@@ -337,23 +337,23 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main Content */}
       <div className={cn('transition-all duration-300', sidebarOpen ? 'lg:ml-64' : 'lg:ml-20')}>
         {/* Header */}
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-card/80 backdrop-blur px-4 sm:px-6">
-          <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(true)} className="lg:hidden">
+        <header className="sticky top-0 z-30 flex h-14 sm:h-16 items-center gap-2 sm:gap-4 border-b border-border bg-card/80 backdrop-blur px-3 sm:px-4 lg:px-6">
+          <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(true)} className="lg:hidden shrink-0">
             <Menu className="h-5 w-5" />
           </Button>
 
           <div className="flex-1" />
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             {/* On-Demand Toggle — doctors only */}
             {user.role === 'doctor' && (
-              <div className="flex items-center gap-2 rounded-full bg-secondary/60 px-3 py-1.5">
+              <div className="flex items-center gap-1.5 sm:gap-2 rounded-full bg-secondary/60 px-2 sm:px-3 py-1 sm:py-1.5">
                 <Switch
                   checked={(user as Doctor).isOnDemand ?? false}
                   onCheckedChange={handleOnDemandToggle}
                   id="header-on-demand"
                 />
-                <label htmlFor="header-on-demand" className="text-xs font-medium cursor-pointer hidden sm:block">
+                <label htmlFor="header-on-demand" className="text-[10px] sm:text-xs font-medium cursor-pointer hidden sm:block">
                   On-Demand
                 </label>
                 <span className={`h-2 w-2 rounded-full shrink-0 ${
@@ -364,18 +364,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             {/* Notifications */}
             <DropdownMenu onOpenChange={(open) => { if (open && unreadCount > 0) { clearBadge(); notificationService.markAllAsRead(''); } }}>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="h-5 w-5" />
+                <Button variant="ghost" size="icon" className="relative shrink-0">
+                  <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center">
+                    <span className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 h-4 w-4 sm:h-5 sm:w-5 rounded-full bg-destructive text-destructive-foreground text-[10px] sm:text-xs flex items-center justify-center font-medium">
                       {unreadCount}
                     </span>
                   )}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80 p-0">
+              <DropdownMenuContent align="end" className="w-72 sm:w-80 p-0">
                 <div className="px-3 py-2 border-b border-border">
-                  <span className="text-sm font-semibold">Notifications</span>
+                  <span className="text-xs sm:text-sm font-semibold">Notifications</span>
                 </div>
                 <div className="max-h-80 overflow-y-auto">
                   {notifications.length === 0 ? (
@@ -422,14 +422,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
-                  <Avatar className="h-8 w-8">
+                <Button variant="ghost" size="icon" className="rounded-full shrink-0">
+                  <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
                     <AvatarImage src={user.avatar} />
                     <AvatarFallback>{user?.name?.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent align="end" className="w-48 sm:w-56">
                 <DropdownMenuLabel>
                   <div>
                     <p className="font-medium">{user.name}</p>
@@ -452,7 +452,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </header>
 
         {/* Page Content */}
-        <main className="p-4 sm:p-6 lg:p-8 relative w-full">
+        <main className="p-3 sm:p-4 md:p-6 lg:p-8 relative w-full">
           {routeLoading && (
             <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/70 backdrop-blur-sm">
               <div className="h-10 w-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />

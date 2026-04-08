@@ -437,33 +437,33 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-12 sm:py-16 lg:py-20">
+        <div className="container mx-auto px-3 sm:px-4 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="relative rounded-3xl gradient-hero p-12 sm:p-16 text-center overflow-hidden"
+            className="relative rounded-2xl sm:rounded-3xl gradient-hero p-8 sm:p-12 lg:p-16 text-center overflow-hidden"
           >
             <div className="absolute inset-0 bg-grid-white/10" />
             <div className="relative">
-              <h2 className="text-3xl sm:text-4xl font-bold text-primary-foreground mb-4">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary-foreground mb-3 sm:mb-4">
                 Ready to Take Control of Your Health?
               </h2>
-              <p className="text-lg text-primary-foreground/80 max-w-2xl mx-auto mb-8">
+              <p className="text-sm sm:text-base lg:text-lg text-primary-foreground/80 max-w-2xl mx-auto mb-6 sm:mb-8">
                 Join CareConnect — book appointments, track your queue, consult via video, and manage your health records all in one place.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                 <Link href="/signup">
-                  <Button size="lg" variant="secondary" className="text-lg px-8 h-12 w-full sm:w-auto">
+                  <Button size="lg" variant="secondary" className="text-sm sm:text-base lg:text-lg px-6 sm:px-8 h-11 sm:h-12 w-full sm:w-auto">
                     Get Started Free
-                    <ArrowRight className="ml-2 h-5 w-5" />
+                    <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                   </Button>
                 </Link>
                 <Link href="/signin">
-                  <Button size="lg" variant="outline" className="text-lg px-8 h-12 border-primary-foreground/60 text-primary-foreground bg-primary-foreground/10 hover:bg-primary-foreground/20 w-full sm:w-auto">
-                    <Users className="mr-2 h-5 w-5" />
+                  <Button size="lg" variant="outline" className="text-sm sm:text-base lg:text-lg px-6 sm:px-8 h-11 sm:h-12 border-primary-foreground/60 text-primary-foreground bg-primary-foreground/10 hover:bg-primary-foreground/20 w-full sm:w-auto">
+                    <Users className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                     Sign In
                   </Button>
                 </Link>
@@ -474,18 +474,18 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-secondary/50 border-t border-border py-8">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg gradient-primary">
-              <Activity className="h-5 w-5 text-primary-foreground" />
+      <footer className="bg-secondary/50 border-t border-border py-6 sm:py-8">
+        <div className="container mx-auto px-3 sm:px-4 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+          <Link href="/" className="flex items-center gap-1.5 sm:gap-2">
+            <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg gradient-primary">
+              <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold text-foreground">CareConnect</span>
+            <span className="text-base sm:text-lg lg:text-xl font-bold text-foreground">CareConnect</span>
           </Link>
-          <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} CareConnect. All rights reserved.</p>
-          <a href="mailto:careconnect126@gmail.com" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors" title="careconnect126@gmail.com">
-            <img src="/gmail.svg" alt="Gmail" className="h-5 w-5" />
-            careconnect126@gmail.com
+          <p className="text-xs sm:text-sm text-muted-foreground">&copy; {new Date().getFullYear()} CareConnect. All rights reserved.</p>
+          <a href="mailto:careconnect126@gmail.com" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors" title="careconnect126@gmail.com">
+            <img src="/gmail.svg" alt="Gmail" className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className="hidden sm:inline">careconnect126@gmail.com</span>
           </a>
         </div>
       </footer>

@@ -71,24 +71,24 @@ export default function PatientDashboard() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-2xl gradient-primary p-6 text-primary-foreground"
+          className="relative overflow-hidden rounded-xl sm:rounded-2xl gradient-primary p-4 sm:p-5 lg:p-6 text-primary-foreground"
         >
           <div className="absolute inset-0 opacity-10 hero-radial" />
-          <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">
                 Welcome back, {firstName}! 👋
               </h1>
-              <p className="text-primary-foreground/80 mt-1 text-sm">
+              <p className="text-primary-foreground/80 mt-1 text-xs sm:text-sm">
                 How are you feeling today? Your health, our priority.
               </p>
             </div>
             <Button
               variant="secondary"
-              className="gap-2 shrink-0 bg-white/20 text-primary-foreground border-white/30 hover:bg-white/30"
+              className="gap-2 shrink-0 bg-white/20 text-primary-foreground border-white/30 hover:bg-white/30 text-xs sm:text-sm"
               onClick={() => router.push('/patient/doctors?available=true')}
             >
-              <Zap className="h-4 w-4" />
+              <Zap className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               Consult Now
             </Button>
           </div>
@@ -96,8 +96,8 @@ export default function PatientDashboard() {
 
         {/* Quick Actions */}
         <div>
-          <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wide">Quick Actions</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <h2 className="text-xs sm:text-sm font-semibold text-muted-foreground mb-2 sm:mb-3 uppercase tracking-wide">Quick Actions</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
             {quickActions.map((action, index) => (
               <motion.div
                 key={action.label}
@@ -107,13 +107,13 @@ export default function PatientDashboard() {
               >
                 <Link href={action.href}>
                   <Card className="hover:shadow-md transition-all duration-200 hover:border-primary/30 cursor-pointer h-full group">
-                    <CardContent className="flex flex-col items-center justify-center p-4 text-center gap-2">
-                      <div className={`h-11 w-11 rounded-xl ${action.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                        <action.icon className="h-5 w-5 text-white" />
+                    <CardContent className="flex flex-col items-center justify-center p-3 sm:p-4 text-center gap-1.5 sm:gap-2">
+                      <div className={`h-9 w-9 sm:h-10 sm:w-10 lg:h-11 lg:w-11 rounded-lg sm:rounded-xl ${action.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                        <action.icon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                       </div>
                       <div>
-                        <p className="text-xs font-semibold text-foreground leading-tight">{action.label}</p>
-                        <p className="text-[10px] text-muted-foreground mt-0.5 hidden sm:block">{action.desc}</p>
+                        <p className="text-[11px] sm:text-xs font-semibold text-foreground leading-tight">{action.label}</p>
+                        <p className="text-[9px] sm:text-[10px] text-muted-foreground mt-0.5 hidden sm:block">{action.desc}</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -130,19 +130,19 @@ export default function PatientDashboard() {
           transition={{ delay: 0.3 }}
         >
           <Card className="border-warning/30 bg-warning/5 overflow-hidden">
-            <CardContent className="p-5 flex flex-col sm:flex-row items-center gap-4">
-              <div className="h-14 w-14 rounded-2xl bg-warning/20 flex items-center justify-center shrink-0">
-                <Video className="h-7 w-7 text-warning" />
+            <CardContent className="p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+              <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl sm:rounded-2xl bg-warning/20 flex items-center justify-center shrink-0">
+                <Video className="h-6 w-6 sm:h-7 sm:w-7 text-warning" />
               </div>
               <div className="flex-1 text-center sm:text-left">
-                <p className="font-semibold text-foreground">Need to see a doctor now?</p>
-                <p className="text-sm text-muted-foreground">Doctors are available for on-demand video consultation — get seen within 15 minutes.</p>
+                <p className="font-semibold text-foreground text-sm sm:text-base">Need to see a doctor now?</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Doctors are available for on-demand video consultation — get seen within 15 minutes.</p>
               </div>
               <Button
-                className="bg-warning text-warning-foreground hover:bg-warning/90 gap-2 shrink-0"
+                className="bg-warning text-warning-foreground hover:bg-warning/90 gap-2 shrink-0 text-xs sm:text-sm"
                 onClick={() => router.push('/patient/doctors?available=true')}
               >
-                <Zap className="h-4 w-4" />
+                <Zap className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Consult Now
               </Button>
             </CardContent>
@@ -151,13 +151,13 @@ export default function PatientDashboard() {
 
         {/* Upcoming Appointments */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Clock className="h-5 w-5 text-primary" />
+          <CardHeader className="flex flex-row items-center justify-between pb-2 sm:pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+              <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               Upcoming Appointments
             </CardTitle>
             <Link href="/patient/appointments">
-              <Button variant="ghost" size="sm" className="text-xs gap-1">
+              <Button variant="ghost" size="sm" className="text-[10px] sm:text-xs gap-1">
                 View All <ArrowRight className="h-3 w-3" />
               </Button>
             </Link>
@@ -184,34 +184,34 @@ export default function PatientDashboard() {
                 </Link>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {upcomingAppointments.map((apt) => (
                   <motion.div
                     key={apt.id}
                     whileHover={{ scale: 1.01 }}
-                    className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-xl bg-secondary/50 border border-border hover:border-primary/20 transition-colors"
+                    className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-secondary/50 border border-border hover:border-primary/20 transition-colors"
                   >
-                    <Avatar className="h-12 w-12">
+                    <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
                       <AvatarImage src={apt.doctor?.avatar} />
                       <AvatarFallback>{apt.doctor?.name?.[0]}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-foreground">{apt.doctor?.name}</p>
-                      <p className="text-sm text-primary">{apt.doctor?.specialty}</p>
-                      <p className="text-xs text-muted-foreground">{apt.doctor?.hospital}</p>
+                      <p className="font-medium text-foreground text-sm sm:text-base">{apt.doctor?.name}</p>
+                      <p className="text-xs sm:text-sm text-primary">{apt.doctor?.specialty}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{apt.doctor?.hospital}</p>
                     </div>
-                    <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-1">
-                      <Badge variant={apt.type === 'online' ? 'default' : 'secondary'} className="text-xs gap-1">
-                        {apt.type === 'online' ? <Video className="h-3 w-3" /> : null}
+                    <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-1 w-full sm:w-auto">
+                      <Badge variant={apt.type === 'online' ? 'default' : 'secondary'} className="text-[10px] sm:text-xs gap-1">
+                        {apt.type === 'online' ? <Video className="h-2.5 w-2.5 sm:h-3 sm:w-3" /> : null}
                         {apt.type === 'online' ? 'Video' : 'In-Clinic'}
                       </Badge>
                       <div className="text-right">
-                        <p className="text-xs font-medium text-foreground">{apt.date}</p>
-                        <p className="text-xs text-muted-foreground">{formatTime12Hour(apt.time)}</p>
+                        <p className="text-[10px] sm:text-xs font-medium text-foreground">{apt.date}</p>
+                        <p className="text-[10px] sm:text-xs text-muted-foreground">{formatTime12Hour(apt.time)}</p>
                       </div>
                     </div>
                     {apt.type === 'online' && (
-                      <Button size="sm" className="gap-1.5 shrink-0" onClick={() => router.push('/patient/appointments')}>
+                      <Button size="sm" className="gap-1.5 shrink-0 text-xs" onClick={() => router.push('/patient/appointments')}>
                         <Video className="h-3.5 w-3.5" />Join
                       </Button>
                     )}
@@ -224,19 +224,19 @@ export default function PatientDashboard() {
 
         {/* Specialty Quick Search */}
         <div>
-          <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wide">Browse by Specialty</h2>
-          <div className="flex flex-wrap gap-2">
+          <h2 className="text-xs sm:text-sm font-semibold text-muted-foreground mb-2 sm:mb-3 uppercase tracking-wide">Browse by Specialty</h2>
+          <div className="flex flex-wrap gap-1.5 sm:gap-2">
             {specialtyChips.map((s) => (
               <Link key={s.label} href={`/patient/doctors?specialty=${encodeURIComponent(s.label)}`}>
                 <motion.div
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.97 }}
                   className={cn(
-                    'flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border border-transparent cursor-pointer transition-colors',
+                    'flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium border border-transparent cursor-pointer transition-colors',
                     s.color
                   )}
                 >
-                  <s.icon className="h-4 w-4" />
+                  <s.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   {s.label}
                 </motion.div>
               </Link>
@@ -246,24 +246,24 @@ export default function PatientDashboard() {
 
         {/* Top Doctors */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Users className="h-5 w-5 text-primary" />
+          <CardHeader className="flex flex-row items-center justify-between pb-2 sm:pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+              <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               Top Doctors
             </CardTitle>
             <Link href="/patient/doctors">
-              <Button variant="ghost" size="sm" className="text-xs gap-1">
+              <Button variant="ghost" size="sm" className="text-[10px] sm:text-xs gap-1">
                 See All <ArrowRight className="h-3 w-3" />
               </Button>
             </Link>
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="grid sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                 {[1,2,3,4].map(i => <Skeleton key={i} className="h-20 rounded-xl" />)}
               </div>
             ) : (
-              <div className="grid sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                 {topDoctors.map((doctor, i) => {
                   const doctorName = doctor.name ?? 'Unknown Doctor';
                   const doctorInitial = doctorName.charAt(0) || '?';
@@ -276,29 +276,29 @@ export default function PatientDashboard() {
                       whileHover={{ scale: 1.02 }}
                     >
                       <Link href={`/patient/doctors/${doctor.id}`}>
-                        <div className="flex items-center gap-3 p-4 rounded-xl border border-border hover:border-primary/30 hover:bg-secondary/50 transition-all">
+                        <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-border hover:border-primary/30 hover:bg-secondary/50 transition-all">
                           <div className="relative">
-                            <Avatar className="h-14 w-14">
+                            <Avatar className="h-12 w-12 sm:h-14 sm:w-14">
                               <AvatarImage src={doctor.avatar} />
                               <AvatarFallback>{doctorInitial}</AvatarFallback>
                             </Avatar>
                             {doctor.isAvailable && (
-                              <span className="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 bg-success rounded-full border-2 border-background" />
+                              <span className="absolute bottom-0.5 right-0.5 w-3 h-3 sm:w-3.5 sm:h-3.5 bg-success rounded-full border-2 border-background" />
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-foreground text-sm leading-tight">{doctorName}</p>
-                            <p className="text-xs text-primary">{doctor.specialty}</p>
-                            <p className="text-xs text-muted-foreground truncate">{doctor.hospital}</p>
-                            <div className="flex items-center gap-1 mt-1">
-                              <Star className="h-3 w-3 fill-warning text-warning" />
-                              <span className="text-xs font-medium">{doctor.rating}</span>
-                              <span className="text-xs text-muted-foreground">· ₱{doctor.onlineConsultationFee}</span>
+                            <p className="font-medium text-foreground text-xs sm:text-sm leading-tight">{doctorName}</p>
+                            <p className="text-[10px] sm:text-xs text-primary">{doctor.specialty}</p>
+                            <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{doctor.hospital}</p>
+                            <div className="flex items-center gap-1 mt-0.5 sm:mt-1">
+                              <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-warning text-warning" />
+                              <span className="text-[10px] sm:text-xs font-medium">{doctor.rating}</span>
+                              <span className="text-[10px] sm:text-xs text-muted-foreground">· ₱{doctor.onlineConsultationFee}</span>
                             </div>
                           </div>
                           {doctor.isOnDemand && (
-                            <Badge className="shrink-0 bg-success/15 text-success border-success/30 text-[10px]">
-                              <Zap className="h-2.5 w-2.5 mr-0.5" />Now
+                            <Badge className="shrink-0 bg-success/15 text-success border-success/30 text-[9px] sm:text-[10px]">
+                              <Zap className="h-2 w-2 sm:h-2.5 sm:w-2.5 mr-0.5" />Now
                             </Badge>
                           )}
                         </div>
@@ -312,8 +312,8 @@ export default function PatientDashboard() {
         </Card>
 
         {/* Privacy / Security Note */}
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-muted/50 border border-border text-sm text-muted-foreground">
-          <Shield className="h-5 w-5 text-primary shrink-0" />
+        <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-muted/50 border border-border text-xs sm:text-sm text-muted-foreground">
+          <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
           <p>All your health data, consultations, and files are <span className="font-medium text-foreground">encrypted and private</span>. Only you and your doctors can access them.</p>
         </div>
       </div>

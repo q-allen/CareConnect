@@ -130,20 +130,20 @@ export default function DoctorDashboardPage() {
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Welcome Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-primary/80 p-8 text-primary-foreground shadow-lg"
+        className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-primary/80 p-4 sm:p-6 lg:p-8 text-primary-foreground shadow-lg"
       >
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.3),transparent)]" />
-        <div className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+        <div className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 sm:gap-4">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-bold">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold">
               {greeting}, Dr. {firstName}! 👋
             </h1>
-            <p className="text-primary-foreground/90 mt-2 text-base">
+            <p className="text-primary-foreground/90 mt-1 sm:mt-2 text-xs sm:text-sm md:text-base">
               {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
           </div>
@@ -151,17 +151,17 @@ export default function DoctorDashboardPage() {
       </motion.div>
 
       {/* Summary Cards */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <Card className="border-primary/20 hover:shadow-md transition-shadow">
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6 pb-3 sm:pb-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Today's Appointments</p>
-                  <p className="text-3xl font-bold text-foreground mt-1">{isLoading ? '-' : consultsToday}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Today's Appointments</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-foreground mt-1">{isLoading ? '-' : consultsToday}</p>
                 </div>
-                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Calendar className="h-6 w-6 text-primary" />
+                <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                 </div>
               </div>
             </CardContent>
@@ -170,14 +170,14 @@ export default function DoctorDashboardPage() {
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
           <Card className="border-success/20 hover:shadow-md transition-shadow">
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6 pb-3 sm:pb-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Patients Seen</p>
-                  <p className="text-3xl font-bold text-foreground mt-1">{isLoading ? '-' : patientsSeen}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Patients Seen</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-foreground mt-1">{isLoading ? '-' : patientsSeen}</p>
                 </div>
-                <div className="h-12 w-12 rounded-xl bg-success/10 flex items-center justify-center">
-                  <CheckCircle2 className="h-6 w-6 text-success" />
+                <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg sm:rounded-xl bg-success/10 flex items-center justify-center">
+                  <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-success" />
                 </div>
               </div>
             </CardContent>
@@ -186,14 +186,14 @@ export default function DoctorDashboardPage() {
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <Card className="border-warning/20 hover:shadow-md transition-shadow">
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6 pb-3 sm:pb-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Waiting in Queue</p>
-                  <p className="text-3xl font-bold text-foreground mt-1">{isLoading ? '-' : waitingCount}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Waiting in Queue</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-foreground mt-1">{isLoading ? '-' : waitingCount}</p>
                 </div>
-                <div className="h-12 w-12 rounded-xl bg-warning/10 flex items-center justify-center">
-                  <Clock className="h-6 w-6 text-warning" />
+                <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg sm:rounded-xl bg-warning/10 flex items-center justify-center">
+                  <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-warning" />
                 </div>
               </div>
             </CardContent>
@@ -202,16 +202,16 @@ export default function DoctorDashboardPage() {
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
           <Card className="border-primary/20 hover:shadow-md transition-shadow">
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6 pb-3 sm:pb-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Earnings Today</p>
-                  <p className="text-2xl font-bold text-foreground mt-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground">Earnings Today</p>
+                  <p className="text-lg sm:text-2xl font-bold text-foreground mt-1">
                     {isLoading ? '-' : formatPHP(earnings?.revenueToday)}
                   </p>
                 </div>
-                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <TrendingUp className="h-6 w-6 text-primary" />
+                <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                 </div>
               </div>
             </CardContent>
@@ -221,8 +221,8 @@ export default function DoctorDashboardPage() {
 
       {/* Quick Actions Grid */}
       <div>
-        <h2 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <h2 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
           {quickActions.map((action, index) => (
             <motion.div
               key={action.label}
@@ -232,13 +232,13 @@ export default function DoctorDashboardPage() {
             >
               <Link href={action.href}>
                 <Card className="hover:shadow-lg transition-all duration-200 hover:scale-105 cursor-pointer h-full group border-border/50">
-                  <CardContent className="flex flex-col items-center justify-center p-5 text-center gap-3">
-                    <div className={`h-14 w-14 rounded-2xl ${action.color} flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow`}>
-                      <action.icon className="h-7 w-7 text-white" />
+                  <CardContent className="flex flex-col items-center justify-center p-3 sm:p-4 lg:p-5 text-center gap-2 sm:gap-3">
+                    <div className={`h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 rounded-xl sm:rounded-2xl ${action.color} flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow`}>
+                      <action.icon className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-white" />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-foreground leading-tight">{action.label}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{action.desc}</p>
+                      <p className="text-xs sm:text-sm font-semibold text-foreground leading-tight">{action.label}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 hidden sm:block">{action.desc}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -248,7 +248,7 @@ export default function DoctorDashboardPage() {
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Now Serving / Queue */}
         <Card className="lg:col-span-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
@@ -282,16 +282,16 @@ export default function DoctorDashboardPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-5 rounded-xl bg-background border-2 border-primary/20 shadow-sm">
-                  <Avatar className="h-16 w-16 border-2 border-primary/30">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 lg:p-5 rounded-lg sm:rounded-xl bg-background border-2 border-primary/20 shadow-sm">
+                  <Avatar className="h-12 w-12 sm:h-14 sm:w-14 lg:h-16 lg:w-16 border-2 border-primary/30">
                     <AvatarImage src={nowServing.patient?.avatar} />
-                    <AvatarFallback className="text-xl bg-primary/10 text-primary">
+                    <AvatarFallback className="text-base sm:text-lg lg:text-xl bg-primary/10 text-primary">
                       {nowServing.patient?.name?.[0]}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <p className="text-lg font-bold text-foreground">{nowServing.patient?.name}</p>
-                    <p className="text-sm text-muted-foreground mt-0.5">
+                    <p className="text-base sm:text-lg font-bold text-foreground">{nowServing.patient?.name}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
                       {formatTime12Hour(nowServing.time)} • {nowServing.type === 'online' ? 'Video Consult' : 'In-Clinic'}
                     </p>
                     <Badge className="mt-2 bg-success/15 text-success border-success/30">
@@ -300,16 +300,16 @@ export default function DoctorDashboardPage() {
                   </div>
                 </div>
 
-                <div className="grid sm:grid-cols-3 gap-2">
-                  <Button className="gap-2" onClick={() => router.push('/doctor/queue')}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                  <Button className="gap-2 text-xs sm:text-sm" onClick={() => router.push('/doctor/queue')}>
                     <Video className="h-4 w-4" />
                     Start Video
                   </Button>
-                  <Button variant="outline" onClick={handleMarkDone} className="gap-2">
+                  <Button variant="outline" onClick={handleMarkDone} className="gap-2 text-xs sm:text-sm">
                     <CheckCircle2 className="h-4 w-4" />
                     Mark Done
                   </Button>
-                  <Button variant="outline" onClick={() => router.push(`/doctor/appointments/${nowServing.id}`)} className="gap-2">
+                  <Button variant="outline" onClick={() => router.push(`/doctor/appointments/${nowServing.id}`)} className="gap-2 text-xs sm:text-sm col-span-full sm:col-span-1">
                     <FileText className="h-4 w-4" />
                     Details
                   </Button>
