@@ -522,11 +522,21 @@ async function request(path, init = {}, _retry = true) {
         let message = res.statusText;
         try {
             const body = await res.json();
-            if (body.detail) message = body.detail;
-            else if (body.non_field_errors) message = body.non_field_errors[0];
-            else {
-                const first = Object.values(body)[0];
-                if (Array.isArray(first)) message = first[0];
+            if (body.detail) {
+                message = body.detail;
+            } else if (body.non_field_errors) {
+                message = Array.isArray(body.non_field_errors) ? body.non_field_errors[0] : body.non_field_errors;
+            } else {
+                // Collect all field-level errors into a readable message
+                const fieldErrors = [];
+                for (const [field, errors] of Object.entries(body)){
+                    if (Array.isArray(errors)) {
+                        fieldErrors.push(`${field}: ${errors[0]}`);
+                    } else if (typeof errors === "string") {
+                        fieldErrors.push(`${field}: ${errors}`);
+                    }
+                }
+                if (fieldErrors.length > 0) message = fieldErrors.join("; ");
             }
         } catch  {
         // use default status text
@@ -555,7 +565,18 @@ async function upload(path, body, method = "POST", _retry = true) {
         let message = res.statusText;
         try {
             const b = await res.json();
-            if (b.detail) message = b.detail;
+            if (b.detail) {
+                message = b.detail;
+            } else if (b.non_field_errors) {
+                message = Array.isArray(b.non_field_errors) ? b.non_field_errors[0] : b.non_field_errors;
+            } else {
+                const fieldErrors = [];
+                for (const [field, errors] of Object.entries(b)){
+                    if (Array.isArray(errors)) fieldErrors.push(`${field}: ${errors[0]}`);
+                    else if (typeof errors === "string") fieldErrors.push(`${field}: ${errors}`);
+                }
+                if (fieldErrors.length > 0) message = fieldErrors.join("; ");
+            }
         } catch  {
         // use default status text
         }
@@ -629,6 +650,7 @@ const API_ENDPOINTS = {
     // Records
     PRESCRIPTIONS: "/api/records/prescriptions",
     PRESCRIPTION_DETAIL: (id)=>`/api/records/prescriptions/${id}`,
+    PRESCRIPTION_PDF: (id)=>`/api/records/prescriptions/${id}/pdf/`,
     LAB_RESULTS: "/api/records/labs",
     LAB_DETAIL: (id)=>`/api/records/labs/${id}`,
     CERTIFICATES: "/api/records/certificates",
@@ -661,7 +683,15 @@ const API_ENDPOINTS = {
     // Patients
     MY_DOCTORS: "/api/patients/my-doctors/",
     FAMILY_MEMBERS: "/api/patients/family-members/",
-    FAMILY_MEMBER_DETAIL: (id)=>`/api/patients/family-members/${id}/`
+    FAMILY_MEMBER_DETAIL: (id)=>`/api/patients/family-members/${id}/`,
+    // Payouts
+    PAYOUTS: "/api/payouts/",
+    PAYOUT_REQUEST: "/api/payouts/request/",
+    PAYOUT_EARNINGS: "/api/payouts/earnings/",
+    PAYOUT_DETAIL: (id)=>`/api/payouts/${id}/`,
+    PAYOUT_APPROVE: (id)=>`/api/payouts/${id}/approve/`,
+    PAYOUT_REJECT: (id)=>`/api/payouts/${id}/reject/`,
+    ADMIN_REVENUE: "/api/payouts/admin/revenue/"
 };
 }),
 "[project]/src/services/userService.ts [app-ssr] (ecmascript)", ((__turbopack_context__) => {
@@ -868,21 +898,6 @@ const authService = {
                     user: toFrontendUser(res.user),
                     familyMembers: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$userService$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["mapFamilyMembers"])(res.user.family_members ?? [])
                 };
-            }
-            // If we have a role hint cookie, try a silent refresh once and re-fetch.
-            if (typeof document !== "undefined" && document.cookie.includes("user_role=")) {
-                try {
-                    await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["api"].post(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].REFRESH, {});
-                    const retry = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["api"].get(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].ME);
-                    if (retry.user) {
-                        return {
-                            user: toFrontendUser(retry.user),
-                            familyMembers: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$userService$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["mapFamilyMembers"])(retry.user.family_members ?? [])
-                        };
-                    }
-                } catch  {
-                // fall through to null
-                }
             }
             return null;
         } catch  {
@@ -1264,17 +1279,16 @@ function AuthRehydrator() {
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         if (user) return;
         setLoading(true);
-        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$authService$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["authService"].refresh().catch(()=>{}).finally(()=>{
-            __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$authService$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["authService"].getMe().then((result)=>{
-                if (result) {
-                    setUser(result.user);
-                    setFamilyMembers(result.familyMembers);
-                } else {
-                    setUser(null);
-                }
-                setLoading(false);
-            });
-        });
+        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$authService$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["authService"].refresh().then(()=>__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$authService$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["authService"].getMe()).then((result)=>{
+            if (result) {
+                setUser(result.user);
+                setFamilyMembers(result.familyMembers);
+            } else {
+                setUser(null);
+            }
+        }).catch(()=>{
+            setUser(null);
+        }).finally(()=>setLoading(false));
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
     // Proactive silent refresh every 13 min (access token lifetime is 15 min)
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
@@ -1306,34 +1320,34 @@ function Providers({ children }) {
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(AuthRehydrator, {}, void 0, false, {
                         fileName: "[project]/app/providers.tsx",
-                        lineNumber: 57,
+                        lineNumber: 58,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$toaster$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Toaster"], {}, void 0, false, {
                         fileName: "[project]/app/providers.tsx",
-                        lineNumber: 58,
+                        lineNumber: 59,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$sonner$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["Toaster"], {}, void 0, false, {
                         fileName: "[project]/app/providers.tsx",
-                        lineNumber: 59,
+                        lineNumber: 60,
                         columnNumber: 11
                     }, this),
                     children
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/providers.tsx",
-                lineNumber: 56,
+                lineNumber: 57,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/app/providers.tsx",
-            lineNumber: 55,
+            lineNumber: 56,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/app/providers.tsx",
-        lineNumber: 54,
+        lineNumber: 55,
         columnNumber: 5
     }, this);
 }

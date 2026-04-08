@@ -123,9 +123,14 @@ export default function DoctorDashboardPage() {
   const firstName = doctor?.name?.split(' ')[0] ?? doctor?.name ?? 'Doctor';
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  const nextPayoutDate = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return d.toLocaleDateString();
+  }, []);
 
   return (
-    <div className="space-y-6 p-6 max-w-7xl mx-auto">
+    <div className="space-y-6">
       {/* Welcome Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -371,7 +376,7 @@ export default function DoctorDashboardPage() {
             <Separator />
             <div className="text-xs text-muted-foreground">
               <p>Payouts are processed weekly on Fridays.</p>
-              <p className="mt-1">Next payout: {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}</p>
+              <p className="mt-1">Next payout: {nextPayoutDate}</p>
             </div>
           </CardContent>
         </Card>
