@@ -2,12 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import {
   Video, PhoneOff, ArrowLeft, Loader2, AlertCircle, XCircle, RefreshCw,
   Radio, FileText, BadgeCheck, CreditCard, User, Mail, Phone, Calendar,
   Clock, MessageCircle, Stethoscope, FileDown, CheckCircle2, FlaskConical,
+  ExternalLink, Copy, ChevronRight,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -59,6 +60,10 @@ export default function DoctorAppointmentDetailPage() {
   const [refundOpen, setRefundOpen] = useState(false);
   const [refundReason, setRefundReason] = useState("");
   const [isRefunding, setIsRefunding] = useState(false);
+  // "idle" | "confirming" | "processing" | "success" | "manual_required"
+  type RefundStep = "idle" | "confirming" | "processing" | "success" | "manual_required";
+  const [refundStep, setRefundStep] = useState<RefundStep>("idle");
+  const [refundNote, setRefundNote] = useState("");
   const [consultNotes, setConsultNotes] = useState("");
   const [consultSummary, setConsultSummary] = useState("");
 
@@ -104,32 +109,37 @@ export default function DoctorAppointmentDetailPage() {
 
   const handleRefundAndCancel = async () => {
     if (!appointment) return;
+    setRefundStep("processing");
     setIsRefunding(true);
     try {
       const res = await appointmentService.requestRefund(appointment.id, refundReason);
       if (res.success) {
-        const refundData = res.data as Appointment & { refund_issued?: boolean; refund_note?: string; needs_manual_refund?: boolean };
-        const refundIssued = refundData.refund_issued ?? false;
-        const needsManual = refundData.needs_manual_refund ?? false;
-        const refundNote = refundData.refund_note ?? "Appointment cancelled";
+        const data = res.data as Appointment & { refund_issued?: boolean; refund_note?: string; needs_manual_refund?: boolean };
         setAppointment(res.data);
-        setRefundOpen(false);
-        toast({
-          title: refundIssued
-            ? "Refund processed & appointment cancelled"
-            : needsManual
-            ? "⚠️ Manual refund required"
-            : "Appointment cancelled",
-          description: refundNote,
-          variant: needsManual ? "destructive" : "default",
-        });
+        setRefundNote(data.refund_note ?? "");
+        if (data.refund_issued) {
+          setRefundStep("success");
+        } else if (data.needs_manual_refund) {
+          setRefundStep("manual_required");
+        } else {
+          // No payment was made — just cancelled
+          setRefundStep("success");
+          setRefundNote("Appointment cancelled. No payment was on record.");
+        }
       }
     } catch (err) {
       toast({ title: "Error", description: err instanceof Error ? err.message : "Unknown error", variant: "destructive" });
+      setRefundStep("confirming");
     } finally {
       setIsRefunding(false);
-      setRefundReason("");
     }
+  };
+
+  const closeRefundDialog = () => {
+    setRefundOpen(false);
+    setRefundStep("idle");
+    setRefundReason("");
+    setRefundNote("");
   };
 
   const handleStartVideo = async () => {
@@ -584,20 +594,43 @@ export default function DoctorAppointmentDetailPage() {
             <div className="flex items-start gap-3">
               <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
               <div className="flex-1">
-                <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Manual Refund Required</p>
+                <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Refund Pending — Action Required</p>
                 <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
-                  The automatic refund could not be processed (insufficient payout balance). Please manually refund the patient via your{" "}
-                  <a
-                    href="https://dashboard.paymongo.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline font-medium"
-                  >
-                    PayMongo dashboard
-                  </a>
-                  . Reference: <span className="font-mono font-semibold">APT-{appointment.id.slice(-8).toUpperCase()}</span>
+                  The automatic refund failed (insufficient payout balance). Follow the steps below to complete the refund.
                 </p>
               </div>
+            </div>
+            <div className="space-y-2 pl-8">
+              {[
+                { step: 1, text: "Go to your PayMongo Dashboard", href: "https://dashboard.paymongo.com/payments" },
+                { step: 2, text: `Search for payment reference: APT-${appointment.id.slice(-8).toUpperCase()}` },
+                { step: 3, text: "Click the payment → select \"Refund\"" },
+                { step: 4, text: `Enter amount: ₱${appointment.fee?.toLocaleString("en-PH", { minimumFractionDigits: 2 }) ?? "0.00"}` },
+              ].map(({ step, text, href }) => (
+                <div key={step} className="flex items-start gap-2.5">
+                  <span className="flex-shrink-0 h-5 w-5 rounded-full bg-amber-200 dark:bg-amber-800 text-amber-800 dark:text-amber-200 text-[11px] font-bold flex items-center justify-center">{step}</span>
+                  {href ? (
+                    <a href={href} target="_blank" rel="noopener noreferrer"
+                      className="text-xs text-amber-700 dark:text-amber-300 underline flex items-center gap-1">
+                      {text} <ExternalLink className="h-3 w-3" />
+                    </a>
+                  ) : (
+                    <p className="text-xs text-amber-700 dark:text-amber-300">{text}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="pl-8">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(`APT-${appointment.id.slice(-8).toUpperCase()}`);
+                  toast({ title: "Copied!", description: "Reference number copied to clipboard." });
+                }}
+                className="flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-300 hover:text-amber-900 transition-colors"
+              >
+                <Copy className="h-3.5 w-3.5" />
+                Copy reference: APT-{appointment.id.slice(-8).toUpperCase()}
+              </button>
             </div>
           </CardContent>
         </Card>
@@ -620,7 +653,7 @@ export default function DoctorAppointmentDetailPage() {
             <Button
               variant="destructive"
               className="gap-2"
-              onClick={() => setRefundOpen(true)}
+              onClick={() => { setRefundStep("confirming"); setRefundOpen(true); }}
             >
               <RefreshCw className="h-4 w-4" />
               Refund & Cancel Appointment
@@ -629,32 +662,176 @@ export default function DoctorAppointmentDetailPage() {
         </Card>
       )}
 
-      {/* Refund Dialog */}
-      <Dialog open={refundOpen} onOpenChange={setRefundOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Refund & Cancel Appointment</DialogTitle>
-            <DialogDescription>
-              This will cancel the appointment and issue a full refund to the patient's original payment method.
-              This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Reason (optional)</label>
-            <Textarea
-              placeholder="Reason for cancellation..."
-              value={refundReason}
-              onChange={(e) => setRefundReason(e.target.value)}
-              className="h-20 resize-none"
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setRefundOpen(false)}>Go Back</Button>
-            <Button variant="destructive" onClick={handleRefundAndCancel} disabled={isRefunding}>
-              {isRefunding && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Confirm Refund & Cancel
-            </Button>
-          </DialogFooter>
+      {/* ── Guided Refund Dialog ─────────────────────────────────────────── */}
+      <Dialog open={refundOpen} onOpenChange={(open) => { if (!open) closeRefundDialog(); }}>
+        <DialogContent className="max-w-md">
+          <AnimatePresence mode="wait">
+
+            {/* STEP 1: Confirm */}
+            {refundStep === "confirming" && (
+              <motion.div key="confirming" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <RefreshCw className="h-5 w-5 text-destructive" />
+                    Refund & Cancel Appointment
+                  </DialogTitle>
+                  <DialogDescription>Review the details before proceeding.</DialogDescription>
+                </DialogHeader>
+
+                {/* Appointment summary */}
+                <div className="my-4 rounded-xl border border-border bg-muted/40 p-4 space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Patient</span>
+                    <span className="font-medium">{patientName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Date</span>
+                    <span>{format(new Date(appointment.date), "MMM d, yyyy")} at {appointment.time}</span>
+                  </div>
+                  {appointment.paymentStatus === "paid" && (
+                    <>
+                      <Separator />
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Refund Amount</span>
+                        <span className="text-lg font-bold text-primary">
+                          ₱{appointment.fee?.toLocaleString("en-PH", { minimumFractionDigits: 2 }) ?? "0.00"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Refund to</span>
+                        <span className="text-xs">Patient&apos;s original payment method</span>
+                      </div>
+                      <div className="rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-2.5 text-xs text-blue-700 dark:text-blue-300">
+                        GCash/Maya: typically instant · Cards: 3–7 business days
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <div className="space-y-1.5 mb-4">
+                  <label className="text-sm font-medium">Reason <span className="text-muted-foreground font-normal">(optional)</span></label>
+                  <Textarea
+                    placeholder="e.g. Patient requested cancellation due to schedule conflict"
+                    value={refundReason}
+                    onChange={(e) => setRefundReason(e.target.value)}
+                    className="h-20 resize-none text-sm"
+                  />
+                </div>
+
+                <DialogFooter>
+                  <Button variant="outline" onClick={closeRefundDialog}>Go Back</Button>
+                  <Button variant="destructive" onClick={handleRefundAndCancel} className="gap-2">
+                    <RefreshCw className="h-4 w-4" />
+                    Confirm Refund & Cancel
+                  </Button>
+                </DialogFooter>
+              </motion.div>
+            )}
+
+            {/* STEP 2: Processing */}
+            {refundStep === "processing" && (
+              <motion.div key="processing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-10 flex flex-col items-center gap-4">
+                <Loader2 className="h-10 w-10 text-primary animate-spin" />
+                <p className="text-sm font-medium text-foreground">Processing refund…</p>
+                <p className="text-xs text-muted-foreground text-center">Contacting PayMongo. Please don&apos;t close this window.</p>
+              </motion.div>
+            )}
+
+            {/* STEP 3a: Success */}
+            {refundStep === "success" && (
+              <motion.div key="success" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="py-6 flex flex-col items-center gap-4 text-center">
+                <div className="h-16 w-16 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
+                  <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-base font-semibold text-foreground">Refund Processed!</p>
+                  <p className="text-sm text-muted-foreground mt-1">{refundNote || "The appointment has been cancelled and the patient has been refunded."}</p>
+                </div>
+                <div className="w-full rounded-xl bg-muted/50 border border-border p-3 text-xs text-muted-foreground">
+                  GCash/Maya: typically instant · Credit/Debit cards: 3–7 business days
+                </div>
+                <Button className="w-full" onClick={closeRefundDialog}>Done</Button>
+              </motion.div>
+            )}
+
+            {/* STEP 3b: Manual Required */}
+            {refundStep === "manual_required" && (
+              <motion.div key="manual" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+                    <AlertCircle className="h-5 w-5" />
+                    Manual Refund Required
+                  </DialogTitle>
+                  <DialogDescription>
+                    The appointment was cancelled but the automatic refund could not be processed
+                    (insufficient payout balance in your PayMongo account).
+                    Follow these steps to complete the refund.
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="my-4 space-y-3">
+                  {/* Reference to copy */}
+                  <div className="flex items-center justify-between rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-900/20 px-3 py-2">
+                    <div>
+                      <p className="text-[10px] text-amber-600 font-medium uppercase tracking-wide">Payment Reference</p>
+                      <p className="font-mono font-bold text-amber-800 dark:text-amber-200">
+                        APT-{appointment.id.slice(-8).toUpperCase()}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="gap-1.5 text-amber-700 hover:text-amber-900 hover:bg-amber-100"
+                      onClick={() => {
+                        navigator.clipboard.writeText(`APT-${appointment.id.slice(-8).toUpperCase()}`);
+                        toast({ title: "Copied!", description: "Reference copied to clipboard." });
+                      }}
+                    >
+                      <Copy className="h-3.5 w-3.5" /> Copy
+                    </Button>
+                  </div>
+
+                  {/* Step-by-step */}
+                  <div className="space-y-2">
+                    {[
+                      { n: 1, label: "Open PayMongo Dashboard", sub: "Go to Payments section", href: "https://dashboard.paymongo.com/payments" },
+                      { n: 2, label: "Find the payment", sub: `Search for reference APT-${appointment.id.slice(-8).toUpperCase()}` },
+                      { n: 3, label: "Click \"Refund\"", sub: "Select full refund and confirm" },
+                      { n: 4, label: "Notify the patient", sub: "Send a message once refund is done" },
+                    ].map(({ n, label, sub, href }) => (
+                      <div key={n} className="flex items-start gap-3">
+                        <span className="flex-shrink-0 h-6 w-6 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 text-xs font-bold flex items-center justify-center mt-0.5">{n}</span>
+                        <div className="flex-1">
+                          {href ? (
+                            <a href={href} target="_blank" rel="noopener noreferrer"
+                              className="text-sm font-medium text-primary flex items-center gap-1 hover:underline">
+                              {label} <ExternalLink className="h-3.5 w-3.5" />
+                            </a>
+                          ) : (
+                            <p className="text-sm font-medium text-foreground">{label}</p>
+                          )}
+                          <p className="text-xs text-muted-foreground">{sub}</p>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground/40 mt-0.5 shrink-0" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <DialogFooter className="gap-2">
+                  <Button variant="outline" onClick={closeRefundDialog}>Close</Button>
+                  <Button
+                    className="gap-2"
+                    onClick={() => window.open("https://dashboard.paymongo.com/payments", "_blank")}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Open PayMongo
+                  </Button>
+                </DialogFooter>
+              </motion.div>
+            )}
+
+          </AnimatePresence>
         </DialogContent>
       </Dialog>
     </div>
