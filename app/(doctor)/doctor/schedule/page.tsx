@@ -286,7 +286,7 @@ export default function SchedulePage() {
   // ── Loading skeleton ───────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="space-y-6 max-w-5xl mx-auto pb-20">
+      <div className="space-y-6 max-w-none w-full pb-20">
         <Skeleton className="h-10 w-56 rounded-xl" />
         <Skeleton className="h-20 w-full rounded-2xl" />
         <div className="grid lg:grid-cols-3 gap-6">
@@ -305,7 +305,7 @@ export default function SchedulePage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-none w-full">
       {/* ── Page header ─────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -684,7 +684,7 @@ export default function SchedulePage() {
         isDirty ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
       }`}>
         <div className="bg-card/95 backdrop-blur border-t border-border shadow-xl px-4 py-3">
-          <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
+          <div className="max-w-none mx-auto flex items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-warning animate-pulse" />
               You have unsaved changes
