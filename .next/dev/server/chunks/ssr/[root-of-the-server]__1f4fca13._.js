@@ -459,8 +459,8 @@ __turbopack_context__.s([
     "getChatWsBaseUrl",
     ()=>getChatWsBaseUrl
 ]);
-const DEFAULT_BASE_URL = ("TURBOPACK compile-time value", "http://localhost:8000") ?? "";
-const DEFAULT_CHAT_WS_URL = ("TURBOPACK compile-time value", "http://localhost:8000") ?? "";
+const DEFAULT_BASE_URL = ("TURBOPACK compile-time value", "http://127.0.0.1:8000") ?? "";
+const DEFAULT_CHAT_WS_URL = ("TURBOPACK compile-time value", "http://127.0.0.1:8000") ?? "";
 function getBaseUrl() {
     if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
     ;

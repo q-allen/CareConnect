@@ -1,5 +1,20 @@
 {
   "/(auth)/signin/page": "app/(auth)/signin/page.js",
+  "/(doctor)/doctor/appointments/page": "app/(doctor)/doctor/appointments/page.js",
+  "/(doctor)/doctor/earnings/page": "app/(doctor)/doctor/earnings/page.js",
+  "/(doctor)/doctor/lab-results/page": "app/(doctor)/doctor/lab-results/page.js",
+  "/(doctor)/doctor/messages/page": "app/(doctor)/doctor/messages/page.js",
+  "/(doctor)/doctor/page": "app/(doctor)/doctor/page.js",
+  "/(doctor)/doctor/patients/page": "app/(doctor)/doctor/patients/page.js",
+  "/(doctor)/doctor/prescriptions/page": "app/(doctor)/doctor/prescriptions/page.js",
+  "/(doctor)/doctor/profile/complete/page": "app/(doctor)/doctor/profile/complete/page.js",
+  "/(doctor)/doctor/profile/page": "app/(doctor)/doctor/profile/page.js",
+  "/(doctor)/doctor/queue/page": "app/(doctor)/doctor/queue/page.js",
+  "/(doctor)/doctor/schedule/page": "app/(doctor)/doctor/schedule/page.js",
+  "/(patient)/patient/page": "app/(patient)/patient/page.js",
+  "/(patient)/patient/profile/complete/page": "app/(patient)/patient/profile/complete/page.js",
+  "/(patient)/patient/profile/page": "app/(patient)/patient/profile/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
   "/login/page": "app/login/page.js",
   "/page": "app/page.js"
 }

@@ -999,6 +999,7 @@ function ClinicLocationPicker({ value, onChange, label = "Clinic Location" }) {
                         columnNumber: 11
                     }, this) : query ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                         type: "button",
+                        "aria-label": "Clear search",
                         onClick: ()=>{
                             setQuery("");
                             setSuggestions([]);
@@ -1008,7 +1009,7 @@ function ClinicLocationPicker({ value, onChange, label = "Clinic Location" }) {
                             className: "h-4 w-4"
                         }, void 0, false, {
                             fileName: "[project]/src/components/doctor/ClinicLocationPicker.tsx",
-                            lineNumber: 260,
+                            lineNumber: 261,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
@@ -1028,24 +1029,24 @@ function ClinicLocationPicker({ value, onChange, label = "Clinic Location" }) {
                                             className: "inline h-3 w-3 mr-1.5 text-primary shrink-0"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/doctor/ClinicLocationPicker.tsx",
-                                            lineNumber: 273,
+                                            lineNumber: 274,
                                             columnNumber: 19
                                         }, this),
                                         r.display_name
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/doctor/ClinicLocationPicker.tsx",
-                                    lineNumber: 268,
+                                    lineNumber: 269,
                                     columnNumber: 17
                                 }, this)
                             }, r.place_id, false, {
                                 fileName: "[project]/src/components/doctor/ClinicLocationPicker.tsx",
-                                lineNumber: 267,
+                                lineNumber: 268,
                                 columnNumber: 15
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/src/components/doctor/ClinicLocationPicker.tsx",
-                        lineNumber: 265,
+                        lineNumber: 266,
                         columnNumber: 11
                     }, this)
                 ]
@@ -1056,14 +1057,11 @@ function ClinicLocationPicker({ value, onChange, label = "Clinic Location" }) {
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 ref: containerRef,
-                className: "w-full rounded-xl border border-border overflow-hidden",
-                style: {
-                    height: 280
-                },
+                className: "w-full rounded-xl border border-border overflow-hidden h-[280px]",
                 "aria-label": "Clinic location map"
             }, void 0, false, {
                 fileName: "[project]/src/components/doctor/ClinicLocationPicker.tsx",
-                lineNumber: 283,
+                lineNumber: 284,
                 columnNumber: 7
             }, this),
             value && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {

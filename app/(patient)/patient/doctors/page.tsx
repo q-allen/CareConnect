@@ -21,6 +21,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { doctorService, DoctorSearchFilters } from '@/services/doctorService';
 import { Doctor } from '@/types';
+import { PH_CITIES } from '@/data/phCities';
 
 const specialties = [
   'All Specialties', 'General Medicine', 'Family Medicine', 'Internal Medicine',
@@ -28,11 +29,7 @@ const specialties = [
   'Neurology', 'Psychiatry', 'ENT', 'Ophthalmology', 'Pulmonology',
 ];
 
-const locations = [
-  'All Locations', 'Makati City', 'Quezon City', 'Pasig City', 'Taguig City',
-  'Muntinlupa City', 'Mandaluyong City', 'Parañaque City', 'Las Piñas City',
-  'Caloocan City', 'Marikina City', 'Cebu City', 'Davao City',
-];
+const locations = ['All Locations', ...PH_CITIES];
 
 const popularSpecialties = [
   { label: 'General Medicine', icon: Stethoscope },

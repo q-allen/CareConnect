@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -33,8 +33,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
@@ -83,15 +81,15 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname();
   const [routeLoading, setRouteLoading] = useState(false);
-  const prevPath = useState(pathname);
+  const prevPath = useRef(pathname);
 
   useEffect(() => {
-    if (pathname === prevPath[0]) return;
-    prevPath[1](pathname);
-    setRouteLoading(true);
-    const t = setTimeout(() => setRouteLoading(false), 400);
-    return () => clearTimeout(t);
-  }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (pathname === prevPath.current) return;
+    prevPath.current = pathname;
+    const t = setTimeout(() => setRouteLoading(true), 0);
+    const t2 = setTimeout(() => setRouteLoading(false), 400);
+    return () => { clearTimeout(t); clearTimeout(t2); };
+  }, [pathname]);
   const router = useRouter();
   const { toast } = useToast();
   const { user, setUser, logout: logoutStore } = useAuthStore();
@@ -422,30 +420,52 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full shrink-0">
+                <Button variant="ghost" size="icon" className="rounded-full shrink-0 ring-offset-background hover:ring-2 hover:ring-primary/30 transition-all">
                   <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
                     <AvatarImage src={user.avatar} />
-                    <AvatarFallback>{user?.name?.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                    <AvatarFallback className="gradient-primary text-primary-foreground text-xs font-semibold">
+                      {getInitials(user.name)}
+                    </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 sm:w-56">
-                <DropdownMenuLabel>
-                  <div>
-                    <p className="font-medium">{user.name}</p>
-                    <p className="text-xs text-muted-foreground">{user.email}</p>
+              <DropdownMenuContent align="end" className="w-72 p-0 overflow-hidden">
+                {/* Header */}
+                <div className="flex items-center gap-3 px-4 py-3.5 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-b border-border">
+                  <Avatar className="h-10 w-10 shrink-0">
+                    <AvatarImage src={user.avatar} />
+                    <AvatarFallback className="gradient-primary text-primary-foreground text-sm font-semibold">
+                      {getInitials(user.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground break-words">{user.name}</p>
+                    <p className="text-xs text-muted-foreground break-all">{user.email}</p>
+                    <span className={cn(
+                      'inline-flex items-center mt-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium capitalize',
+                      user.role === 'doctor' ? 'bg-blue-500/15 text-blue-600 dark:text-blue-400' : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                    )}>
+                      {user.role}
+                    </span>
                   </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push(`/${user.role}/profile`)}>
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="text-destructive">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Logout
-                </DropdownMenuItem>
+                </div>
+                {/* Menu Items */}
+                <div className="p-1.5">
+                  <DropdownMenuItem onClick={() => router.push(`/${user.role}/profile`)} className="flex items-center gap-2.5 px-3 py-2 rounded-md cursor-pointer">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-md bg-secondary">
+                      <User className="h-3.5 w-3.5" />
+                    </div>
+                    <span className="text-sm">My Profile</span>
+                  </DropdownMenuItem>
+                </div>
+                <div className="p-1.5 border-t border-border">
+                  <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2.5 px-3 py-2 rounded-md cursor-pointer text-destructive hover:bg-destructive/10 focus:bg-destructive/10 focus:text-destructive">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-md bg-destructive/10">
+                      <LogOut className="h-3.5 w-3.5" />
+                    </div>
+                    <span className="text-sm font-medium">Log out</span>
+                  </DropdownMenuItem>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

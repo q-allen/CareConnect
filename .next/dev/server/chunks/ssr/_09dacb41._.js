@@ -1921,35 +1921,39 @@ function DoctorPrescriptionsPage() {
         });
         setIssueOpen(true);
     };
-    const handlePrint = ()=>{
-        if (!selected?.pdfUrl) {
+    const handlePrint = async ()=>{
+        if (!selected?.id) {
             toast({
-                title: 'No PDF available',
-                description: 'PDF has not been generated for this prescription.',
+                title: 'No prescription selected',
                 variant: 'destructive'
             });
             return;
         }
-        const win = window.open(selected.pdfUrl, '_blank');
-        if (!win) {
-            toast({
-                title: 'Popup blocked',
-                description: 'Allow popups to print this document.',
-                variant: 'destructive'
+        try {
+            const { getBaseUrl } = await __turbopack_context__.A("[project]/src/services/api.ts [app-ssr] (ecmascript, async loader)");
+            const res = await fetch(`${getBaseUrl()}/api/records/prescriptions/${selected.id}/pdf/`, {
+                credentials: 'include'
             });
-            return;
-        }
-        const timer = window.setInterval(()=>{
-            try {
-                if (win.document?.readyState === 'complete') {
-                    win.focus();
-                    win.print();
-                    window.clearInterval(timer);
-                }
-            } catch  {
-                window.clearInterval(timer);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const win = window.open(url, '_blank');
+            if (!win) {
+                toast({
+                    title: 'Popup blocked',
+                    description: 'Allow popups to print this document.',
+                    variant: 'destructive'
+                });
             }
-        }, 500);
+            // Revoke after a short delay to allow the tab to load
+            setTimeout(()=>URL.revokeObjectURL(url), 60_000);
+        } catch (err) {
+            toast({
+                title: 'Could not load PDF',
+                description: err instanceof Error ? err.message : 'Please try again.',
+                variant: 'destructive'
+            });
+        }
     };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: "space-y-6",
@@ -1964,7 +1968,7 @@ function DoctorPrescriptionsPage() {
                                 children: "Prescriptions"
                             }, void 0, false, {
                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                lineNumber: 213,
+                                lineNumber: 221,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1972,7 +1976,7 @@ function DoctorPrescriptionsPage() {
                                 children: "Issue, review, and reprint digital prescriptions."
                             }, void 0, false, {
                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                lineNumber: 214,
+                                lineNumber: 222,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1986,7 +1990,7 @@ function DoctorPrescriptionsPage() {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                        lineNumber: 216,
+                                        lineNumber: 224,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
@@ -1997,19 +2001,19 @@ function DoctorPrescriptionsPage() {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                        lineNumber: 217,
+                                        lineNumber: 225,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                lineNumber: 215,
+                                lineNumber: 223,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                        lineNumber: 212,
+                        lineNumber: 220,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -2023,20 +2027,20 @@ function DoctorPrescriptionsPage() {
                                 className: "h-4 w-4"
                             }, void 0, false, {
                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                lineNumber: 221,
+                                lineNumber: 229,
                                 columnNumber: 11
                             }, this),
                             "Issue New Prescription"
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                        lineNumber: 220,
+                        lineNumber: 228,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                lineNumber: 211,
+                lineNumber: 219,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2049,7 +2053,7 @@ function DoctorPrescriptionsPage() {
                                 className: "absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
                             }, void 0, false, {
                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                lineNumber: 229,
+                                lineNumber: 237,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
@@ -2059,13 +2063,13 @@ function DoctorPrescriptionsPage() {
                                 className: "pl-10"
                             }, void 0, false, {
                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                lineNumber: 230,
+                                lineNumber: 238,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                        lineNumber: 228,
+                        lineNumber: 236,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2081,18 +2085,18 @@ function DoctorPrescriptionsPage() {
                                 children: mode === 'recent' ? 'Last 30 Days' : mode === 'week' ? 'This Week' : 'All Time'
                             }, mode, false, {
                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                lineNumber: 239,
+                                lineNumber: 247,
                                 columnNumber: 13
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                        lineNumber: 237,
+                        lineNumber: 245,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                lineNumber: 227,
+                lineNumber: 235,
                 columnNumber: 7
             }, this),
             loading ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2105,19 +2109,19 @@ function DoctorPrescriptionsPage() {
                         className: "h-52 rounded-xl"
                     }, i, false, {
                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                        lineNumber: 254,
+                        lineNumber: 262,
                         columnNumber: 33
                     }, this))
             }, void 0, false, {
                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                lineNumber: 253,
+                lineNumber: 261,
                 columnNumber: 9
             }, this) : filtered.length === 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(EmptyState, {
                 icon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$file$2d$text$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__FileText$3e$__["FileText"], {
                     className: "h-12 w-12 text-muted-foreground/40"
                 }, void 0, false, {
                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                    lineNumber: 258,
+                    lineNumber: 266,
                     columnNumber: 17
                 }, void 0),
                 title: "No prescriptions found",
@@ -2132,7 +2136,7 @@ function DoctorPrescriptionsPage() {
                             children: "View Patients"
                         }, void 0, false, {
                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                            lineNumber: 263,
+                            lineNumber: 271,
                             columnNumber: 15
                         }, void 0),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -2144,25 +2148,25 @@ function DoctorPrescriptionsPage() {
                                     className: "h-4 w-4"
                                 }, void 0, false, {
                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                    lineNumber: 267,
+                                    lineNumber: 275,
                                     columnNumber: 17
                                 }, void 0),
                                 "View Queue"
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                            lineNumber: 266,
+                            lineNumber: 274,
                             columnNumber: 15
                         }, void 0)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                    lineNumber: 262,
+                    lineNumber: 270,
                     columnNumber: 13
                 }, void 0)
             }, void 0, false, {
                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                lineNumber: 257,
+                lineNumber: 265,
                 columnNumber: 9
             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "grid md:grid-cols-2 xl:grid-cols-3 gap-4",
@@ -2193,20 +2197,20 @@ function DoctorPrescriptionsPage() {
                                                         src: rx.patient?.avatar
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                        lineNumber: 286,
+                                                        lineNumber: 294,
                                                         columnNumber: 23
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$avatar$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AvatarFallback"], {
                                                         children: rx.patient?.name?.[0] ?? '?'
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                        lineNumber: 287,
+                                                        lineNumber: 295,
                                                         columnNumber: 23
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                lineNumber: 285,
+                                                lineNumber: 293,
                                                 columnNumber: 21
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2217,7 +2221,7 @@ function DoctorPrescriptionsPage() {
                                                         children: rx.patient?.name ?? 'Unknown patient'
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                        lineNumber: 290,
+                                                        lineNumber: 298,
                                                         columnNumber: 23
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2225,7 +2229,7 @@ function DoctorPrescriptionsPage() {
                                                         children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$date$2d$fns$2f$format$2e$mjs__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["format"])(new Date(rx.date), 'MMM d, yyyy')
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                        lineNumber: 291,
+                                                        lineNumber: 299,
                                                         columnNumber: 23
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2233,7 +2237,7 @@ function DoctorPrescriptionsPage() {
                                                         children: rx.diagnosis
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                        lineNumber: 294,
+                                                        lineNumber: 302,
                                                         columnNumber: 23
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2241,13 +2245,13 @@ function DoctorPrescriptionsPage() {
                                                         children: buildMedSummary(rx.medications)
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                        lineNumber: 295,
+                                                        lineNumber: 303,
                                                         columnNumber: 23
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                lineNumber: 289,
+                                                lineNumber: 297,
                                                 columnNumber: 21
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DropdownMenu"], {
@@ -2262,17 +2266,17 @@ function DoctorPrescriptionsPage() {
                                                                 className: "h-4 w-4"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                                lineNumber: 302,
+                                                                lineNumber: 310,
                                                                 columnNumber: 27
                                                             }, this)
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                            lineNumber: 301,
+                                                            lineNumber: 309,
                                                             columnNumber: 25
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                        lineNumber: 300,
+                                                        lineNumber: 308,
                                                         columnNumber: 23
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DropdownMenuContent"], {
@@ -2286,7 +2290,7 @@ function DoctorPrescriptionsPage() {
                                                                 children: "View Details"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                                lineNumber: 306,
+                                                                lineNumber: 314,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DropdownMenuItem"], {
@@ -2297,12 +2301,12 @@ function DoctorPrescriptionsPage() {
                                                                 children: "Reprint"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                                lineNumber: 309,
+                                                                lineNumber: 317,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DropdownMenuSeparator"], {}, void 0, false, {
                                                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                                lineNumber: 312,
+                                                                lineNumber: 320,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DropdownMenuItem"], {
@@ -2310,7 +2314,7 @@ function DoctorPrescriptionsPage() {
                                                                 children: "Message Patient"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                                lineNumber: 313,
+                                                                lineNumber: 321,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DropdownMenuItem"], {
@@ -2318,25 +2322,25 @@ function DoctorPrescriptionsPage() {
                                                                 children: "Issue New (Pre-fill)"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                                lineNumber: 316,
+                                                                lineNumber: 324,
                                                                 columnNumber: 25
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                        lineNumber: 305,
+                                                        lineNumber: 313,
                                                         columnNumber: 23
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                lineNumber: 299,
+                                                lineNumber: 307,
                                                 columnNumber: 21
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                        lineNumber: 284,
+                                        lineNumber: 292,
                                         columnNumber: 19
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2347,7 +2351,7 @@ function DoctorPrescriptionsPage() {
                                                 children: isActive(rx) ? 'Active' : 'Expired'
                                             }, void 0, false, {
                                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                lineNumber: 324,
+                                                lineNumber: 332,
                                                 columnNumber: 21
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
@@ -2359,7 +2363,7 @@ function DoctorPrescriptionsPage() {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                lineNumber: 329,
+                                                lineNumber: 337,
                                                 columnNumber: 21
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2370,13 +2374,13 @@ function DoctorPrescriptionsPage() {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                lineNumber: 330,
+                                                lineNumber: 338,
                                                 columnNumber: 21
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                        lineNumber: 323,
+                                        lineNumber: 331,
                                         columnNumber: 19
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2394,14 +2398,14 @@ function DoctorPrescriptionsPage() {
                                                         className: "h-3.5 w-3.5"
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                        lineNumber: 337,
+                                                        lineNumber: 345,
                                                         columnNumber: 23
                                                     }, this),
                                                     "View"
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                lineNumber: 336,
+                                                lineNumber: 344,
                                                 columnNumber: 21
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -2417,14 +2421,14 @@ function DoctorPrescriptionsPage() {
                                                         className: "h-3.5 w-3.5"
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                        lineNumber: 341,
+                                                        lineNumber: 349,
                                                         columnNumber: 23
                                                     }, this),
                                                     "Reprint"
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                lineNumber: 340,
+                                                lineNumber: 348,
                                                 columnNumber: 21
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -2437,41 +2441,41 @@ function DoctorPrescriptionsPage() {
                                                         className: "h-3.5 w-3.5"
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                        lineNumber: 345,
+                                                        lineNumber: 353,
                                                         columnNumber: 23
                                                     }, this),
                                                     "Message"
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                lineNumber: 344,
+                                                lineNumber: 352,
                                                 columnNumber: 21
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                        lineNumber: 335,
+                                        lineNumber: 343,
                                         columnNumber: 19
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                lineNumber: 283,
+                                lineNumber: 291,
                                 columnNumber: 17
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                            lineNumber: 282,
+                            lineNumber: 290,
                             columnNumber: 15
                         }, this)
                     }, rx.id, false, {
                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                        lineNumber: 276,
+                        lineNumber: 284,
                         columnNumber: 13
                     }, this))
             }, void 0, false, {
                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                lineNumber: 274,
+                lineNumber: 282,
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Dialog"], {
@@ -2486,20 +2490,20 @@ function DoctorPrescriptionsPage() {
                                     children: "Prescription Details"
                                 }, void 0, false, {
                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                    lineNumber: 360,
+                                    lineNumber: 368,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DialogDescription"], {
                                     children: "Review issued medicines and instructions."
                                 }, void 0, false, {
                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                    lineNumber: 361,
+                                    lineNumber: 369,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                            lineNumber: 359,
+                            lineNumber: 367,
                             columnNumber: 11
                         }, this),
                         selected && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2515,20 +2519,20 @@ function DoctorPrescriptionsPage() {
                                                     src: selected.patient?.avatar
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                    lineNumber: 367,
+                                                    lineNumber: 375,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$avatar$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AvatarFallback"], {
                                                     children: selected.patient?.name?.[0] ?? '?'
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                    lineNumber: 368,
+                                                    lineNumber: 376,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                            lineNumber: 366,
+                                            lineNumber: 374,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2538,7 +2542,7 @@ function DoctorPrescriptionsPage() {
                                                     children: selected.patient?.name ?? 'Unknown patient'
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                    lineNumber: 371,
+                                                    lineNumber: 379,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2551,7 +2555,7 @@ function DoctorPrescriptionsPage() {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                    lineNumber: 372,
+                                                    lineNumber: 380,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2559,19 +2563,19 @@ function DoctorPrescriptionsPage() {
                                                     children: selected.diagnosis
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                    lineNumber: 375,
+                                                    lineNumber: 383,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                            lineNumber: 370,
+                                            lineNumber: 378,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                    lineNumber: 365,
+                                    lineNumber: 373,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2586,7 +2590,7 @@ function DoctorPrescriptionsPage() {
                                                             children: med.name
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                            lineNumber: 383,
+                                                            lineNumber: 391,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2598,7 +2602,7 @@ function DoctorPrescriptionsPage() {
                                                             ].filter(Boolean).join(' • ')
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                            lineNumber: 384,
+                                                            lineNumber: 392,
                                                             columnNumber: 23
                                                         }, this),
                                                         med.instructions && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2606,13 +2610,13 @@ function DoctorPrescriptionsPage() {
                                                             children: med.instructions
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                            lineNumber: 388,
+                                                            lineNumber: 396,
                                                             columnNumber: 25
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                    lineNumber: 382,
+                                                    lineNumber: 390,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
@@ -2621,18 +2625,18 @@ function DoctorPrescriptionsPage() {
                                                     children: isActive(selected) ? 'Active' : 'Expired'
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                    lineNumber: 391,
+                                                    lineNumber: 399,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, `${med.name}-${i}`, true, {
                                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                            lineNumber: 381,
+                                            lineNumber: 389,
                                             columnNumber: 19
                                         }, this))
                                 }, void 0, false, {
                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                    lineNumber: 379,
+                                    lineNumber: 387,
                                     columnNumber: 15
                                 }, this),
                                 selected.instructions && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2643,20 +2647,20 @@ function DoctorPrescriptionsPage() {
                                             children: "Instructions"
                                         }, void 0, false, {
                                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                            lineNumber: 400,
+                                            lineNumber: 408,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                             children: selected.instructions
                                         }, void 0, false, {
                                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                            lineNumber: 401,
+                                            lineNumber: 409,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                    lineNumber: 399,
+                                    lineNumber: 407,
                                     columnNumber: 17
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2673,14 +2677,14 @@ function DoctorPrescriptionsPage() {
                                                     className: "h-4 w-4"
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                    lineNumber: 407,
+                                                    lineNumber: 415,
                                                     columnNumber: 19
                                                 }, this),
                                                 "Reprint"
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                            lineNumber: 406,
+                                            lineNumber: 414,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -2690,7 +2694,7 @@ function DoctorPrescriptionsPage() {
                                             children: "Message Patient"
                                         }, void 0, false, {
                                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                            lineNumber: 410,
+                                            lineNumber: 418,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -2703,30 +2707,30 @@ function DoctorPrescriptionsPage() {
                                             children: "Issue New (Pre-fill)"
                                         }, void 0, false, {
                                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                            lineNumber: 413,
+                                            lineNumber: 421,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                    lineNumber: 405,
+                                    lineNumber: 413,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                            lineNumber: 364,
+                            lineNumber: 372,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                    lineNumber: 358,
+                    lineNumber: 366,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                lineNumber: 357,
+                lineNumber: 365,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Dialog"], {
@@ -2741,20 +2745,20 @@ function DoctorPrescriptionsPage() {
                                     children: "Prescription Preview"
                                 }, void 0, false, {
                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                    lineNumber: 426,
+                                    lineNumber: 434,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DialogDescription"], {
                                     children: "Review before printing."
                                 }, void 0, false, {
                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                    lineNumber: 427,
+                                    lineNumber: 435,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                            lineNumber: 425,
+                            lineNumber: 433,
                             columnNumber: 11
                         }, this),
                         selected && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2768,7 +2772,7 @@ function DoctorPrescriptionsPage() {
                                             children: selected.patient?.name ?? 'Unknown patient'
                                         }, void 0, false, {
                                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                            lineNumber: 432,
+                                            lineNumber: 440,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2779,7 +2783,7 @@ function DoctorPrescriptionsPage() {
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                            lineNumber: 433,
+                                            lineNumber: 441,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2787,13 +2791,13 @@ function DoctorPrescriptionsPage() {
                                             children: selected.diagnosis
                                         }, void 0, false, {
                                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                            lineNumber: 436,
+                                            lineNumber: 444,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                    lineNumber: 431,
+                                    lineNumber: 439,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2806,7 +2810,7 @@ function DoctorPrescriptionsPage() {
                                                     children: med.name
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                    lineNumber: 441,
+                                                    lineNumber: 449,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2818,18 +2822,18 @@ function DoctorPrescriptionsPage() {
                                                     ].filter(Boolean).join(' · ')
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                    lineNumber: 442,
+                                                    lineNumber: 450,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, `${med.name}-${i}`, true, {
                                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                            lineNumber: 440,
+                                            lineNumber: 448,
                                             columnNumber: 19
                                         }, this))
                                 }, void 0, false, {
                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                    lineNumber: 438,
+                                    lineNumber: 446,
                                     columnNumber: 15
                                 }, this),
                                 selected.instructions && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2837,7 +2841,7 @@ function DoctorPrescriptionsPage() {
                                     children: selected.instructions
                                 }, void 0, false, {
                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                    lineNumber: 449,
+                                    lineNumber: 457,
                                     columnNumber: 17
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DialogFooter"], {
@@ -2848,7 +2852,7 @@ function DoctorPrescriptionsPage() {
                                             children: "Cancel"
                                         }, void 0, false, {
                                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                            lineNumber: 452,
+                                            lineNumber: 460,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -2859,37 +2863,37 @@ function DoctorPrescriptionsPage() {
                                                     className: "h-4 w-4"
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                    lineNumber: 454,
+                                                    lineNumber: 462,
                                                     columnNumber: 19
                                                 }, this),
                                                 "Print PDF"
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                            lineNumber: 453,
+                                            lineNumber: 461,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                    lineNumber: 451,
+                                    lineNumber: 459,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                            lineNumber: 430,
+                            lineNumber: 438,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                    lineNumber: 424,
+                    lineNumber: 432,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                lineNumber: 423,
+                lineNumber: 431,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Dialog"], {
@@ -2909,20 +2913,20 @@ function DoctorPrescriptionsPage() {
                                     children: "Issue New Prescription"
                                 }, void 0, false, {
                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                    lineNumber: 467,
+                                    lineNumber: 475,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DialogDescription"], {
                                     children: "Select a patient, then fill in the prescription details below."
                                 }, void 0, false, {
                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                    lineNumber: 468,
+                                    lineNumber: 476,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                            lineNumber: 466,
+                            lineNumber: 474,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2937,13 +2941,13 @@ function DoctorPrescriptionsPage() {
                                             children: "*"
                                         }, void 0, false, {
                                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                            lineNumber: 474,
+                                            lineNumber: 482,
                                             columnNumber: 23
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                    lineNumber: 473,
+                                    lineNumber: 481,
                                     columnNumber: 13
                                 }, this),
                                 patients.length === 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2951,7 +2955,7 @@ function DoctorPrescriptionsPage() {
                                     children: "No patients found. Complete an appointment first."
                                 }, void 0, false, {
                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                    lineNumber: 477,
+                                    lineNumber: 485,
                                     columnNumber: 15
                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Select"], {
                                     value: patientId,
@@ -2964,12 +2968,12 @@ function DoctorPrescriptionsPage() {
                                                 placeholder: "Select patient"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                lineNumber: 481,
+                                                lineNumber: 489,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                            lineNumber: 480,
+                                            lineNumber: 488,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectContent"], {
@@ -2985,7 +2989,7 @@ function DoctorPrescriptionsPage() {
                                                                         src: p.avatar
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                                        lineNumber: 488,
+                                                                        lineNumber: 496,
                                                                         columnNumber: 27
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$avatar$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AvatarFallback"], {
@@ -2993,42 +2997,42 @@ function DoctorPrescriptionsPage() {
                                                                         children: p.name?.[0]
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                                        lineNumber: 489,
+                                                                        lineNumber: 497,
                                                                         columnNumber: 27
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                                lineNumber: 487,
+                                                                lineNumber: 495,
                                                                 columnNumber: 25
                                                             }, this),
                                                             p.name
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                        lineNumber: 486,
+                                                        lineNumber: 494,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, p.id, false, {
                                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                                    lineNumber: 485,
+                                                    lineNumber: 493,
                                                     columnNumber: 21
                                                 }, this))
                                         }, void 0, false, {
                                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                            lineNumber: 483,
+                                            lineNumber: 491,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                                    lineNumber: 479,
+                                    lineNumber: 487,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                            lineNumber: 472,
+                            lineNumber: 480,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$video$2f$PrescriptionComposer$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -3038,24 +3042,24 @@ function DoctorPrescriptionsPage() {
                             sendLabel: "Send to Patient"
                         }, patientId + JSON.stringify(prefill), false, {
                             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                            lineNumber: 501,
+                            lineNumber: 509,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                    lineNumber: 465,
+                    lineNumber: 473,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                lineNumber: 464,
+                lineNumber: 472,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-        lineNumber: 209,
+        lineNumber: 217,
         columnNumber: 5
     }, this);
 }
@@ -3069,7 +3073,7 @@ function EmptyState({ icon, title, description, action }) {
                     children: icon
                 }, void 0, false, {
                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                    lineNumber: 525,
+                    lineNumber: 533,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3077,7 +3081,7 @@ function EmptyState({ icon, title, description, action }) {
                     children: title
                 }, void 0, false, {
                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                    lineNumber: 526,
+                    lineNumber: 534,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3085,7 +3089,7 @@ function EmptyState({ icon, title, description, action }) {
                     children: description
                 }, void 0, false, {
                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                    lineNumber: 527,
+                    lineNumber: 535,
                     columnNumber: 9
                 }, this),
                 action && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3093,18 +3097,18 @@ function EmptyState({ icon, title, description, action }) {
                     children: action
                 }, void 0, false, {
                     fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-                    lineNumber: 528,
+                    lineNumber: 536,
                     columnNumber: 20
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-            lineNumber: 524,
+            lineNumber: 532,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/app/(doctor)/doctor/prescriptions/page.tsx",
-        lineNumber: 523,
+        lineNumber: 531,
         columnNumber: 5
     }, this);
 }

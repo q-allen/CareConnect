@@ -52,7 +52,7 @@ const toAbsUrl = (url)=>{
         }
         return url;
     }
-    const base = ("TURBOPACK compile-time value", "http://localhost:8000") ?? "";
+    const base = ("TURBOPACK compile-time value", "http://127.0.0.1:8000") ?? "";
     return `${base}${url}`;
 };
 const mapAppointmentStatus = (status)=>{

@@ -37,6 +37,7 @@ import { doctorService, DoctorProfileCompletionData } from "@/services/doctorSer
 import axiosClient from "@/services/axiosClient";
 import { API_ENDPOINTS } from "@/services/api";
 import { mapDoctorFromDetail } from "@/services/mappers";
+import { PH_CITIES } from "@/data/phCities";
 
 const SPECIALTIES = [
   "General Medicine", "Internal Medicine", "Pediatrics", "OB-GYN",
@@ -46,11 +47,7 @@ const SPECIALTIES = [
   "Oncology", "Rheumatology", "Surgery", "Dentistry", "Other",
 ];
 
-const CITIES = [
-  "Metro Manila", "Quezon City", "Makati", "Taguig", "Pasig",
-  "Mandaluyong", "Cebu City", "Davao City", "Iloilo City",
-  "Bacolod", "Cagayan de Oro", "Zamboanga City", "Baguio", "Other",
-];
+const CITIES = PH_CITIES;
 
 const LANGUAGES = ["Filipino", "English", "Cebuano", "Ilocano", "Hiligaynon", "Waray", "Other"];
 
@@ -270,7 +267,7 @@ export default function DoctorProfileCompletePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-xl space-y-6">
 
         {/* Header */}

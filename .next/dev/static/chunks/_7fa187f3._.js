@@ -522,8 +522,8 @@ __turbopack_context__.s([
     ()=>getChatWsBaseUrl
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$polyfills$2f$process$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = /*#__PURE__*/ __turbopack_context__.i("[project]/node_modules/next/dist/build/polyfills/process.js [app-client] (ecmascript)");
-const DEFAULT_BASE_URL = ("TURBOPACK compile-time value", "http://localhost:8000") ?? "";
-const DEFAULT_CHAT_WS_URL = ("TURBOPACK compile-time value", "http://localhost:8000") ?? "";
+const DEFAULT_BASE_URL = ("TURBOPACK compile-time value", "http://127.0.0.1:8000") ?? "";
+const DEFAULT_CHAT_WS_URL = ("TURBOPACK compile-time value", "http://127.0.0.1:8000") ?? "";
 function getBaseUrl() {
     if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
     ;
