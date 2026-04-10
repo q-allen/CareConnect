@@ -368,7 +368,7 @@ export default function DoctorQueuePage() {
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
           <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
             <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <CardTitle className="text-xl flex items-center gap-2">
+              <CardTitle className="text-lg flex items-center gap-2">
                 <User className="h-6 w-6 text-primary" />
                 Now Serving
               </CardTitle>
@@ -494,7 +494,7 @@ export default function DoctorQueuePage() {
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <CardTitle className="text-xl">Waiting List</CardTitle>
+              <CardTitle className="text-lg">Waiting List</CardTitle>
               <Badge variant="secondary" className="text-sm px-3 py-1">{queueWaiting.length}</Badge>
             </CardHeader>
             <CardContent>
