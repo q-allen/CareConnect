@@ -162,6 +162,8 @@ export const api = {
   patchUpload:  <T>(path: string, body: FormData) => upload<T>(path, body, "PATCH"),
 };
 
+const RECORDS_BASE = "/api/records";
+
 export const API_ENDPOINTS = {
   // Auth
   ME:                   "/api/auth/me",
@@ -215,11 +217,11 @@ export const API_ENDPOINTS = {
   PRESCRIPTION_PDF:     (id: number | string) => `/api/records/prescriptions/${id}/pdf/`,
   LAB_RESULTS:          "/api/records/labs",
   LAB_DETAIL:           (id: number | string) => `/api/records/labs/${id}`,
-  CERTIFICATES:         "/api/records/certificates",
-  CERTIFICATE_DETAIL:   (id: number | string) => `/api/records/certificates/${id}`,
-  CERT_REQUESTS:        "/api/records/certificates/request",
-  CERT_REQUEST_APPROVE: (id: number | string) => `/api/records/certificates/request/${id}/approve`,
-  CERT_REQUEST_REJECT:  (id: number | string) => `/api/records/certificates/request/${id}/reject`,
+  CERTIFICATES:         `${RECORDS_BASE}/certificates`,
+  CERTIFICATE_DETAIL:   (id: number | string) => `${RECORDS_BASE}/certificates/${id}`,
+  CERT_REQUESTS:        `${RECORDS_BASE}/certificates/request`,
+  CERT_REQUEST_APPROVE: (id: number | string) => `${RECORDS_BASE}/certificates/request/${id}/approve`,
+  CERT_REQUEST_REJECT:  (id: number | string) => `${RECORDS_BASE}/certificates/request/${id}/reject`,
   // Chat
   CONVERSATIONS:        "/api/chat/",
   MESSAGES:             (convId: number | string) => `/api/chat/${convId}/messages/`,

@@ -685,6 +685,7 @@ const api = {
     upload: (path, body)=>upload(path, body, "POST"),
     patchUpload: (path, body)=>upload(path, body, "PATCH")
 };
+const RECORDS_BASE = "/api/records";
 const API_ENDPOINTS = {
     // Auth
     ME: "/api/auth/me",
@@ -738,11 +739,11 @@ const API_ENDPOINTS = {
     PRESCRIPTION_PDF: (id)=>`/api/records/prescriptions/${id}/pdf/`,
     LAB_RESULTS: "/api/records/labs",
     LAB_DETAIL: (id)=>`/api/records/labs/${id}`,
-    CERTIFICATES: "/api/records/certificates",
-    CERTIFICATE_DETAIL: (id)=>`/api/records/certificates/${id}`,
-    CERT_REQUESTS: "/api/records/certificates/request",
-    CERT_REQUEST_APPROVE: (id)=>`/api/records/certificates/request/${id}/approve`,
-    CERT_REQUEST_REJECT: (id)=>`/api/records/certificates/request/${id}/reject`,
+    CERTIFICATES: `${RECORDS_BASE}/certificates`,
+    CERTIFICATE_DETAIL: (id)=>`${RECORDS_BASE}/certificates/${id}`,
+    CERT_REQUESTS: `${RECORDS_BASE}/certificates/request`,
+    CERT_REQUEST_APPROVE: (id)=>`${RECORDS_BASE}/certificates/request/${id}/approve`,
+    CERT_REQUEST_REJECT: (id)=>`${RECORDS_BASE}/certificates/request/${id}/reject`,
     // Chat
     CONVERSATIONS: "/api/chat/",
     MESSAGES: (convId)=>`/api/chat/${convId}/messages/`,
