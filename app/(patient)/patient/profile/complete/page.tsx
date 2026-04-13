@@ -228,41 +228,49 @@ export default function PatientProfileCompletePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 flex items-center justify-center p-4">
-      <div className="w-full max-w-lg space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex items-center justify-center p-4 py-8">
+      <div className="w-full max-w-2xl space-y-8">
+
+        {/* Logo Header */}
+        <div className="flex items-center gap-3 justify-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg">
+            <Heart className="h-6 w-6 text-primary-foreground" />
+          </div>
+          <span className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">CareConnect</span>
+        </div>
 
         {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold text-foreground">Complete Your Profile</h1>
-          <p className="text-sm text-muted-foreground">
+        <div className="text-center space-y-3 px-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground">Complete Your Profile</h1>
+          <p className="text-base text-muted-foreground max-w-md mx-auto">
             Optional — add details now to make booking faster, or skip and continue.
           </p>
           <Button
             variant="secondary"
-            size="sm"
+            size="default"
             onClick={skipWizard}
             disabled={saving}
-            className="mt-1"
+            className="mt-2 shadow-md hover:shadow-lg transition-all"
           >
             Skip for now
           </Button>
         </div>
 
         {/* Step indicators */}
-        <div className="flex items-center justify-between px-2">
+        <div className="flex items-center justify-between px-4 md:px-12">
           {STEPS.map((s, i) => {
             const n = i + 1;
             const done = step > n; const current = step === n;
             return (
-              <div key={s.label} className="flex flex-col items-center gap-1 flex-1">
-                <div className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-semibold border-2 transition-colors ${
-                  done    ? "bg-primary border-primary text-primary-foreground" :
-                  current ? "border-primary text-primary bg-primary/10" :
-                            "border-muted text-muted-foreground"
+              <div key={s.label} className="flex flex-col items-center gap-2 flex-1">
+                <div className={`h-11 w-11 rounded-full flex items-center justify-center text-base font-bold border-2 transition-all shadow-md ${
+                  done    ? "bg-primary border-primary text-primary-foreground scale-105" :
+                  current ? "border-primary text-primary bg-primary/10 scale-110 shadow-lg" :
+                            "border-muted-foreground/30 text-muted-foreground"
                 }`}>
-                  {done ? <Check className="h-4 w-4" /> : n}
+                  {done ? <Check className="h-5 w-5" /> : n}
                 </div>
-                <span className={`text-xs ${current ? "text-primary font-medium" : "text-muted-foreground"}`}>
+                <span className={`text-xs md:text-sm text-center ${current ? "text-primary font-semibold" : "text-muted-foreground"}`}>
                   {s.label}
                 </span>
               </div>
@@ -270,7 +278,7 @@ export default function PatientProfileCompletePage() {
           })}
         </div>
 
-        <Progress value={progress} className="h-1.5" />
+        <Progress value={progress} className="h-2 shadow-sm" />
 
         {/* Step cards */}
         <AnimatePresence mode="wait">
@@ -281,12 +289,12 @@ export default function PatientProfileCompletePage() {
           >
             {/* ── Step 1: Personal Info ── */}
             {step === 1 && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <User className="h-4 w-4 text-primary" /> Personal Information
+              <Card className="shadow-xl border-2">
+                <CardHeader className="pb-4 bg-gradient-to-br from-primary/5 to-transparent">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <User className="h-5 w-5 text-primary" /> Personal Information
                   </CardTitle>
-                  <p className="text-xs text-muted-foreground">Required to book appointments</p>
+                  <p className="text-xs text-muted-foreground mt-1">Required to book appointments</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
@@ -338,12 +346,12 @@ export default function PatientProfileCompletePage() {
 
             {/* ── Step 2: Health Info (optional) ── */}
             {step === 2 && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Heart className="h-4 w-4 text-primary" /> Health Information
+              <Card className="shadow-xl border-2">
+                <CardHeader className="pb-4 bg-gradient-to-br from-primary/5 to-transparent">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Heart className="h-5 w-5 text-primary" /> Health Information
                   </CardTitle>
-                  <p className="text-xs text-muted-foreground">Optional — helps doctors provide better care</p>
+                  <p className="text-xs text-muted-foreground mt-1">Optional — helps doctors provide better care</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-1.5">
@@ -391,12 +399,12 @@ export default function PatientProfileCompletePage() {
 
             {/* ── Step 3: HMO & Family (optional) ── */}
             {step === 3 && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-primary" /> HMO & Family Members
+              <Card className="shadow-xl border-2">
+                <CardHeader className="pb-4 bg-gradient-to-br from-primary/5 to-transparent">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-primary" /> HMO & Family Members
                   </CardTitle>
-                  <p className="text-xs text-muted-foreground">Optional — add now or later from your profile</p>
+                  <p className="text-xs text-muted-foreground mt-1">Optional — add now or later from your profile</p>
                 </CardHeader>
                 <CardContent className="space-y-5">
                   {/* HMO */}
@@ -455,16 +463,16 @@ export default function PatientProfileCompletePage() {
         </AnimatePresence>
 
         {/* Navigation */}
-        <div className="flex items-center justify-between">
-          <Button variant="ghost" onClick={() => setStep((s) => s - 1)} disabled={step === 1 || saving} className="gap-2">
-            <ChevronLeft className="h-4 w-4" /> Back
+        <div className="flex items-center justify-between px-4">
+          <Button variant="ghost" onClick={() => setStep((s) => s - 1)} disabled={step === 1 || saving} className="gap-2 h-12 px-6">
+            <ChevronLeft className="h-5 w-5" /> Back
           </Button>
 
           <div className="flex items-center gap-3">
             <Button
               onClick={handleNext}
               disabled={(step === 1 && !step1Valid) || saving}
-              className="gap-2 min-w-[120px]"
+              className="gap-2 min-w-[140px] h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all"
             >
               {saving ? (
                 <><Loader2 className="h-4 w-4 animate-spin" /> Saving...</>

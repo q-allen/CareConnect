@@ -1153,6 +1153,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$re
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$calendar$2d$days$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__CalendarDays$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/calendar-days.js [app-client] (ecmascript) <export default as CalendarDays>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$award$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Award$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/award.js [app-client] (ecmascript) <export default as Award>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$plus$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Plus$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/plus.js [app-client] (ecmascript) <export default as Plus>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$pen$2d$line$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__PenLine$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/pen-line.js [app-client] (ecmascript) <export default as PenLine>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/card.tsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/button.tsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/components/ui/input.tsx [app-client] (ecmascript)");
@@ -1246,6 +1247,42 @@ function DoctorProfilePage() {
     const doctor = user;
     const [editingSection, setEditingSection] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     const [uploadingAvatar, setUploadingAvatar] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [uploadingSignature, setUploadingSignature] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [signaturePreview, setSignaturePreview] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
+    const handleSignatureChange = async (e)=>{
+        const file = e.target.files?.[0];
+        if (!file) return;
+        // Show local blob preview immediately for instant feedback
+        const blobUrl = URL.createObjectURL(file);
+        setSignaturePreview(blobUrl);
+        setUploadingSignature(true);
+        try {
+            const form = new FormData();
+            form.append('signature', file);
+            const res = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$axiosClient$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].patch(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].DOCTOR_PROFILE_COMPLETE, form, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            // Replace blob URL with the real server URL so it persists after refresh
+            const serverSigUrl = res.data?.signature;
+            if (serverSigUrl) setSignaturePreview(serverSigUrl);
+            toast({
+                title: 'Signature uploaded',
+                description: 'Your e-signature will appear on new prescriptions.'
+            });
+        } catch (err) {
+            const message = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].isAxiosError(err) ? err.response?.data?.detail ?? err.message : 'Failed to upload signature.';
+            toast({
+                title: 'Upload failed',
+                description: message,
+                variant: 'destructive'
+            });
+            setSignaturePreview(null);
+        } finally{
+            setUploadingSignature(false);
+        }
+    };
     const handleAvatarChange = async (e)=>{
         const file = e.target.files?.[0];
         if (!file) return;
@@ -1337,6 +1374,11 @@ function DoctorProfilePage() {
                         setProfile(buildProfileState(mapped));
                         setSelectedServices(mapped.services ?? []);
                         setSelectedHmos(mapped.hmoAccepted ?? []);
+                        // Seed signature preview from existing profile data
+                        const mappedWithSig = mapped;
+                        if (mappedWithSig.signature) {
+                            setSignaturePreview(mappedWithSig.signature);
+                        }
                         if (mapped.clinicLat && mapped.clinicLng) {
                             setClinicLocation({
                                 address: mapped.clinicAddress ?? '',
@@ -1474,7 +1516,7 @@ function DoctorProfilePage() {
                             children: "My Profile"
                         }, void 0, false, {
                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                            lineNumber: 266,
+                            lineNumber: 301,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1482,20 +1524,20 @@ function DoctorProfilePage() {
                             children: "Manage your professional info, schedule, and public listing"
                         }, void 0, false, {
                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                            lineNumber: 267,
+                            lineNumber: 302,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                    lineNumber: 265,
+                    lineNumber: 300,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$doctor$2f$VerificationBanner$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                     doctor: activeDoctor
                 }, void 0, false, {
                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                    lineNumber: 271,
+                    lineNumber: 306,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$tabs$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Tabs"], {
@@ -1510,7 +1552,7 @@ function DoctorProfilePage() {
                                     children: "Personal"
                                 }, void 0, false, {
                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                    lineNumber: 275,
+                                    lineNumber: 310,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$tabs$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TabsTrigger"], {
@@ -1518,7 +1560,7 @@ function DoctorProfilePage() {
                                     children: "Professional"
                                 }, void 0, false, {
                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                    lineNumber: 276,
+                                    lineNumber: 311,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$tabs$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TabsTrigger"], {
@@ -1526,13 +1568,13 @@ function DoctorProfilePage() {
                                     children: "Schedule"
                                 }, void 0, false, {
                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                    lineNumber: 277,
+                                    lineNumber: 312,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                            lineNumber: 274,
+                            lineNumber: 309,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$tabs$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TabsContent"], {
@@ -1565,7 +1607,7 @@ function DoctorProfilePage() {
                                                                         alt: activeDoctor?.name ?? 'Doctor'
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                        lineNumber: 288,
+                                                                        lineNumber: 323,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$avatar$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AvatarFallback"], {
@@ -1573,13 +1615,13 @@ function DoctorProfilePage() {
                                                                         children: getInitials(activeDoctor?.name || 'DR')
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                        lineNumber: 289,
+                                                                        lineNumber: 324,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                lineNumber: 287,
+                                                                lineNumber: 322,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -1591,13 +1633,13 @@ function DoctorProfilePage() {
                                                                         className: "h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                        lineNumber: 299,
+                                                                        lineNumber: 334,
                                                                         columnNumber: 29
                                                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$camera$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Camera$3e$__["Camera"], {
                                                                         className: "h-4 w-4"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                        lineNumber: 300,
+                                                                        lineNumber: 335,
                                                                         columnNumber: 29
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -1609,19 +1651,19 @@ function DoctorProfilePage() {
                                                                         disabled: uploadingAvatar
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                        lineNumber: 301,
+                                                                        lineNumber: 336,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                lineNumber: 293,
+                                                                lineNumber: 328,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                        lineNumber: 286,
+                                                        lineNumber: 321,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1632,7 +1674,7 @@ function DoctorProfilePage() {
                                                                 children: profile.name
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                lineNumber: 312,
+                                                                lineNumber: 347,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1640,7 +1682,7 @@ function DoctorProfilePage() {
                                                                 children: profile.specialty
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                lineNumber: 313,
+                                                                lineNumber: 348,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1651,7 +1693,7 @@ function DoctorProfilePage() {
                                                                         children: "Doctor"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                        lineNumber: 315,
+                                                                        lineNumber: 350,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     activeDoctor?.isVerified ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
@@ -1661,14 +1703,14 @@ function DoctorProfilePage() {
                                                                                 className: "h-3 w-3"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                                lineNumber: 318,
+                                                                                lineNumber: 353,
                                                                                 columnNumber: 29
                                                                             }, this),
                                                                             " Verified"
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                        lineNumber: 317,
+                                                                        lineNumber: 352,
                                                                         columnNumber: 27
                                                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
                                                                         className: "bg-warning/10 text-warning border-warning/20 gap-1",
@@ -1677,14 +1719,14 @@ function DoctorProfilePage() {
                                                                                 className: "h-3 w-3"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                                lineNumber: 322,
+                                                                                lineNumber: 357,
                                                                                 columnNumber: 29
                                                                             }, this),
                                                                             " Pending Verification"
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                        lineNumber: 321,
+                                                                        lineNumber: 356,
                                                                         columnNumber: 27
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
@@ -1696,7 +1738,7 @@ function DoctorProfilePage() {
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                        lineNumber: 326,
+                                                                        lineNumber: 361,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     activeDoctor?.isOnDemand && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
@@ -1704,40 +1746,40 @@ function DoctorProfilePage() {
                                                                         children: "On-Demand"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                        lineNumber: 330,
+                                                                        lineNumber: 365,
                                                                         columnNumber: 27
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                lineNumber: 314,
+                                                                lineNumber: 349,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                        lineNumber: 311,
+                                                        lineNumber: 346,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                lineNumber: 285,
+                                                lineNumber: 320,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                            lineNumber: 284,
+                                            lineNumber: 319,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                        lineNumber: 283,
+                                        lineNumber: 318,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                    lineNumber: 282,
+                                    lineNumber: 317,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].div, {
@@ -1764,14 +1806,14 @@ function DoctorProfilePage() {
                                                                 className: "h-4 w-4 text-primary"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                lineNumber: 343,
+                                                                lineNumber: 378,
                                                                 columnNumber: 21
                                                             }, this),
                                                             " Personal Information"
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                        lineNumber: 342,
+                                                        lineNumber: 377,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -1785,7 +1827,7 @@ function DoctorProfilePage() {
                                                                     className: "h-3.5 w-3.5"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 349,
+                                                                    lineNumber: 384,
                                                                     columnNumber: 56
                                                                 }, this),
                                                                 " Cancel"
@@ -1796,7 +1838,7 @@ function DoctorProfilePage() {
                                                                     className: "h-3.5 w-3.5"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 349,
+                                                                    lineNumber: 384,
                                                                     columnNumber: 100
                                                                 }, this),
                                                                 " Edit"
@@ -1804,13 +1846,13 @@ function DoctorProfilePage() {
                                                         }, void 0, true)
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                        lineNumber: 345,
+                                                        lineNumber: 380,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                lineNumber: 341,
+                                                lineNumber: 376,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -1827,7 +1869,7 @@ function DoctorProfilePage() {
                                                                             children: "Full Name"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 357,
+                                                                            lineNumber: 392,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -1838,13 +1880,13 @@ function DoctorProfilePage() {
                                                                                 })
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 358,
+                                                                            lineNumber: 393,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 356,
+                                                                    lineNumber: 391,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1854,7 +1896,7 @@ function DoctorProfilePage() {
                                                                             children: "Phone Number"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 361,
+                                                                            lineNumber: 396,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -1865,13 +1907,13 @@ function DoctorProfilePage() {
                                                                                 })
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 362,
+                                                                            lineNumber: 397,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 360,
+                                                                    lineNumber: 395,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1881,7 +1923,7 @@ function DoctorProfilePage() {
                                                                             children: "Languages Spoken (comma-separated)"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 365,
+                                                                            lineNumber: 400,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -1893,19 +1935,19 @@ function DoctorProfilePage() {
                                                                             placeholder: "English, Filipino"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 366,
+                                                                            lineNumber: 401,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 364,
+                                                                    lineNumber: 399,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                            lineNumber: 355,
+                                                            lineNumber: 390,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -1917,7 +1959,7 @@ function DoctorProfilePage() {
                                                                     className: "h-4 w-4"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 370,
+                                                                    lineNumber: 405,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 " ",
@@ -1925,7 +1967,7 @@ function DoctorProfilePage() {
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                            lineNumber: 369,
+                                                            lineNumber: 404,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
@@ -1962,12 +2004,12 @@ function DoctorProfilePage() {
                                                                             className: "h-4 w-4 text-primary"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 383,
+                                                                            lineNumber: 418,
                                                                             columnNumber: 29
                                                                         }, this)
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                        lineNumber: 382,
+                                                                        lineNumber: 417,
                                                                         columnNumber: 27
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1977,7 +2019,7 @@ function DoctorProfilePage() {
                                                                                 children: label
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                                lineNumber: 386,
+                                                                                lineNumber: 421,
                                                                                 columnNumber: 29
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1985,19 +2027,19 @@ function DoctorProfilePage() {
                                                                                 children: value
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                                lineNumber: 387,
+                                                                                lineNumber: 422,
                                                                                 columnNumber: 29
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                        lineNumber: 385,
+                                                                        lineNumber: 420,
                                                                         columnNumber: 27
                                                                     }, this)
                                                                 ]
                                                             }, label, true, {
                                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                lineNumber: 381,
+                                                                lineNumber: 416,
                                                                 columnNumber: 25
                                                             }, this)),
                                                         languageList.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2009,12 +2051,12 @@ function DoctorProfilePage() {
                                                                         className: "h-4 w-4 text-primary"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                        lineNumber: 394,
+                                                                        lineNumber: 429,
                                                                         columnNumber: 29
                                                                     }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 393,
+                                                                    lineNumber: 428,
                                                                     columnNumber: 27
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2024,7 +2066,7 @@ function DoctorProfilePage() {
                                                                             children: "Languages"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 397,
+                                                                            lineNumber: 432,
                                                                             columnNumber: 29
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2035,52 +2077,212 @@ function DoctorProfilePage() {
                                                                                     children: l
                                                                                 }, l, false, {
                                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                                    lineNumber: 400,
+                                                                                    lineNumber: 435,
                                                                                     columnNumber: 33
                                                                                 }, this))
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 398,
+                                                                            lineNumber: 433,
                                                                             columnNumber: 29
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 396,
+                                                                    lineNumber: 431,
                                                                     columnNumber: 27
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                            lineNumber: 392,
+                                                            lineNumber: 427,
                                                             columnNumber: 25
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                    lineNumber: 374,
+                                                    lineNumber: 409,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                lineNumber: 352,
+                                                lineNumber: 387,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                        lineNumber: 340,
+                                        lineNumber: 375,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                    lineNumber: 339,
+                                    lineNumber: 374,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].div, {
+                                    initial: {
+                                        opacity: 0,
+                                        y: 10
+                                    },
+                                    animate: {
+                                        opacity: 1,
+                                        y: 0
+                                    },
+                                    transition: {
+                                        delay: 0.1
+                                    },
+                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardHeader"], {
+                                                className: "pb-3",
+                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardTitle"], {
+                                                    className: "text-base flex items-center gap-2",
+                                                    children: [
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$pen$2d$line$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__PenLine$3e$__["PenLine"], {
+                                                            className: "h-4 w-4 text-primary"
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
+                                                            lineNumber: 452,
+                                                            columnNumber: 21
+                                                        }, this),
+                                                        " E-Signature"
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
+                                                    lineNumber: 451,
+                                                    columnNumber: 19
+                                                }, this)
+                                            }, void 0, false, {
+                                                fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
+                                                lineNumber: 450,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
+                                                className: "space-y-4",
+                                                children: [
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                        className: "text-xs text-muted-foreground",
+                                                        children: "Upload a PNG with a transparent background. It will appear on all generated prescription PDFs."
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
+                                                        lineNumber: 456,
+                                                        columnNumber: 19
+                                                    }, this),
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                        className: "flex items-center gap-4",
+                                                        children: [
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                className: "w-48 h-20 border-2 border-dashed border-border rounded-xl flex items-center justify-center bg-muted/30 overflow-hidden shrink-0",
+                                                                children: signaturePreview ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("img", {
+                                                                    src: signaturePreview,
+                                                                    alt: "E-Signature preview",
+                                                                    className: "max-h-full max-w-full object-contain p-2"
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
+                                                                    lineNumber: 462,
+                                                                    columnNumber: 25
+                                                                }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                    className: "text-xs text-muted-foreground text-center px-2",
+                                                                    children: "No signature uploaded"
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
+                                                                    lineNumber: 468,
+                                                                    columnNumber: 25
+                                                                }, this)
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
+                                                                lineNumber: 460,
+                                                                columnNumber: 21
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                className: "space-y-2",
+                                                                children: [
+                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
+                                                                        htmlFor: "signature-upload",
+                                                                        className: "inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium cursor-pointer hover:bg-primary/90 transition-colors",
+                                                                        children: [
+                                                                            uploadingSignature ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                                className: "h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"
+                                                                            }, void 0, false, {
+                                                                                fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
+                                                                                lineNumber: 477,
+                                                                                columnNumber: 29
+                                                                            }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$camera$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Camera$3e$__["Camera"], {
+                                                                                className: "h-4 w-4"
+                                                                            }, void 0, false, {
+                                                                                fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
+                                                                                lineNumber: 478,
+                                                                                columnNumber: 29
+                                                                            }, this),
+                                                                            uploadingSignature ? 'Uploading...' : 'Upload Signature',
+                                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                                                                id: "signature-upload",
+                                                                                type: "file",
+                                                                                accept: "image/png,image/jpeg,image/webp",
+                                                                                className: "sr-only",
+                                                                                onChange: handleSignatureChange,
+                                                                                disabled: uploadingSignature
+                                                                            }, void 0, false, {
+                                                                                fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
+                                                                                lineNumber: 480,
+                                                                                columnNumber: 25
+                                                                            }, this)
+                                                                        ]
+                                                                    }, void 0, true, {
+                                                                        fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
+                                                                        lineNumber: 472,
+                                                                        columnNumber: 23
+                                                                    }, this),
+                                                                    signaturePreview && !uploadingSignature && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                        className: "flex items-center gap-1.5 text-xs text-success",
+                                                                        children: [
+                                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$check$2d$big$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__CheckCircle$3e$__["CheckCircle"], {
+                                                                                className: "h-3.5 w-3.5"
+                                                                            }, void 0, false, {
+                                                                                fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
+                                                                                lineNumber: 491,
+                                                                                columnNumber: 27
+                                                                            }, this),
+                                                                            " Signature uploaded"
+                                                                        ]
+                                                                    }, void 0, true, {
+                                                                        fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
+                                                                        lineNumber: 490,
+                                                                        columnNumber: 25
+                                                                    }, this)
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
+                                                                lineNumber: 471,
+                                                                columnNumber: 21
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
+                                                        lineNumber: 459,
+                                                        columnNumber: 19
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
+                                                lineNumber: 455,
+                                                columnNumber: 17
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
+                                        lineNumber: 449,
+                                        columnNumber: 15
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
+                                    lineNumber: 448,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                            lineNumber: 281,
+                            lineNumber: 316,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$tabs$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TabsContent"], {
@@ -2108,14 +2310,14 @@ function DoctorProfilePage() {
                                                                 className: "h-4 w-4 text-primary"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                lineNumber: 419,
+                                                                lineNumber: 508,
                                                                 columnNumber: 21
                                                             }, this),
                                                             " Professional Details"
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                        lineNumber: 418,
+                                                        lineNumber: 507,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -2129,7 +2331,7 @@ function DoctorProfilePage() {
                                                                     className: "h-3.5 w-3.5"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 425,
+                                                                    lineNumber: 514,
                                                                     columnNumber: 60
                                                                 }, this),
                                                                 " Cancel"
@@ -2140,7 +2342,7 @@ function DoctorProfilePage() {
                                                                     className: "h-3.5 w-3.5"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 425,
+                                                                    lineNumber: 514,
                                                                     columnNumber: 104
                                                                 }, this),
                                                                 " Edit"
@@ -2148,13 +2350,13 @@ function DoctorProfilePage() {
                                                         }, void 0, true)
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                        lineNumber: 421,
+                                                        lineNumber: 510,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                lineNumber: 417,
+                                                lineNumber: 506,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -2171,7 +2373,7 @@ function DoctorProfilePage() {
                                                                             children: "Specialty"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 433,
+                                                                            lineNumber: 522,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -2182,13 +2384,13 @@ function DoctorProfilePage() {
                                                                                 })
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 434,
+                                                                            lineNumber: 523,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 432,
+                                                                    lineNumber: 521,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2198,7 +2400,7 @@ function DoctorProfilePage() {
                                                                             children: "Hospital / Clinic"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 437,
+                                                                            lineNumber: 526,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -2209,13 +2411,13 @@ function DoctorProfilePage() {
                                                                                 })
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 438,
+                                                                            lineNumber: 527,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 436,
+                                                                    lineNumber: 525,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2225,7 +2427,7 @@ function DoctorProfilePage() {
                                                                             children: "Years of Experience"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 441,
+                                                                            lineNumber: 530,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -2237,13 +2439,13 @@ function DoctorProfilePage() {
                                                                                 })
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 442,
+                                                                            lineNumber: 531,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 440,
+                                                                    lineNumber: 529,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2253,7 +2455,7 @@ function DoctorProfilePage() {
                                                                             children: "In-Clinic Fee (₱)"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 445,
+                                                                            lineNumber: 534,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -2265,13 +2467,13 @@ function DoctorProfilePage() {
                                                                                 })
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 446,
+                                                                            lineNumber: 535,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 444,
+                                                                    lineNumber: 533,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2281,7 +2483,7 @@ function DoctorProfilePage() {
                                                                             children: "Online Fee (₱)"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 449,
+                                                                            lineNumber: 538,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -2293,13 +2495,13 @@ function DoctorProfilePage() {
                                                                                 })
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 450,
+                                                                            lineNumber: 539,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 448,
+                                                                    lineNumber: 537,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2309,7 +2511,7 @@ function DoctorProfilePage() {
                                                                             children: "Bio / About"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 453,
+                                                                            lineNumber: 542,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$textarea$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Textarea"], {
@@ -2322,19 +2524,19 @@ function DoctorProfilePage() {
                                                                             placeholder: "Tell patients about your background and approach..."
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 454,
+                                                                            lineNumber: 543,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 452,
+                                                                    lineNumber: 541,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                            lineNumber: 431,
+                                                            lineNumber: 520,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$doctor$2f$ClinicLocationPicker$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -2343,7 +2545,7 @@ function DoctorProfilePage() {
                                                             label: "Clinic Location (pin on map)"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                            lineNumber: 459,
+                                                            lineNumber: 548,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2356,14 +2558,14 @@ function DoctorProfilePage() {
                                                                             className: "h-3.5 w-3.5 text-primary"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 468,
+                                                                            lineNumber: 557,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         " Services Offered"
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 467,
+                                                                    lineNumber: 556,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2383,26 +2585,26 @@ function DoctorProfilePage() {
                                                                                     children: "✓"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                                    lineNumber: 488,
+                                                                                    lineNumber: 577,
                                                                                     columnNumber: 44
                                                                                 }, this),
                                                                                 s
                                                                             ]
                                                                         }, s, true, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 474,
+                                                                            lineNumber: 563,
                                                                             columnNumber: 31
                                                                         }, this);
                                                                     })
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 470,
+                                                                    lineNumber: 559,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                            lineNumber: 466,
+                                                            lineNumber: 555,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2415,14 +2617,14 @@ function DoctorProfilePage() {
                                                                             className: "h-3.5 w-3.5 text-primary"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 498,
+                                                                            lineNumber: 587,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         " HMO Accepted"
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 497,
+                                                                    lineNumber: 586,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2442,26 +2644,26 @@ function DoctorProfilePage() {
                                                                                     children: "✓"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                                    lineNumber: 518,
+                                                                                    lineNumber: 607,
                                                                                     columnNumber: 44
                                                                                 }, this),
                                                                                 h
                                                                             ]
                                                                         }, h, true, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 504,
+                                                                            lineNumber: 593,
                                                                             columnNumber: 31
                                                                         }, this);
                                                                     })
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 500,
+                                                                    lineNumber: 589,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                            lineNumber: 496,
+                                                            lineNumber: 585,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -2473,7 +2675,7 @@ function DoctorProfilePage() {
                                                                     className: "h-4 w-4"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 526,
+                                                                    lineNumber: 615,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 " ",
@@ -2481,7 +2683,7 @@ function DoctorProfilePage() {
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                            lineNumber: 525,
+                                                            lineNumber: 614,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
@@ -2520,12 +2722,12 @@ function DoctorProfilePage() {
                                                                                 className: "h-4 w-4 text-primary"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                                lineNumber: 540,
+                                                                                lineNumber: 629,
                                                                                 columnNumber: 31
                                                                             }, this)
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 539,
+                                                                            lineNumber: 628,
                                                                             columnNumber: 29
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2535,7 +2737,7 @@ function DoctorProfilePage() {
                                                                                     children: label
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                                    lineNumber: 543,
+                                                                                    lineNumber: 632,
                                                                                     columnNumber: 31
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2543,24 +2745,24 @@ function DoctorProfilePage() {
                                                                                     children: value
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                                    lineNumber: 544,
+                                                                                    lineNumber: 633,
                                                                                     columnNumber: 31
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 542,
+                                                                            lineNumber: 631,
                                                                             columnNumber: 29
                                                                         }, this)
                                                                     ]
                                                                 }, label, true, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 538,
+                                                                    lineNumber: 627,
                                                                     columnNumber: 27
                                                                 }, this))
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                            lineNumber: 531,
+                                                            lineNumber: 620,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2576,7 +2778,7 @@ function DoctorProfilePage() {
                                                                                     className: "h-4 w-4 text-primary"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                                    lineNumber: 554,
+                                                                                    lineNumber: 643,
                                                                                     columnNumber: 29
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2584,13 +2786,13 @@ function DoctorProfilePage() {
                                                                                     children: "In-Clinic Fee"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                                    lineNumber: 555,
+                                                                                    lineNumber: 644,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 553,
+                                                                            lineNumber: 642,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2598,13 +2800,13 @@ function DoctorProfilePage() {
                                                                             children: profile.consultationFee ? `₱${Number(profile.consultationFee).toLocaleString()}` : '—'
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 557,
+                                                                            lineNumber: 646,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 552,
+                                                                    lineNumber: 641,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2617,7 +2819,7 @@ function DoctorProfilePage() {
                                                                                     className: "h-4 w-4 text-accent"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                                    lineNumber: 563,
+                                                                                    lineNumber: 652,
                                                                                     columnNumber: 29
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2625,13 +2827,13 @@ function DoctorProfilePage() {
                                                                                     children: "Online Fee"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                                    lineNumber: 564,
+                                                                                    lineNumber: 653,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 562,
+                                                                            lineNumber: 651,
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2639,19 +2841,19 @@ function DoctorProfilePage() {
                                                                             children: profile.onlineConsultationFee ? `₱${Number(profile.onlineConsultationFee).toLocaleString()}` : '—'
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 566,
+                                                                            lineNumber: 655,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 561,
+                                                                    lineNumber: 650,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                            lineNumber: 551,
+                                                            lineNumber: 640,
                                                             columnNumber: 23
                                                         }, this),
                                                         activeDoctor?.rating != null && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2661,7 +2863,7 @@ function DoctorProfilePage() {
                                                                     className: "h-5 w-5 fill-warning text-warning shrink-0"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 575,
+                                                                    lineNumber: 664,
                                                                     columnNumber: 27
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2674,7 +2876,7 @@ function DoctorProfilePage() {
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 577,
+                                                                            lineNumber: 666,
                                                                             columnNumber: 29
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2685,19 +2887,19 @@ function DoctorProfilePage() {
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 578,
+                                                                            lineNumber: 667,
                                                                             columnNumber: 29
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 576,
+                                                                    lineNumber: 665,
                                                                     columnNumber: 27
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                            lineNumber: 574,
+                                                            lineNumber: 663,
                                                             columnNumber: 25
                                                         }, this),
                                                         profile.bio && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2708,7 +2910,7 @@ function DoctorProfilePage() {
                                                                     children: "About"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 586,
+                                                                    lineNumber: 675,
                                                                     columnNumber: 27
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2716,13 +2918,13 @@ function DoctorProfilePage() {
                                                                     children: profile.bio
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 587,
+                                                                    lineNumber: 676,
                                                                     columnNumber: 27
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                            lineNumber: 585,
+                                                            lineNumber: 674,
                                                             columnNumber: 25
                                                         }, this),
                                                         (activeDoctor?.education ?? []).length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2733,7 +2935,7 @@ function DoctorProfilePage() {
                                                                     children: "Education"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 594,
+                                                                    lineNumber: 683,
                                                                     columnNumber: 27
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
@@ -2745,25 +2947,25 @@ function DoctorProfilePage() {
                                                                                     className: "h-3.5 w-3.5 text-success mt-0.5 shrink-0"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                                    lineNumber: 598,
+                                                                                    lineNumber: 687,
                                                                                     columnNumber: 33
                                                                                 }, this),
                                                                                 edu
                                                                             ]
                                                                         }, i, true, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 597,
+                                                                            lineNumber: 686,
                                                                             columnNumber: 31
                                                                         }, this))
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 595,
+                                                                    lineNumber: 684,
                                                                     columnNumber: 27
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                            lineNumber: 593,
+                                                            lineNumber: 682,
                                                             columnNumber: 25
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2774,7 +2976,7 @@ function DoctorProfilePage() {
                                                                     children: "Services Offered"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 608,
+                                                                    lineNumber: 697,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 (activeDoctor?.services ?? []).length > 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2785,25 +2987,25 @@ function DoctorProfilePage() {
                                                                             children: s
                                                                         }, s, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 612,
+                                                                            lineNumber: 701,
                                                                             columnNumber: 31
                                                                         }, this))
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 610,
+                                                                    lineNumber: 699,
                                                                     columnNumber: 27
                                                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                                     className: "text-xs text-muted-foreground italic",
                                                                     children: "No services added — edit to add."
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 616,
+                                                                    lineNumber: 705,
                                                                     columnNumber: 27
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                            lineNumber: 607,
+                                                            lineNumber: 696,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2814,7 +3016,7 @@ function DoctorProfilePage() {
                                                                     children: "HMO Accepted"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 622,
+                                                                    lineNumber: 711,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 (activeDoctor?.hmoAccepted ?? []).length > 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2824,25 +3026,25 @@ function DoctorProfilePage() {
                                                                             children: h
                                                                         }, h, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 626,
+                                                                            lineNumber: 715,
                                                                             columnNumber: 31
                                                                         }, this))
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 624,
+                                                                    lineNumber: 713,
                                                                     columnNumber: 27
                                                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                                     className: "text-xs text-muted-foreground italic",
                                                                     children: "No HMOs added — edit to add."
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 630,
+                                                                    lineNumber: 719,
                                                                     columnNumber: 27
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                            lineNumber: 621,
+                                                            lineNumber: 710,
                                                             columnNumber: 23
                                                         }, this),
                                                         activeDoctor?.clinicLat && activeDoctor?.clinicLng && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2853,7 +3055,7 @@ function DoctorProfilePage() {
                                                                     children: "Clinic on Map"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 637,
+                                                                    lineNumber: 726,
                                                                     columnNumber: 27
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("a", {
@@ -2866,42 +3068,42 @@ function DoctorProfilePage() {
                                                                             className: "h-3 w-3"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 644,
+                                                                            lineNumber: 733,
                                                                             columnNumber: 29
                                                                         }, this),
                                                                         activeDoctor.clinicAddress || 'View on Google Maps'
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 638,
+                                                                    lineNumber: 727,
                                                                     columnNumber: 27
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                            lineNumber: 636,
+                                                            lineNumber: 725,
                                                             columnNumber: 25
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                    lineNumber: 530,
+                                                    lineNumber: 619,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                lineNumber: 428,
+                                                lineNumber: 517,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                        lineNumber: 416,
+                                        lineNumber: 505,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                    lineNumber: 415,
+                                    lineNumber: 504,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].div, {
@@ -2925,30 +3127,30 @@ function DoctorProfilePage() {
                                                     className: "h-3 w-3"
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                    lineNumber: 658,
+                                                    lineNumber: 747,
                                                     columnNumber: 19
                                                 }, this),
                                                 " Profile changes are reviewed before appearing in patient search results."
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                            lineNumber: 657,
+                                            lineNumber: 746,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                        lineNumber: 656,
+                                        lineNumber: 745,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                    lineNumber: 655,
+                                    lineNumber: 744,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                            lineNumber: 414,
+                            lineNumber: 503,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$tabs$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TabsContent"], {
@@ -2976,14 +3178,14 @@ function DoctorProfilePage() {
                                                                 className: "h-4 w-4 text-primary"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                lineNumber: 670,
+                                                                lineNumber: 759,
                                                                 columnNumber: 21
                                                             }, this),
                                                             " Weekly Schedule"
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                        lineNumber: 669,
+                                                        lineNumber: 758,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -2999,20 +3201,20 @@ function DoctorProfilePage() {
                                                                 className: "h-3.5 w-3.5"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                lineNumber: 676,
+                                                                lineNumber: 765,
                                                                 columnNumber: 21
                                                             }, this),
                                                             " Edit"
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                        lineNumber: 672,
+                                                        lineNumber: 761,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                lineNumber: 668,
+                                                lineNumber: 757,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -3023,7 +3225,7 @@ function DoctorProfilePage() {
                                                             className: "h-10 w-10 mx-auto mb-2 opacity-30"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                            lineNumber: 682,
+                                                            lineNumber: 771,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3031,7 +3233,7 @@ function DoctorProfilePage() {
                                                             children: "No schedule set yet."
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                            lineNumber: 683,
+                                                            lineNumber: 772,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -3042,13 +3244,13 @@ function DoctorProfilePage() {
                                                             children: "Set Up Schedule"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                            lineNumber: 684,
+                                                            lineNumber: 773,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                    lineNumber: 681,
+                                                    lineNumber: 770,
                                                     columnNumber: 21
                                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                     className: "grid grid-cols-1 sm:grid-cols-2 gap-3",
@@ -3064,12 +3266,12 @@ function DoctorProfilePage() {
                                                                         children: DAY_LABELS[day.toLowerCase()] ?? day.slice(0, 3)
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                        lineNumber: 695,
+                                                                        lineNumber: 784,
                                                                         columnNumber: 31
                                                                     }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 694,
+                                                                    lineNumber: 783,
                                                                     columnNumber: 29
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3084,7 +3286,7 @@ function DoctorProfilePage() {
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 698,
+                                                                            lineNumber: 787,
                                                                             columnNumber: 31
                                                                         }, this),
                                                                         h.consultation_types && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3092,48 +3294,48 @@ function DoctorProfilePage() {
                                                                             children: h.consultation_types.replace('_', ' ')
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                            lineNumber: 700,
+                                                                            lineNumber: 789,
                                                                             columnNumber: 33
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 697,
+                                                                    lineNumber: 786,
                                                                     columnNumber: 29
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$clock$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Clock$3e$__["Clock"], {
                                                                     className: "h-4 w-4 text-muted-foreground"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 703,
+                                                                    lineNumber: 792,
                                                                     columnNumber: 29
                                                                 }, this)
                                                             ]
                                                         }, day, true, {
                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                            lineNumber: 693,
+                                                            lineNumber: 782,
                                                             columnNumber: 27
                                                         }, this);
                                                     })
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                    lineNumber: 689,
+                                                    lineNumber: 778,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                lineNumber: 679,
+                                                lineNumber: 768,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                        lineNumber: 667,
+                                        lineNumber: 756,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                    lineNumber: 666,
+                                    lineNumber: 755,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].div, {
@@ -3159,19 +3361,19 @@ function DoctorProfilePage() {
                                                             className: "h-4 w-4 text-primary"
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                            lineNumber: 717,
+                                                            lineNumber: 806,
                                                             columnNumber: 21
                                                         }, this),
                                                         " Consultation Types"
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                    lineNumber: 716,
+                                                    lineNumber: 805,
                                                     columnNumber: 19
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                lineNumber: 715,
+                                                lineNumber: 804,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -3190,7 +3392,7 @@ function DoctorProfilePage() {
                                                                                 children: "Online Video"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                                lineNumber: 731,
+                                                                                lineNumber: 820,
                                                                                 columnNumber: 27
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3198,25 +3400,25 @@ function DoctorProfilePage() {
                                                                                 children: activeDoctor?.acceptsOnline ? `₱${activeDoctor.onlineConsultationFee?.toLocaleString()}` : 'Not offered'
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                                lineNumber: 732,
+                                                                                lineNumber: 821,
                                                                                 columnNumber: 27
                                                                             }, this),
                                                                             activeDoctor?.acceptsOnline && isVerified && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$check$2d$big$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__CheckCircle$3e$__["CheckCircle"], {
                                                                                 className: "h-4 w-4 text-success mt-2"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                                lineNumber: 735,
+                                                                                lineNumber: 824,
                                                                                 columnNumber: 73
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                        lineNumber: 724,
+                                                                        lineNumber: 813,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 723,
+                                                                    lineNumber: 812,
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 !isVerified && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$tooltip$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TooltipContent"], {
@@ -3224,18 +3426,18 @@ function DoctorProfilePage() {
                                                                         children: "Available after verification"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                        lineNumber: 738,
+                                                                        lineNumber: 827,
                                                                         columnNumber: 55
                                                                     }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 738,
+                                                                    lineNumber: 827,
                                                                     columnNumber: 39
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                            lineNumber: 722,
+                                                            lineNumber: 811,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$tooltip$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Tooltip"], {
@@ -3250,7 +3452,7 @@ function DoctorProfilePage() {
                                                                                 children: "In-Clinic"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                                lineNumber: 749,
+                                                                                lineNumber: 838,
                                                                                 columnNumber: 27
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3258,25 +3460,25 @@ function DoctorProfilePage() {
                                                                                 children: activeDoctor?.acceptsInClinic ? `₱${activeDoctor.consultationFee?.toLocaleString()}` : 'Not offered'
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                                lineNumber: 750,
+                                                                                lineNumber: 839,
                                                                                 columnNumber: 27
                                                                             }, this),
                                                                             activeDoctor?.acceptsInClinic && isVerified && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$check$2d$big$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__CheckCircle$3e$__["CheckCircle"], {
                                                                                 className: "h-4 w-4 text-primary mt-2"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                                lineNumber: 753,
+                                                                                lineNumber: 842,
                                                                                 columnNumber: 75
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                        lineNumber: 742,
+                                                                        lineNumber: 831,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 741,
+                                                                    lineNumber: 830,
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 !isVerified && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$tooltip$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["TooltipContent"], {
@@ -3284,67 +3486,67 @@ function DoctorProfilePage() {
                                                                         children: "Available after verification"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                        lineNumber: 756,
+                                                                        lineNumber: 845,
                                                                         columnNumber: 55
                                                                     }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                                    lineNumber: 756,
+                                                                    lineNumber: 845,
                                                                     columnNumber: 39
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                            lineNumber: 740,
+                                                            lineNumber: 829,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                    lineNumber: 721,
+                                                    lineNumber: 810,
                                                     columnNumber: 19
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                                lineNumber: 720,
+                                                lineNumber: 809,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                        lineNumber: 714,
+                                        lineNumber: 803,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                                    lineNumber: 713,
+                                    lineNumber: 802,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                            lineNumber: 665,
+                            lineNumber: 754,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-                    lineNumber: 273,
+                    lineNumber: 308,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-            lineNumber: 264,
+            lineNumber: 299,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/app/(doctor)/doctor/profile/page.tsx",
-        lineNumber: 263,
+        lineNumber: 298,
         columnNumber: 7
     }, this);
 }
-_s(DoctorProfilePage, "yaRgU7IShrzpHFulntGBRXgpLGA=", false, function() {
+_s(DoctorProfilePage, "js7eyI252HaaMOUZzVG4G0K4AOs=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$store$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAuthStore"],
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$use$2d$toast$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useToast"]

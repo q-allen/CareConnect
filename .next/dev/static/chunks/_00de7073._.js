@@ -588,7 +588,8 @@ const buildDoctor = (data)=>{
         clinicAddress: data?.clinic_address ?? data?.clinicAddress,
         weeklySchedule: data?.weekly_schedule ?? data?.weeklySchedule,
         clinicLat: data?.clinic_lat != null ? Number(data.clinic_lat) : undefined,
-        clinicLng: data?.clinic_lng != null ? Number(data.clinic_lng) : undefined
+        clinicLng: data?.clinic_lng != null ? Number(data.clinic_lng) : undefined,
+        signature: data?.signature ?? undefined
     };
 };
 const buildPatient = (data)=>{
@@ -1120,7 +1121,8 @@ const doctorService = {
    */ async completeDoctorProfile (data) {
         try {
             let res;
-            if (data.profile_photo instanceof File) {
+            const hasFileUpload = Object.values(data).some((v)=>v instanceof File);
+            if (hasFileUpload) {
                 // Use multipart when a photo file is included
                 const form = new FormData();
                 Object.entries(data).forEach(([key, val])=>{

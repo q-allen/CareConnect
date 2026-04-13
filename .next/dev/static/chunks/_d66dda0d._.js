@@ -828,7 +828,8 @@ const doctorService = {
    */ async completeDoctorProfile (data) {
         try {
             let res;
-            if (data.profile_photo instanceof File) {
+            const hasFileUpload = Object.values(data).some((v)=>v instanceof File);
+            if (hasFileUpload) {
                 // Use multipart when a photo file is included
                 const form = new FormData();
                 Object.entries(data).forEach(([key, val])=>{

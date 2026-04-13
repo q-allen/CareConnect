@@ -1,26 +1,28 @@
+
 "use client";
 
 /**
  * app/(doctor)/doctor/profile/complete/page.tsx
  *
- * Doctor onboarding wizard — 4 steps:
- *   Step 1 — Basic Info      (photo, bio, languages)
- *   Step 2 — Clinic & Fees   (clinic name/address/city, fees, services, HMOs)
- *   Step 3 — Schedule        (weekly hours + on-demand toggle)
- *   Step 4 — Specialty       (specialty, sub-specialties, years of experience)
+ * Doctor onboarding wizard — 6 steps:
+ *   Step 1 — Basic Info
+ *   Step 2 — Clinic & Fees
+ *   Step 3 — Schedule
+ *   Step 4 — Specialty
+ *   Step 5 — Documents & Signature
+ *   Step 6 — Face Verification (liveness + blink)
  *
- * On mount: fetches GET /api/doctors/me/complete/ to pre-populate all inputs.
- * Each step PATCHes /api/doctors/me/complete/ to save progress.
- * Final step sets is_profile_complete=true → redirects to /doctor/dashboard.
+ * Mandatory: doctors cannot leave this page or skip steps until
+ * is_profile_complete = true.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   User, MapPin, DollarSign, Calendar, Stethoscope,
   ChevronRight, ChevronLeft, Check, Loader2, Plus, X,
-  Camera, Clock, Zap,
+  Camera, Clock, Zap, FileImage, IdCard, ScanFace, ShieldCheck, AlertTriangle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,6 +33,14 @@ import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import AutoCaptureFaceVerification from "@/components/doctor/AutoCaptureFaceVerification";
 import { useAuthStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
 import { doctorService, DoctorProfileCompletionData } from "@/services/doctorService";
@@ -65,12 +75,14 @@ const HMO_CHOICES = [
 
 const WEEKDAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 6;
 const STEPS = [
-  { label: "Basic Info",    icon: User },
+  { label: "Basic Info", icon: User },
   { label: "Clinic & Fees", icon: MapPin },
-  { label: "Schedule",      icon: Calendar },
-  { label: "Specialty",     icon: Stethoscope },
+  { label: "Schedule", icon: Calendar },
+  { label: "Specialty", icon: Stethoscope },
+  { label: "Documents & Signature", icon: FileImage },
+  { label: "Face Verification", icon: ScanFace },
 ];
 
 type DaySchedule = { start: string; end: string; enabled: boolean };
@@ -80,6 +92,14 @@ const defaultSchedule = (): Record<string, DaySchedule> =>
     WEEKDAYS.map((d) => [d, { start: "09:00", end: "17:00", enabled: ["monday","tuesday","wednesday","thursday","friday"].includes(d) }])
   );
 
+const toMediaUrl = (url?: string | null) => {
+  if (!url) return "";
+  if (url.startsWith("http")) return url;
+  const base = process.env.NEXT_PUBLIC_BACKEND_URL ?? "";
+  if (!base) return url.startsWith("/") ? url : `/${url}`;
+  return `${base}${url.startsWith("/") ? "" : "/"}${url}`;
+};
+
 export default function DoctorProfileCompletePage() {
   const router = useRouter();
   const { user, setDoctorProfileComplete } = useAuthStore();
@@ -88,6 +108,7 @@ export default function DoctorProfileCompletePage() {
   const [step, setStep]   = useState(1);
   const [saving, setSaving] = useState(false);
   const [loadingProfile, setLoadingProfile] = useState(true);
+  const [allowLeave, setAllowLeave] = useState(false);
 
   // Step 1 — Basic Info
   const [photoFile,    setPhotoFile]    = useState<File | null>(null);
@@ -114,12 +135,32 @@ export default function DoctorProfileCompletePage() {
   const [subSpecialties, setSubSpecialties] = useState<string[]>([]);
   const [yearsExp,       setYearsExp]       = useState("");
 
+  // Step 5 — Documents & Signature
+  const [signatureFile, setSignatureFile] = useState<File | null>(null);
+  const [signaturePreview, setSignaturePreview] = useState("");
+  const [prcCardFile, setPrcCardFile] = useState<File | null>(null);
+  const [prcCardPreview, setPrcCardPreview] = useState("");
+  const signatureInputRef = useRef<HTMLInputElement | null>(null);
+  const prcInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Step 6 — Face Verification
+  const [faceFrontFile, setFaceFrontFile] = useState<File | null>(null);
+  const [faceLeftFile, setFaceLeftFile] = useState<File | null>(null);
+  const [faceRightFile, setFaceRightFile] = useState<File | null>(null);
+  const [faceFrontPreview, setFaceFrontPreview] = useState("");
+  const [faceLeftPreview, setFaceLeftPreview] = useState("");
+  const [faceRightPreview, setFaceRightPreview] = useState("");
+  const [isFaceVerified, setIsFaceVerified] = useState(false);
+
+  const [faceCaptureOpen, setFaceCaptureOpen] = useState(false);
+
   // ── Pre-populate from existing profile ──────────────────────────────────
   useEffect(() => {
     const load = async () => {
       try {
         const res = await axiosClient.get(API_ENDPOINTS.DOCTOR_PROFILE_COMPLETE);
-        const d = mapDoctorFromDetail(res.data);
+        const detail = res.data;
+        const d = mapDoctorFromDetail(detail);
 
         if (d.avatar) setPhotoPreview(d.avatar);
         if (d.bio) setBio(d.bio);
@@ -152,6 +193,31 @@ export default function DoctorProfileCompletePage() {
         if (d.specialty) setSpecialty(d.specialty);
         if (d.specialties?.length) setSubSpecialties(d.specialties);
         if (d.experience) setYearsExp(String(d.experience));
+
+        const signatureUrl =
+          detail?.signature ??
+          detail?.e_signature ??
+          detail?.eSignature ??
+          (d as { signature?: string })?.signature;
+        const prcUrl =
+          detail?.prc_card_image ??
+          detail?.prc_card ??
+          detail?.prc_card_photo ??
+          detail?.prc_card_url;
+
+        if (signatureUrl) setSignaturePreview(toMediaUrl(signatureUrl));
+        if (prcUrl) setPrcCardPreview(toMediaUrl(prcUrl));
+        if (detail?.face_front) setFaceFrontPreview(toMediaUrl(detail.face_front));
+        if (detail?.face_left) setFaceLeftPreview(toMediaUrl(detail.face_left));
+        if (detail?.face_right) setFaceRightPreview(toMediaUrl(detail.face_right));
+        if (detail?.is_face_verified !== undefined) setIsFaceVerified(Boolean(detail.is_face_verified));
+
+        if (detail?.is_profile_complete) {
+          setAllowLeave(true);
+          setDoctorProfileComplete(true);
+          router.replace("/doctor");
+          return;
+        }
       } catch {
         // Non-fatal — wizard still works with empty defaults
       } finally {
@@ -159,13 +225,87 @@ export default function DoctorProfileCompletePage() {
       }
     };
     load();
-  }, []);
+  }, [router, setDoctorProfileComplete]);
 
-  const progress = ((step - 1) / TOTAL_STEPS) * 100;
+  // ── Block navigation away until profile is complete ──────────────────────
+  useEffect(() => {
+    if (allowLeave || user?.doctorProfileComplete) return;
+
+    const confirmLeave = () =>
+      window.confirm(
+        "You must complete your doctor profile before leaving this page.\n\nIf you leave now, your profile will remain incomplete."
+      );
+
+    const lockedUrl = window.location.href;
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+      return "";
+    };
+
+    const handlePopState = () => {
+      if (confirmLeave()) {
+        setAllowLeave(true);
+        return;
+      }
+      history.pushState(null, "", lockedUrl);
+    };
+
+    const handleLinkClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      const anchor = target?.closest("a");
+      if (!anchor) return;
+
+      const href = anchor.getAttribute("href");
+      if (!href || href.startsWith("#")) return;
+      if (anchor.hasAttribute("download") || anchor.getAttribute("target") === "_blank") return;
+
+      const nextUrl = new URL(anchor.href, window.location.href);
+      const currentUrl = new URL(window.location.href);
+      if (nextUrl.pathname === currentUrl.pathname && nextUrl.search === currentUrl.search) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      if (confirmLeave()) {
+        setAllowLeave(true);
+        window.location.href = anchor.href;
+      }
+    };
+
+    history.pushState(null, "", lockedUrl);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("popstate", handlePopState);
+    document.addEventListener("click", handleLinkClick, true);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("popstate", handlePopState);
+      document.removeEventListener("click", handleLinkClick, true);
+    };
+  }, [allowLeave, user?.doctorProfileComplete]);
+
+  const progress = ((step - 1) / (TOTAL_STEPS - 1)) * 100;
 
   // ── Validation ────────────────────────────────────────────────────────────
-  const step2Valid = clinicName.trim() && (feeOnline || feeInPerson);
-  const step4Valid = specialty;
+  const step2Valid = Boolean(clinicName.trim()) && Boolean(feeOnline || feeInPerson);
+  const step4Valid = Boolean(specialty);
+  const step5Valid = Boolean(signatureFile || signaturePreview) && Boolean(prcCardFile || prcCardPreview);
+  const step6Valid = Boolean(faceFrontFile || faceFrontPreview)
+    && Boolean(faceLeftFile || faceLeftPreview)
+    && Boolean(faceRightFile || faceRightPreview)
+    && Boolean(isFaceVerified);
+
+  const stepValidity: Record<number, boolean> = {
+    1: true,
+    2: step2Valid,
+    3: true,
+    4: step4Valid,
+    5: step5Valid,
+    6: step6Valid,
+  };
+
+  const isCurrentStepValid = stepValidity[step];
 
   // ── Photo handler ─────────────────────────────────────────────────────────
   const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -173,6 +313,36 @@ export default function DoctorProfileCompletePage() {
     if (!file) return;
     setPhotoFile(file);
     setPhotoPreview(URL.createObjectURL(file));
+  };
+
+  const handleSignature = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.type !== "image/png") {
+      toast({
+        title: "Invalid file type",
+        description: "E-signature must be a PNG with transparent background.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setSignatureFile(file);
+    setSignaturePreview(URL.createObjectURL(file));
+  };
+
+  const handlePrcCard = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Invalid file type",
+        description: "PRC card must be an image file.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setPrcCardFile(file);
+    setPrcCardPreview(URL.createObjectURL(file));
   };
 
   // ── Build weekly_schedule payload (only enabled days) ────────────────────
@@ -218,18 +388,29 @@ export default function DoctorProfileCompletePage() {
         weekly_schedule: buildWeeklySchedule(),
         is_on_demand:    isOnDemand,
       });
-    } else {
-      // Final step — mark complete
+    } else if (step === 4) {
       ok = await saveStep({
         specialty,
         sub_specialties:     subSpecialties,
         years_of_experience: yearsExp ? Number(yearsExp) : undefined,
+      });
+    } else if (step === 5) {
+      const payload: DoctorProfileCompletionData = {};
+      if (signatureFile) payload.signature = signatureFile;
+      if (prcCardFile) payload.prc_card_image = prcCardFile;
+      ok = await saveStep(payload);
+    } else {
+      ok = await saveStep({
+        face_front: faceFrontFile ?? undefined,
+        face_left:  faceLeftFile ?? undefined,
+        face_right: faceRightFile ?? undefined,
         is_profile_complete: true,
       });
       if (ok) {
+        setAllowLeave(true);
         setDoctorProfileComplete(true);
-        toast({ title: "Profile complete! 🎉", description: "Your profile is now live." });
-        router.replace("/doctor/dashboard");
+        toast({ title: "Profile complete", description: "Your profile is now live." });
+        router.replace("/doctor");
         return;
       }
     }
@@ -256,6 +437,27 @@ export default function DoctorProfileCompletePage() {
     setSubInput("");
   };
 
+  const handleAutoCaptureComplete = (photos: { front: Blob; left: Blob; right: Blob }) => {
+    const ts = Date.now();
+    const frontFile = new File([photos.front], `face-front-${ts}.jpg`, { type: photos.front.type || "image/jpeg" });
+    const leftFile = new File([photos.left], `face-left-${ts}.jpg`, { type: photos.left.type || "image/jpeg" });
+    const rightFile = new File([photos.right], `face-right-${ts}.jpg`, { type: photos.right.type || "image/jpeg" });
+
+    setFaceFrontFile(frontFile);
+    setFaceLeftFile(leftFile);
+    setFaceRightFile(rightFile);
+    setFaceFrontPreview(URL.createObjectURL(frontFile));
+    setFaceLeftPreview(URL.createObjectURL(leftFile));
+    setFaceRightPreview(URL.createObjectURL(rightFile));
+    setIsFaceVerified(true);
+    setFaceCaptureOpen(false);
+    toast({ title: "Face capture complete", description: "Your photos were captured successfully." });
+  };
+
+  const startFaceCapture = () => {
+    setFaceCaptureOpen(true);
+  };
+
   const initials = `${user?.firstName?.[0] ?? ""}${user?.lastName?.[0] ?? ""}`.toUpperCase() || "DR";
 
   if (loadingProfile) {
@@ -267,33 +469,41 @@ export default function DoctorProfileCompletePage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-xl space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex items-center justify-center p-4 py-8">
+      <div className="w-full max-w-3xl space-y-8">
+
+        {/* Logo Header */}
+        <div className="flex items-center gap-3 justify-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg">
+            <Stethoscope className="h-6 w-6 text-primary-foreground" />
+          </div>
+          <span className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">CareConnect</span>
+        </div>
 
         {/* Header */}
-        <div className="text-center space-y-1">
-          <h1 className="text-2xl font-bold text-foreground">Complete Your Doctor Profile</h1>
-          <p className="text-sm text-muted-foreground">
-            Complete your profile to start consulting patients on CareConnect
+        <div className="text-center space-y-2 px-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground">Complete Your Doctor Profile</h1>
+          <p className="text-base text-muted-foreground max-w-xl mx-auto">
+            This page is mandatory. Finish all steps to unlock your dashboard.
           </p>
         </div>
 
         {/* Step indicators */}
-        <div className="flex items-center justify-between px-2">
+        <div className="flex items-center justify-between px-4 md:px-8">
           {STEPS.map((s, i) => {
             const n = i + 1;
             const done    = step > n;
             const current = step === n;
             return (
-              <div key={s.label} className="flex flex-col items-center gap-1 flex-1">
-                <div className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-semibold border-2 transition-colors ${
-                  done    ? "bg-primary border-primary text-primary-foreground" :
-                  current ? "border-primary text-primary bg-primary/10" :
-                            "border-muted text-muted-foreground"
+              <div key={s.label} className="flex flex-col items-center gap-2 flex-1">
+                <div className={`h-11 w-11 rounded-full flex items-center justify-center text-base font-bold border-2 transition-all shadow-md ${
+                  done    ? "bg-primary border-primary text-primary-foreground scale-105" :
+                  current ? "border-primary text-primary bg-primary/10 scale-110 shadow-lg" :
+                            "border-muted-foreground/30 text-muted-foreground"
                 }`}>
-                  {done ? <Check className="h-4 w-4" /> : n}
+                  {done ? <Check className="h-5 w-5" /> : n}
                 </div>
-                <span className={`text-[11px] text-center ${current ? "text-primary font-medium" : "text-muted-foreground"}`}>
+                <span className={`text-xs md:text-sm text-center ${current ? "text-primary font-semibold" : "text-muted-foreground"}`}>
                   {s.label}
                 </span>
               </div>
@@ -301,7 +511,7 @@ export default function DoctorProfileCompletePage() {
           })}
         </div>
 
-        <Progress value={progress} className="h-1.5" />
+        <Progress value={progress} className="h-2 shadow-sm" />
 
         {/* Step cards */}
         <AnimatePresence mode="wait">
@@ -314,10 +524,10 @@ export default function DoctorProfileCompletePage() {
           >
             {/* ── Step 1: Basic Info ── */}
             {step === 1 && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <User className="h-4 w-4 text-primary" /> Basic Information
+              <Card className="shadow-xl border-2">
+                <CardHeader className="pb-4 bg-gradient-to-br from-primary/5 to-transparent">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <User className="h-5 w-5 text-primary" /> Basic Information
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -376,12 +586,12 @@ export default function DoctorProfileCompletePage() {
 
             {/* ── Step 2: Clinic & Fees + Services + HMOs ── */}
             {step === 2 && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-primary" /> Clinic, Fees & Services
+              <Card className="shadow-xl border-2">
+                <CardHeader className="pb-4 bg-gradient-to-br from-primary/5 to-transparent">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-primary" /> Clinic, Fees & Services
                   </CardTitle>
-                  <p className="text-xs text-muted-foreground">Required — at least one fee must be set</p>
+                  <p className="text-xs text-muted-foreground mt-1">Required — at least one fee must be set</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-1.5">
@@ -393,10 +603,12 @@ export default function DoctorProfileCompletePage() {
                     <Input value={clinicAddress} onChange={(e) => setClinicAddress(e.target.value)} placeholder="Full street address" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>City</Label>
+                    <Label htmlFor="city-select">City</Label>
                     <select
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      id="city-select"
+                      name="city"
                       aria-label="City"
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
                     >
@@ -486,12 +698,12 @@ export default function DoctorProfileCompletePage() {
 
             {/* ── Step 3: Schedule ── */}
             {step === 3 && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-primary" /> Weekly Schedule
+              <Card className="shadow-xl border-2">
+                <CardHeader className="pb-4 bg-gradient-to-br from-primary/5 to-transparent">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-primary" /> Weekly Schedule
                   </CardTitle>
-                  <p className="text-xs text-muted-foreground">Set your recurring availability hours</p>
+                  <p className="text-xs text-muted-foreground mt-1">Set your recurring availability hours</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {/* On-demand toggle */}
@@ -542,19 +754,21 @@ export default function DoctorProfileCompletePage() {
 
             {/* ── Step 4: Specialty ── */}
             {step === 4 && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Stethoscope className="h-4 w-4 text-primary" /> Specialty & Experience
+              <Card className="shadow-xl border-2">
+                <CardHeader className="pb-4 bg-gradient-to-br from-primary/5 to-transparent">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Stethoscope className="h-5 w-5 text-primary" /> Specialty & Experience
                   </CardTitle>
-                  <p className="text-xs text-muted-foreground">Required to appear in patient search</p>
+                  <p className="text-xs text-muted-foreground mt-1">Required to appear in patient search</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-1.5">
-                    <Label>Primary Specialty *</Label>
+                    <Label htmlFor="primary-specialty">Primary Specialty *</Label>
                     <select
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      id="primary-specialty"
+                      name="specialty"
                       aria-label="Primary Specialty"
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                       value={specialty}
                       onChange={(e) => setSpecialty(e.target.value)}
                     >
@@ -607,47 +821,192 @@ export default function DoctorProfileCompletePage() {
                 </CardContent>
               </Card>
             )}
+
+            {/* ── Step 5: Documents & Signature ── */}
+            {step === 5 && (
+              <Card className="shadow-xl border-2">
+                <CardHeader className="pb-4 bg-gradient-to-br from-primary/5 to-transparent">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <FileImage className="h-5 w-5 text-primary" /> Documents & Signature
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground mt-1">Required — uploads are mandatory</p>
+                </CardHeader>
+                <CardContent className="space-y-5">
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <FileImage className="h-4 w-4 text-primary" /> E-Signature (PNG, transparent background) *
+                    </Label>
+                    <div className="flex items-center gap-4">
+                      <div className="h-20 w-40 border rounded-md flex items-center justify-center bg-muted/30 overflow-hidden">
+                        {signaturePreview ? (
+                          <img src={signaturePreview} alt="E-signature preview" className="max-h-20 w-auto" />
+                        ) : (
+                          <span className="text-xs text-muted-foreground">No signature uploaded</span>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Button type="button" variant="outline" onClick={() => signatureInputRef.current?.click()}>
+                          <Camera className="h-4 w-4 mr-2" /> Upload Signature
+                        </Button>
+                        <p className="text-xs text-muted-foreground">PNG only. Transparent background required.</p>
+                      </div>
+                    </div>
+                    <input
+                      ref={signatureInputRef}
+                      type="file"
+                      accept="image/png"
+                      className="hidden"
+                      onChange={handleSignature}
+                      aria-label="Upload e-signature file"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <IdCard className="h-4 w-4 text-primary" /> PRC License Card (front photo) *
+                    </Label>
+                    <div className="flex items-center gap-4">
+                      <div className="h-20 w-40 border rounded-md flex items-center justify-center bg-muted/30 overflow-hidden">
+                        {prcCardPreview ? (
+                          <img src={prcCardPreview} alt="PRC card preview" className="max-h-20 w-auto" />
+                        ) : (
+                          <span className="text-xs text-muted-foreground">No PRC card uploaded</span>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Button type="button" variant="outline" onClick={() => prcInputRef.current?.click()}>
+                          <IdCard className="h-4 w-4 mr-2" /> Upload PRC Card
+                        </Button>
+                        <p className="text-xs text-muted-foreground">Clear front photo required.</p>
+                      </div>
+                    </div>
+                    <input
+                      ref={prcInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handlePrcCard}
+                      aria-label="Upload PRC card photo"
+                    />
+                  </div>
+
+                  {!step5Valid && (
+                    <div className="flex items-start gap-2 text-xs text-destructive">
+                      <AlertTriangle className="h-3.5 w-3.5 mt-0.5" />
+                      Both E-signature (PNG) and PRC card photo are required to continue.
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* ── Step 6: Face Verification ── */}
+            {step === 6 && (
+              <Card className="shadow-xl border-2">
+                <CardHeader className="pb-4 bg-gradient-to-br from-primary/5 to-transparent">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <ScanFace className="h-5 w-5 text-primary" /> Face Verification (Liveness)
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground mt-1">Required — auto-capture 3 angles + blink detection</p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {([
+                      { key: "front", label: "Front" , preview: faceFrontPreview },
+                      { key: "left",  label: "Left"  , preview: faceLeftPreview },
+                      { key: "right", label: "Right" , preview: faceRightPreview },
+                    ] as const).map((item) => (
+                      <div key={item.key} className="border rounded-lg p-3 space-y-2">
+                        <div className="text-sm font-medium">{item.label} Face</div>
+                        <div className="h-24 rounded-md border bg-muted/30 flex items-center justify-center overflow-hidden">
+                          {item.preview ? (
+                            <img src={item.preview} alt={`${item.label} face`} className="h-24 w-auto" />
+                          ) : (
+                            <span className="text-xs text-muted-foreground">No photo</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="p-3 border rounded-lg flex items-start justify-between gap-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-sm font-medium">
+                        <ShieldCheck className="h-4 w-4 text-primary" /> Liveness Check
+                        {isFaceVerified ? (
+                          <Badge className="bg-emerald-600 text-white">Verified</Badge>
+                        ) : (
+                          <Badge variant="secondary">Not Verified</Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Auto-capture will take 3 angles and confirm a blink for liveness.
+                      </p>
+                    </div>
+                    <Button type="button" variant={isFaceVerified ? "outline" : "default"} onClick={startFaceCapture}>
+                      <ScanFace className="h-4 w-4 mr-2" />
+                      {isFaceVerified ? "Retake Verification" : "Start Face Verification"}
+                    </Button>
+                  </div>
+
+                  {!step6Valid && (
+                    <div className="flex items-start gap-2 text-xs text-destructive">
+                      <AlertTriangle className="h-3.5 w-3.5 mt-0.5" />
+                      Front, left, and right photos plus blink verification are required to finish.
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </motion.div>
         </AnimatePresence>
 
         {/* Navigation */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between px-4">
           <Button
             variant="ghost"
             onClick={() => setStep((s) => s - 1)}
             disabled={step === 1 || saving}
-            className="gap-2"
+            className="gap-2 h-12 px-6"
           >
-            <ChevronLeft className="h-4 w-4" /> Back
+            <ChevronLeft className="h-5 w-5" /> Back
           </Button>
 
-          <div className="flex items-center gap-3">
-            {step < TOTAL_STEPS && (
-              <Button
-                variant="ghost"
-                onClick={() => setStep((s) => s + 1)}
-                disabled={saving}
-                className="text-muted-foreground"
-              >
-                Skip
-              </Button>
+          <Button
+            onClick={handleNext}
+            disabled={!isCurrentStepValid || saving}
+            className="gap-2 min-w-[180px] h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all"
+          >
+            {saving ? (
+              <><Loader2 className="h-4 w-4 animate-spin" /> Saving...</>
+            ) : step === TOTAL_STEPS ? (
+              <><Check className="h-4 w-4" /> Complete Profile</>
+            ) : (
+              <>Next <ChevronRight className="h-4 w-4" /></>
             )}
-            <Button
-              onClick={handleNext}
-              disabled={(step === 2 && !step2Valid) || (step === 4 && !step4Valid) || saving}
-              className="gap-2 min-w-[120px]"
-            >
-              {saving ? (
-                <><Loader2 className="h-4 w-4 animate-spin" /> Saving...</>
-              ) : step === TOTAL_STEPS ? (
-                <><Check className="h-4 w-4" /> Finish</>
-              ) : (
-                <>Next <ChevronRight className="h-4 w-4" /></>
-              )}
-            </Button>
-          </div>
+          </Button>
         </div>
       </div>
+
+      {/* Auto-capture Modal */}
+      <Dialog open={faceCaptureOpen} onOpenChange={setFaceCaptureOpen}>
+        <DialogContent
+          className="max-w-3xl p-0 border-0 bg-transparent shadow-none"
+          aria-labelledby="face-verification-title"
+          aria-describedby="face-verification-desc"
+        >
+          <DialogHeader className="sr-only">
+            <DialogTitle id="face-verification-title">Face Verification</DialogTitle>
+            <DialogDescription id="face-verification-desc">
+              Auto-capture face verification with liveness check
+            </DialogDescription>
+          </DialogHeader>
+          <AutoCaptureFaceVerification
+            onComplete={handleAutoCaptureComplete}
+            onCancel={() => setFaceCaptureOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

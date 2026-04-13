@@ -4,6 +4,12 @@ import { mapDoctorFromDetail, mapDoctorFromList } from "./mappers";
 
 export interface DoctorProfileCompletionData {
   profile_photo?: File;
+  signature?: File;
+  prc_card_image?: File;
+  face_front?: File;
+  face_left?: File;
+  face_right?: File;
+  is_face_verified?: boolean;
   bio?: string;
   languages_spoken?: string[];
   clinic_name?: string;
@@ -29,6 +35,12 @@ export interface DoctorProfileCompletionResponse {
   consultation_fee_online: string;
   consultation_fee_in_person: string;
   is_on_demand: boolean;
+  signature: string | null;
+  prc_card_image: string | null;
+  face_front: string | null;
+  face_left: string | null;
+  face_right: string | null;
+  is_face_verified: boolean;
 }
 
 export interface DoctorSlot {
@@ -307,7 +319,8 @@ export const doctorService = {
   ): Promise<ApiResponse<DoctorProfileCompletionResponse>> {
     try {
       let res: DoctorProfileCompletionResponse;
-      if (data.profile_photo instanceof File) {
+      const hasFileUpload = Object.values(data).some((v) => v instanceof File);
+      if (hasFileUpload) {
         // Use multipart when a photo file is included
         const form = new FormData();
         Object.entries(data).forEach(([key, val]) => {

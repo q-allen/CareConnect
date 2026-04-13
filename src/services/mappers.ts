@@ -140,6 +140,7 @@ const buildDoctor = (data: any): Doctor => {
     weeklySchedule: data?.weekly_schedule ?? data?.weeklySchedule,
     clinicLat: data?.clinic_lat != null ? Number(data.clinic_lat) : undefined,
     clinicLng: data?.clinic_lng != null ? Number(data.clinic_lng) : undefined,
+    signature: data?.signature ?? undefined,
   };
 };
 

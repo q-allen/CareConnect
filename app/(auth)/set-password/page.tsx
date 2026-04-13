@@ -49,7 +49,8 @@ function ActivateAccountForm() {
       setDone(true);
       toast({ title: "Account activated!", description: "Welcome to CareConnect." });
       // Auto-login: cookies are already set by the backend response
-      setTimeout(() => router.push("/doctor/profile/complete"), 1800);
+      // Redirect to Terms and Conditions first
+      setTimeout(() => router.push("/terms-and-conditions"), 1800);
     } catch (err) {
       toast({
         title: "Activation failed",
