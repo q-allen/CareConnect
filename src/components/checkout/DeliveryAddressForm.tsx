@@ -207,7 +207,7 @@ export default function DeliveryAddressForm() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Full Name */}
               <div className="sm:col-span-2 space-y-1">
-                <Label className="text-xs">Full Name *</Label>
+                <Label className="text-xs">Full Name <span className="text-red-500">*</span></Label>
                 <Input placeholder="Juan Dela Cruz" value={form.fullName}
                   onChange={(e) => setForm((f) => ({ ...f, fullName: e.target.value }))}
                   className={cn('h-9 text-sm', errors.fullName && 'border-destructive')} />
@@ -216,7 +216,7 @@ export default function DeliveryAddressForm() {
 
               {/* Mobile */}
               <div className="space-y-1">
-                <Label className="text-xs">Mobile Number *</Label>
+                <Label className="text-xs">Mobile Number <span className="text-red-500">*</span></Label>
                 <Input placeholder="09XX-XXX-XXXX" value={form.mobile}
                   onChange={(e) => setForm((f) => ({ ...f, mobile: e.target.value }))}
                   className={cn('h-9 text-sm', errors.mobile && 'border-destructive')} />
@@ -225,7 +225,7 @@ export default function DeliveryAddressForm() {
 
               {/* House/Unit */}
               <div className="space-y-1">
-                <Label className="text-xs">House/Unit # *</Label>
+                <Label className="text-xs">House/Unit # <span className="text-red-500">*</span></Label>
                 <Input placeholder="Unit 1A or 123" value={form.houseUnit}
                   onChange={(e) => setForm((f) => ({ ...f, houseUnit: e.target.value }))}
                   className={cn('h-9 text-sm', errors.houseUnit && 'border-destructive')} />
@@ -234,7 +234,7 @@ export default function DeliveryAddressForm() {
 
               {/* Street */}
               <div className="sm:col-span-2 space-y-1">
-                <Label className="text-xs">Street *</Label>
+                <Label className="text-xs">Street <span className="text-red-500">*</span></Label>
                 <Input placeholder="Rizal Street" value={form.street}
                   onChange={(e) => setForm((f) => ({ ...f, street: e.target.value }))}
                   className={cn('h-9 text-sm', errors.street && 'border-destructive')} />
@@ -243,7 +243,7 @@ export default function DeliveryAddressForm() {
 
               {/* Barangay */}
               <div className="space-y-1">
-                <Label className="text-xs">Barangay *</Label>
+                <Label className="text-xs">Barangay <span className="text-red-500">*</span></Label>
                 <Input placeholder="Brgy. San Antonio" value={form.barangay}
                   onChange={(e) => setForm((f) => ({ ...f, barangay: e.target.value }))}
                   className={cn('h-9 text-sm', errors.barangay && 'border-destructive')} />
@@ -252,7 +252,7 @@ export default function DeliveryAddressForm() {
 
               {/* Province */}
               <div className="space-y-1">
-                <Label className="text-xs">Province *</Label>
+                <Label className="text-xs">Province <span className="text-red-500">*</span></Label>
                 <Select value={form.province}
                   onValueChange={(v) => {
                     const name = provinces.find((p) => p.code === v)?.name ?? '';
@@ -274,7 +274,7 @@ export default function DeliveryAddressForm() {
 
               {/* City */}
               <div className="space-y-1">
-                <Label className="text-xs">City/Municipality *</Label>
+                <Label className="text-xs">City/Municipality <span className="text-red-500">*</span></Label>
                 <Select
                   value={cities.find((c) => c.name === form.city)?.code ?? ''}
                   key={selectedProvinceCode}
@@ -297,7 +297,7 @@ export default function DeliveryAddressForm() {
 
               {/* ZIP Code */}
               <div className="space-y-1">
-                <Label className="text-xs">ZIP Code *</Label>
+                <Label className="text-xs">ZIP Code <span className="text-red-500">*</span></Label>
                 <Input placeholder="1200" value={form.zipCode}
                   onChange={(e) => setForm((f) => ({ ...f, zipCode: e.target.value }))}
                   maxLength={4}

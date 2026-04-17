@@ -1,0 +1,17 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/(doctor)/layout,_N_T_/(doctor)/doctor/layout,_N_T_/(doctor)/doctor/earnings/layout,_N_T_/(doctor)/doctor/earnings/page,_N_T_/doctor/earnings"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/!KGRvY3Rvcik/doctor/earnings/__PAGE__",
+    "/!KGRvY3Rvcik/doctor/earnings",
+    "/!KGRvY3Rvcik/doctor",
+    "/!KGRvY3Rvcik",
+    "/_index",
+    "/_head"
+  ]
+}

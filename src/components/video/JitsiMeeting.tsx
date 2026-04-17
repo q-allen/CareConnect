@@ -6,7 +6,7 @@
  * Embeds a Jitsi Meet room via plain iframe.
  * Both doctor (new tab) and patient (embedded) open the same URL → same room → they meet.
  *
- * SETUP: Add to CareConnectWeb/.env.local:
+ * SETUP: Add to PulseLinkWeb/.env.local:
  *   NEXT_PUBLIC_JITSI_DOMAIN=meet.jit.si
  *
  * HOW IT WORKS:
@@ -72,3 +72,4 @@ export default function JitsiMeeting({
     </div>
   );
 }
+

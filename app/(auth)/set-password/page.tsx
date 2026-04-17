@@ -47,7 +47,7 @@ function ActivateAccountForm() {
       const user = await authService.activateDoctor(uid, token, password, confirmPassword);
       setUser(user);
       setDone(true);
-      toast({ title: "Account activated!", description: "Welcome to CareConnect." });
+      toast({ title: "Account activated!", description: "Welcome to PulseLink." });
       // Auto-login: cookies are already set by the backend response
       // Redirect to Terms and Conditions first
       setTimeout(() => router.push("/terms-and-conditions"), 1800);
@@ -75,7 +75,7 @@ function ActivateAccountForm() {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary">
             <Activity className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-xl font-bold text-foreground">CareConnect</span>
+          <span className="text-xl font-bold text-foreground">PulseLink</span>
         </div>
 
         {/* Invalid link */}
@@ -108,7 +108,7 @@ function ActivateAccountForm() {
             <div>
               <h2 className="text-xl font-bold text-foreground">Activate your account</h2>
               <p className="text-sm text-muted-foreground mt-1">
-                Choose a password to complete your CareConnect doctor account setup.
+                Choose a password to complete your PulseLink doctor account setup.
               </p>
             </div>
 
@@ -194,3 +194,4 @@ export default function SetPasswordPage() {
     </Suspense>
   );
 }
+

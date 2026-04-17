@@ -88,6 +88,10 @@ useEffect(() => {
       let res: Response;
       if (type === 'prescription' && prescription?.id) {
         res = await fetch(`${base}${API_ENDPOINTS.PRESCRIPTION_PDF(prescription.id)}`, { credentials: 'include' });
+      } else if (type === 'certificate' && certificate?.id) {
+        res = await fetch(`${base}${API_ENDPOINTS.CERTIFICATE_PDF(certificate.id)}`, { credentials: 'include' });
+      } else if (type === 'lab-result' && labResult?.id) {
+        res = await fetch(`${base}${API_ENDPOINTS.LAB_PDF(labResult.id)}`, { credentials: 'include' });
       } else if (resolvedFileUrl) {
         const url = resolvedFileUrl.startsWith('http') ? resolvedFileUrl : `${base}${resolvedFileUrl}`;
         res = await fetch(url);
@@ -124,6 +128,10 @@ useEffect(() => {
       let res: Response;
       if (type === 'prescription' && prescription?.id) {
         res = await fetch(`${base}${API_ENDPOINTS.PRESCRIPTION_PDF(prescription.id)}`, { credentials: 'include' });
+      } else if (type === 'certificate' && certificate?.id) {
+        res = await fetch(`${base}${API_ENDPOINTS.CERTIFICATE_PDF(certificate.id)}`, { credentials: 'include' });
+      } else if (type === 'lab-result' && labResult?.id) {
+        res = await fetch(`${base}${API_ENDPOINTS.LAB_PDF(labResult.id)}`, { credentials: 'include' });
       } else if (resolvedFileUrl) {
         const url = resolvedFileUrl.startsWith('http') ? resolvedFileUrl : `${base}${resolvedFileUrl}`;
         res = await fetch(url);
@@ -148,12 +156,16 @@ useEffect(() => {
     const base = getBaseUrl();
     const shareUrl = type === 'prescription' && prescription?.id
       ? `${base}${API_ENDPOINTS.PRESCRIPTION_PDF(prescription.id)}`
-      : resolvedFileUrl
-        ? (resolvedFileUrl.startsWith('http') ? resolvedFileUrl : `${base}${resolvedFileUrl}`)
-        : window.location.href;
+      : type === 'certificate' && certificate?.id
+        ? `${base}${API_ENDPOINTS.CERTIFICATE_PDF(certificate.id)}`
+        : type === 'lab-result' && labResult?.id
+          ? `${base}${API_ENDPOINTS.LAB_PDF(labResult.id)}`
+          : resolvedFileUrl
+            ? (resolvedFileUrl.startsWith('http') ? resolvedFileUrl : `${base}${resolvedFileUrl}`)
+            : window.location.href;
     try {
       if (navigator.share) {
-        await navigator.share({ title: 'CareConnect Document', url: shareUrl });
+        await navigator.share({ title: 'PulseLink Document', url: shareUrl });
         toast({ title: 'Shared', description: 'Secure link shared.' });
         return;
       }
@@ -468,3 +480,4 @@ useEffect(() => {
     </Dialog>
   );
 }
+

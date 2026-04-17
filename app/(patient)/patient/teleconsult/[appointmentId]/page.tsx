@@ -65,7 +65,7 @@ function fmtTime(d = new Date()) {
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-/** Extract Jitsi room name from a full URL like https://meet.jit.si/careconnect-5-abc123 */
+/** Extract Jitsi room name from a full URL like https://meet.jit.si/PulseLink-5-abc123 */
 function roomNameFromUrl(url: string): string {
   return url.split("#")[0].split("/").pop() ?? "";
 }
@@ -560,3 +560,4 @@ export default function PatientTeleconsultPage() {
     </div>
   );
 }
+

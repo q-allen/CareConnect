@@ -194,7 +194,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   animate={{ opacity: 1 }}
                   className="text-xl font-bold text-foreground"
                 >
-                  CareConnect
+                  PulseLink
                 </motion.span>
               )}
             </Link>
@@ -288,7 +288,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary">
                       <Activity className="h-6 w-6 text-primary-foreground" />
                     </div>
-                    <span className="text-xl font-bold text-foreground">CareConnect</span>
+                    <span className="text-xl font-bold text-foreground">PulseLink</span>
                   </Link>
                   <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)}>
                     <X className="h-5 w-5" />
@@ -491,3 +491,4 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     </div>
   );
 }
+

@@ -3,12 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { format } from "date-fns";
+import { format, addDays, startOfToday, isToday, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isBefore, addMonths, subMonths } from "date-fns";
 import {
   Video, Clock, Calendar, User, ArrowLeft,
   AlertCircle, CheckCircle2, Bell, Star, MessageSquare,
   CreditCard, BadgeCheck, RefreshCw, ShoppingBag, Pill, XCircle, FileText,
-  Stethoscope, MapPin, Activity,
+  Stethoscope, MapPin, Activity, CalendarClock,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,8 +26,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthStore } from "@/store";
+import { cn } from "@/lib/utils";
 import { appointmentService } from "@/services/appointmentService";
 import { notificationService } from "@/services/notificationService";
 import { pharmacyService } from "@/services/pharmacyService";
@@ -36,6 +44,7 @@ import { Appointment, Review } from "@/types";
 import JitsiMeeting from "@/components/JitsiMeeting";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { api, API_ENDPOINTS, getBaseUrl } from "@/services/api";
+import { mapAppointmentStatus } from "@/services/mappers";
 
 // ── Star picker component ─────────────────────────────────────────────────────
 // NowServing-style: clickable stars, hover preview, required before submit.
@@ -239,6 +248,202 @@ function SubmittedReviewCard({ review }: { review: Review }) {
   );
 }
 
+// ── Reschedule Dialog ────────────────────────────────────────────────────────
+// Patient picks a new date + time slot. No re-entry of details or payment.
+const DAY_NAME_TO_NUM: Record<string, number> = {
+  sunday: 0, monday: 1, tuesday: 2, wednesday: 3,
+  thursday: 4, friday: 5, saturday: 6,
+};
+
+function RescheduleDialog({
+  appointment,
+  open,
+  onClose,
+  onRescheduled,
+}: {
+  appointment: Appointment;
+  open: boolean;
+  onClose: () => void;
+  onRescheduled: (updated: Appointment) => void;
+}) {
+  const { toast } = useToast();
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedTime, setSelectedTime] = useState("");
+  const [slots, setSlots] = useState<{ time: string; is_available: boolean }[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(() => startOfMonth(startOfToday()));
+
+  const doctor = appointment.doctor as (Appointment["doctor"] & { weeklySchedule?: Record<string, { start: string; end: string }> }) | undefined;
+  const schedule = doctor?.weeklySchedule ?? {};
+  const activeDayNums = new Set(
+    Object.keys(schedule).map((d) => DAY_NAME_TO_NUM[d.toLowerCase()]).filter((n) => n !== undefined)
+  );
+  const today = startOfToday();
+  const maxDate = addDays(today, 60);
+  const isBookable = (date: Date) =>
+    !isBefore(date, today) && !isBefore(maxDate, date) &&
+    (activeDayNums.size === 0 || activeDayNums.has(date.getDay()));
+
+  const calendarDays = eachDayOfInterval({
+    start: startOfWeek(startOfMonth(calendarMonth), { weekStartsOn: 0 }),
+    end: endOfWeek(endOfMonth(calendarMonth), { weekStartsOn: 0 }),
+  });
+
+  useEffect(() => {
+    if (!selectedDate || !appointment.doctorId) return;
+    setLoadingSlots(true);
+    setSelectedTime("");
+    appointmentService.getAvailableSlots(appointment.doctorId, selectedDate)
+      .then((res) => {
+        if (res.success) {
+          const [y, mo, d] = selectedDate.split("-").map(Number);
+          const now = new Date();
+          const filtered = isToday(new Date(y, mo - 1, d))
+            ? res.data.filter((s) => {
+                const [h, m] = s.startTime.split(":").map(Number);
+                return new Date(y, mo - 1, d, h, m) > now;
+              })
+            : res.data;
+          setSlots(filtered.map((s) => ({ time: s.startTime, is_available: s.isAvailable })));
+        }
+      })
+      .catch(() => toast({ title: "Failed to load slots", variant: "destructive" }))
+      .finally(() => setLoadingSlots(false));
+  }, [selectedDate, appointment.doctorId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleSubmit = async () => {
+    if (!selectedDate || !selectedTime) return;
+    setSubmitting(true);
+    try {
+      const res = await appointmentService.rescheduleAppointment(appointment.id, selectedDate, selectedTime);
+      if (res.success) {
+        toast({ title: "Appointment rescheduled ✅", description: `New schedule: ${format(new Date(selectedDate + "T00:00:00"), "MMM d, yyyy")} at ${selectedTime}` });
+        onRescheduled(res.data);
+        onClose();
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to reschedule";
+      if (msg.includes("message your doctor")) {
+        toast({ title: "Cannot reschedule directly", description: "Please message your doctor to request rescheduling.", variant: "destructive" });
+      } else {
+        toast({ title: "Reschedule failed", description: msg, variant: "destructive" });
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <CalendarClock className="h-5 w-5 text-primary" />
+            Reschedule Appointment
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4 py-2">
+          {/* Calendar */}
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Select new date</p>
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => setCalendarMonth((m) => subMonths(m, 1))}
+                disabled={isBefore(endOfMonth(subMonths(calendarMonth, 1)), today)}
+                className="p-1.5 rounded-lg hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <span className="text-sm">‹</span>
+              </button>
+              <span className="text-sm font-semibold">{format(calendarMonth, "MMMM yyyy")}</span>
+              <button
+                onClick={() => setCalendarMonth((m) => addMonths(m, 1))}
+                disabled={isBefore(maxDate, startOfMonth(addMonths(calendarMonth, 1)))}
+                className="p-1.5 rounded-lg hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <span className="text-sm">›</span>
+              </button>
+            </div>
+            <div className="grid grid-cols-7">
+              {["Su","Mo","Tu","We","Th","Fr","Sa"].map((d) => (
+                <div key={d} className="text-center text-[10px] font-semibold text-muted-foreground py-1">{d}</div>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-y-1">
+              {calendarDays.map((date) => {
+                const dateStr = format(date, "yyyy-MM-dd");
+                const inMonth = isSameMonth(date, calendarMonth);
+                const bookable = isBookable(date);
+                const isSelected = selectedDate === dateStr;
+                return (
+                  <button
+                    key={dateStr}
+                    onClick={() => bookable && setSelectedDate(dateStr)}
+                    disabled={!bookable}
+                    className={cn(
+                      "mx-auto flex h-9 w-9 items-center justify-center rounded-full text-sm transition-all",
+                      !inMonth && "opacity-0 pointer-events-none",
+                      inMonth && !bookable && "text-muted-foreground/40 cursor-not-allowed",
+                      inMonth && bookable && !isSelected && "hover:bg-primary/10 text-foreground",
+                      isSelected && "bg-primary text-primary-foreground font-bold",
+                      isToday(date) && !isSelected && "ring-2 ring-primary/50 font-semibold",
+                    )}
+                  >
+                    {format(date, "d")}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Time slots */}
+          {selectedDate && (
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Select time — {format(new Date(selectedDate + "T00:00:00"), "EEE, MMM d")}
+              </p>
+              {loadingSlots ? (
+                <div className="grid grid-cols-4 gap-2">
+                  {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-9 rounded-lg bg-muted animate-pulse" />)}
+                </div>
+              ) : slots.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No available slots for this date.</p>
+              ) : (
+                <div className="grid grid-cols-4 gap-2">
+                  {slots.map((s) => (
+                    <Button
+                      key={s.time}
+                      variant={selectedTime === s.time ? "default" : "outline"}
+                      size="sm"
+                      disabled={!s.is_available}
+                      onClick={() => s.is_available && setSelectedTime(s.time)}
+                      className={cn(
+                        "h-9 text-xs",
+                        selectedTime === s.time && "gradient-primary border-0",
+                        !s.is_available && "opacity-40 cursor-not-allowed line-through",
+                      )}
+                    >
+                      {s.time.slice(0, 5)}
+                    </Button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={submitting}>Cancel</Button>
+          <Button onClick={handleSubmit} disabled={!selectedDate || !selectedTime || submitting}>
+            {submitting ? "Rescheduling…" : "Confirm Reschedule"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function PatientAppointmentDetailPage() {
@@ -265,6 +470,8 @@ export default function PatientAppointmentDetailPage() {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [isCancelling, setIsCancelling] = useState(false);
+  // Reschedule dialog state
+  const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const reviewRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
 
@@ -398,7 +605,7 @@ export default function PatientAppointmentDetailPage() {
         if (payload.type === "status.changed") {
           setAppointment((prev) => prev ? {
             ...prev,
-            status: payload.status,
+            status: mapAppointmentStatus(payload.status),
             ...(payload.payment_status && { paymentStatus: payload.payment_status }),
           } : prev);
           if (payload.status === "completed") {
@@ -497,6 +704,7 @@ export default function PatientAppointmentDetailPage() {
   const isCancelled = appointment.status === "cancelled";
   const canJoin = isOnline && isInProgress && videoData && !inCall;
   const canCancel = isPending && !isCancelled;
+  const canReschedule = isPending && !isCancelled && isOnline;
 
   const showReviewForm = isCompleted && !submittedReview && !appointment.review;
 
@@ -679,6 +887,26 @@ export default function PatientAppointmentDetailPage() {
                 </div>
                 <Button variant="destructive" size="sm" className="rounded-full" onClick={() => setCancelDialogOpen(true)}>
                   Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Reschedule Button — only for pending online appointments */}
+        {canReschedule && (
+          <Card className="border-primary/25 bg-primary/5">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <CalendarClock className="h-4.5 w-4.5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-foreground">Need to reschedule?</p>
+                  <p className="text-xs text-muted-foreground">Pick a new date and time — no re-entry needed.</p>
+                </div>
+                <Button variant="outline" size="sm" className="rounded-full border-primary/40 text-primary hover:bg-primary/10" onClick={() => setRescheduleOpen(true)}>
+                  Reschedule
                 </Button>
               </div>
             </CardContent>
@@ -1154,6 +1382,16 @@ export default function PatientAppointmentDetailPage() {
               )}
             </CardContent>
           </Card>
+        )}
+
+        {/* Reschedule Dialog */}
+        {canReschedule && (
+          <RescheduleDialog
+            appointment={appointment}
+            open={rescheduleOpen}
+            onClose={() => setRescheduleOpen(false)}
+            onRescheduled={(updated) => setAppointment(updated)}
+          />
         )}
 
         {/* Cancel Confirmation Dialog */}

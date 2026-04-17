@@ -452,18 +452,44 @@ const FACE_POSITIONS = [
         instruction: "Turn your head to the right"
     }
 ];
+const FRONT_DETECTION_INTERVAL_MS = 120;
+const SIDE_DETECTION_INTERVAL_MS = 160;
+const CAPTURE_COUNTDOWN_SECONDS = 1;
+const FRONT_MIN_FACE_WIDTH_RATIO = 0.16;
+const SIDE_MIN_FACE_WIDTH_RATIO = 0.18;
+const SIDE_TURN_THRESHOLD = 0.12;
 function AutoCaptureFaceVerification({ onComplete, onCancel }) {
     const videoRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
     const canvasRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
+    const streamRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
     const captureLockRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(false);
+    const isDetectingRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(false);
+    const currentStepRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(0);
+    const faceDetectedStateRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(false);
+    const blinkDetectedRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(false);
+    const errorStateRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])("");
+    const blinkArmedRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(false);
+    const blinkStartRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
+    const earSamplesRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])([]);
+    const closedFramesRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(0);
+    const openFramesRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(0);
+    const lastBlinkAtRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
+    const prevEarRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
+    const lastDropTimeRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
+    const detectInFlightRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(false);
+    const sideSeenStreakRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(0);
+    const captureTimeoutRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
+    const countdownIntervalRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
+    const rafRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
+    const lastDetectionAtRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(0);
+    const modelsLoadedRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(false);
+    const faceApiRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
     const [currentStep, setCurrentStep] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(0);
-    const [isDetecting, setIsDetecting] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [capturedPhotos, setCapturedPhotos] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])({});
     const [error, setError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("");
     const [faceDetected, setFaceDetected] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [blinkDetected, setBlinkDetected] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [countdown, setCountdown] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
-    const [stream, setStream] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
     const currentPosition = FACE_POSITIONS[currentStep];
     // Initialize camera
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
@@ -471,82 +497,341 @@ function AutoCaptureFaceVerification({ onComplete, onCancel }) {
         return ()=>{
             stopCamera();
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        currentStepRef.current = currentStep;
+        if (currentStep !== 0) {
+            // Reset blink detection state when leaving the front-view step
+            blinkArmedRef.current = false;
+            blinkStartRef.current = null;
+            earSamplesRef.current = [];
+            closedFramesRef.current = 0;
+            openFramesRef.current = 0;
+            prevEarRef.current = null;
+            lastDropTimeRef.current = null;
+        }
+    }, [
+        currentStep
+    ]);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        faceDetectedStateRef.current = faceDetected;
+    }, [
+        faceDetected
+    ]);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        blinkDetectedRef.current = blinkDetected;
+    }, [
+        blinkDetected
+    ]);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        errorStateRef.current = error;
+    }, [
+        error
+    ]);
+    const updateFaceDetected = (next)=>{
+        if (faceDetectedStateRef.current !== next) {
+            faceDetectedStateRef.current = next;
+            setFaceDetected(next);
+        }
+    };
+    const updateBlinkDetected = (next)=>{
+        if (blinkDetectedRef.current !== next) {
+            blinkDetectedRef.current = next;
+            setBlinkDetected(next);
+        }
+    };
+    const updateError = (next)=>{
+        if (errorStateRef.current !== next) {
+            errorStateRef.current = next;
+            setError(next);
+        }
+    };
+    const clearTimers = ()=>{
+        if (captureTimeoutRef.current !== null) {
+            window.clearTimeout(captureTimeoutRef.current);
+            captureTimeoutRef.current = null;
+        }
+        if (countdownIntervalRef.current !== null) {
+            window.clearInterval(countdownIntervalRef.current);
+            countdownIntervalRef.current = null;
+        }
+    };
     const startCamera = async ()=>{
         try {
+            stopCamera();
             const mediaStream = await navigator.mediaDevices.getUserMedia({
                 video: {
                     width: {
-                        ideal: 1280
+                        ideal: 640
                     },
                     height: {
-                        ideal: 720
+                        ideal: 480
+                    },
+                    frameRate: {
+                        ideal: 24,
+                        max: 30
                     },
                     facingMode: "user"
                 }
             });
             if (videoRef.current) {
+                streamRef.current = mediaStream;
                 videoRef.current.srcObject = mediaStream;
-                setStream(mediaStream);
-                setIsDetecting(true);
-                startFaceDetection();
+                isDetectingRef.current = true;
+                await videoRef.current.play().catch(()=>undefined);
+                await startFaceDetection();
             }
         } catch (err) {
-            setError("Unable to access camera. Please grant camera permissions.");
+            updateError("Unable to access camera. Please grant camera permissions.");
             console.error("Camera error:", err);
+            isDetectingRef.current = false;
         }
     };
     const stopCamera = ()=>{
-        if (stream) {
-            stream.getTracks().forEach((track)=>track.stop());
-            setStream(null);
+        isDetectingRef.current = false;
+        clearTimers();
+        setCountdown(null);
+        blinkArmedRef.current = false;
+        blinkStartRef.current = null;
+        earSamplesRef.current = [];
+        closedFramesRef.current = 0;
+        openFramesRef.current = 0;
+        detectInFlightRef.current = false;
+        lastDetectionAtRef.current = 0;
+        prevEarRef.current = null;
+        lastDropTimeRef.current = null;
+        sideSeenStreakRef.current = 0;
+        if (rafRef.current !== null) {
+            cancelAnimationFrame(rafRef.current);
+            rafRef.current = null;
+        }
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach((track)=>track.stop());
+            streamRef.current = null;
         }
     };
     const startFaceDetection = async ()=>{
-        // Load face-api.js models
         try {
-            const faceapi = await __turbopack_context__.A("[project]/node_modules/face-api.js/build/es6/index.js [app-ssr] (ecmascript, async loader)");
-            await Promise.all([
-                faceapi.nets.tinyFaceDetector.loadFromUri("/models"),
-                faceapi.nets.faceLandmark68Net.loadFromUri("/models")
-            ]);
-            detectFace(faceapi);
+            if (!modelsLoadedRef.current) {
+                const faceapi = await __turbopack_context__.A("[project]/node_modules/face-api.js/build/es6/index.js [app-ssr] (ecmascript, async loader)");
+                await Promise.all([
+                    faceapi.nets.tinyFaceDetector.loadFromUri("/models"),
+                    faceapi.nets.faceLandmark68Net.loadFromUri("/models")
+                ]);
+                modelsLoadedRef.current = true;
+                faceApiRef.current = faceapi;
+            }
+            detectFace();
         } catch (err) {
             console.error("Face detection error:", err);
-            setError("Face detection initialization failed");
+            updateError("Face detection initialization failed");
+            isDetectingRef.current = false;
         }
     };
-    const detectFace = async (faceapi)=>{
-        if (!videoRef.current || !isDetecting) return;
-        const detections = await faceapi.detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks();
-        if (detections) {
-            setFaceDetected(true);
-            setError("");
-            // Check for blink on front view
-            if (currentPosition.type === "front" && !blinkDetected) {
-                const leftEye = detections.landmarks.getLeftEye();
-                const rightEye = detections.landmarks.getRightEye();
-                // Simple blink detection based on eye aspect ratio
-                const leftEAR = calculateEyeAspectRatio(leftEye);
-                const rightEAR = calculateEyeAspectRatio(rightEye);
-                const avgEAR = (leftEAR + rightEAR) / 2;
-                if (avgEAR < 0.2) {
-                    setBlinkDetected(true);
-                    setTimeout(()=>autoCapture(), 500);
-                }
-            } else if (currentPosition.type !== "front") {
-                // For side views, auto-capture after face is stable
-                setTimeout(()=>{
-                    if (faceDetected) autoCapture();
-                }, 1500);
-            }
-        } else {
-            setFaceDetected(false);
-            setError("No face detected. Please position your face in the frame.");
+    const median = (values)=>{
+        if (values.length === 0) return 0;
+        const sorted = [
+            ...values
+        ].sort((a, b)=>a - b);
+        const mid = Math.floor(sorted.length / 2);
+        return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+    };
+    const percentile = (values, p)=>{
+        if (values.length === 0) return 0;
+        const sorted = [
+            ...values
+        ].sort((a, b)=>a - b);
+        const idx = Math.min(sorted.length - 1, Math.max(0, Math.floor(p / 100 * (sorted.length - 1))));
+        return sorted[idx];
+    };
+    const averagePoint = (points)=>({
+            x: points.reduce((sum, point)=>sum + point.x, 0) / points.length,
+            y: points.reduce((sum, point)=>sum + point.y, 0) / points.length
+        });
+    const getFaceMetrics = (box)=>{
+        const video = videoRef.current;
+        if (!video || !video.videoWidth || !video.videoHeight) {
+            return {
+                centered: false,
+                faceWidthRatio: 0
+            };
         }
-        // Continue detection loop
-        if (isDetecting) {
-            requestAnimationFrame(()=>detectFace(faceapi));
+        const centerX = box.x + box.width / 2;
+        const centerY = box.y + box.height / 2;
+        const offsetX = Math.abs(centerX - video.videoWidth / 2) / video.videoWidth;
+        const offsetY = Math.abs(centerY - video.videoHeight / 2) / video.videoHeight;
+        const faceWidthRatio = box.width / video.videoWidth;
+        return {
+            centered: offsetX < 0.18 && offsetY < 0.2,
+            faceWidthRatio
+        };
+    };
+    const getHeadTurnScore = (landmarks)=>{
+        const nose = averagePoint(landmarks.getNose().slice(3, 6));
+        const jaw = landmarks.getJawOutline();
+        const leftJaw = jaw[2];
+        const rightJaw = jaw[14];
+        const faceWidth = distance(leftJaw, rightJaw) || 1;
+        const leftDistance = distance(nose, leftJaw);
+        const rightDistance = distance(nose, rightJaw);
+        return (leftDistance - rightDistance) / faceWidth;
+    };
+    const detectFace = async ()=>{
+        const faceapi = faceApiRef.current;
+        const video = videoRef.current;
+        if (!faceapi || !video || !isDetectingRef.current) return;
+        if (detectInFlightRef.current) {
+            rafRef.current = requestAnimationFrame(detectFace);
+            return;
+        }
+        if (video.readyState < 2) {
+            rafRef.current = requestAnimationFrame(detectFace);
+            return;
+        }
+        const position = FACE_POSITIONS[currentStepRef.current];
+        const isFront = position.type === "front";
+        const now = performance.now();
+        const detectionInterval = isFront ? FRONT_DETECTION_INTERVAL_MS : SIDE_DETECTION_INTERVAL_MS;
+        if (now - lastDetectionAtRef.current < detectionInterval) {
+            rafRef.current = requestAnimationFrame(detectFace);
+            return;
+        }
+        detectInFlightRef.current = true;
+        lastDetectionAtRef.current = now;
+        const tinyFront = new faceapi.TinyFaceDetectorOptions({
+            inputSize: 224,
+            scoreThreshold: 0.4
+        });
+        const tinySide = new faceapi.TinyFaceDetectorOptions({
+            inputSize: 320,
+            scoreThreshold: 0.2
+        });
+        try {
+            if (isFront) {
+                const detection = await faceapi.detectSingleFace(video, tinyFront).withFaceLandmarks();
+                if (!detection) {
+                    updateFaceDetected(false);
+                    updateError("Center your face inside the oval.");
+                    return;
+                }
+                const metrics = getFaceMetrics(detection.detection.box);
+                if (!metrics.centered) {
+                    updateFaceDetected(false);
+                    updateError("Keep your face centered inside the oval.");
+                    return;
+                }
+                if (metrics.faceWidthRatio < FRONT_MIN_FACE_WIDTH_RATIO) {
+                    updateFaceDetected(false);
+                    updateError("Move a little closer to the camera.");
+                    return;
+                }
+                updateFaceDetected(true);
+                updateError("");
+                if (!blinkDetectedRef.current) {
+                    const leftEye = detection.landmarks.getLeftEye();
+                    const rightEye = detection.landmarks.getRightEye();
+                    const leftEAR = calculateEyeAspectRatio(leftEye);
+                    const rightEAR = calculateEyeAspectRatio(rightEye);
+                    const avgEAR = (leftEAR + rightEAR) / 2;
+                    const samples = earSamplesRef.current;
+                    samples.push(avgEAR);
+                    if (samples.length > 24) samples.shift();
+                    const baseline = Math.max(percentile(samples, 75), median(samples), avgEAR);
+                    const closeThreshold = Math.max(baseline * 0.72, 0.16);
+                    const openThreshold = Math.max(baseline * 0.9, 0.22);
+                    const sampleReady = samples.length >= 8;
+                    const blinkNow = Date.now();
+                    const sharpDrop = prevEarRef.current !== null && prevEarRef.current - avgEAR > Math.max(baseline * 0.12, 0.03);
+                    if (avgEAR <= closeThreshold) {
+                        closedFramesRef.current += 1;
+                        openFramesRef.current = 0;
+                    } else if (avgEAR >= openThreshold) {
+                        openFramesRef.current += 1;
+                        closedFramesRef.current = 0;
+                    }
+                    if (sampleReady && !blinkArmedRef.current && (sharpDrop || closedFramesRef.current >= 2)) {
+                        blinkArmedRef.current = true;
+                        blinkStartRef.current = blinkNow;
+                        lastDropTimeRef.current = blinkNow;
+                    }
+                    if (blinkArmedRef.current && avgEAR >= openThreshold) {
+                        const startedAt = blinkStartRef.current ?? lastDropTimeRef.current ?? blinkNow;
+                        if (blinkNow - startedAt <= 900 && (!lastBlinkAtRef.current || blinkNow - lastBlinkAtRef.current > 700)) {
+                            lastBlinkAtRef.current = blinkNow;
+                            updateBlinkDetected(true);
+                            blinkArmedRef.current = false;
+                            blinkStartRef.current = null;
+                            lastDropTimeRef.current = null;
+                            closedFramesRef.current = 0;
+                            openFramesRef.current = 0;
+                            window.setTimeout(()=>autoCapture(), 200);
+                        } else {
+                            blinkArmedRef.current = false;
+                            blinkStartRef.current = null;
+                            lastDropTimeRef.current = null;
+                        }
+                    }
+                    if (blinkArmedRef.current && blinkStartRef.current && blinkNow - blinkStartRef.current > 1000) {
+                        blinkArmedRef.current = false;
+                        blinkStartRef.current = null;
+                        lastDropTimeRef.current = null;
+                        closedFramesRef.current = 0;
+                        openFramesRef.current = 0;
+                    }
+                    prevEarRef.current = avgEAR;
+                }
+            } else {
+                const detection = await faceapi.detectSingleFace(video, tinySide).withFaceLandmarks();
+                if (!detection) {
+                    updateFaceDetected(false);
+                    sideSeenStreakRef.current = 0;
+                    updateError("Turn your head and keep your face inside the oval.");
+                    return;
+                }
+                const metrics = getFaceMetrics(detection.detection.box);
+                const headTurnScore = getHeadTurnScore(detection.landmarks);
+                const wantsLeft = position.type === "left";
+                const turnedEnough = wantsLeft ? headTurnScore >= SIDE_TURN_THRESHOLD : headTurnScore <= -SIDE_TURN_THRESHOLD;
+                if (!metrics.centered) {
+                    updateFaceDetected(false);
+                    sideSeenStreakRef.current = 0;
+                    updateError("Keep your face centered inside the oval.");
+                    return;
+                }
+                if (metrics.faceWidthRatio < SIDE_MIN_FACE_WIDTH_RATIO) {
+                    updateFaceDetected(false);
+                    sideSeenStreakRef.current = 0;
+                    updateError("Move a little closer to the camera.");
+                    return;
+                }
+                if (!turnedEnough) {
+                    updateFaceDetected(false);
+                    sideSeenStreakRef.current = 0;
+                    updateError(wantsLeft ? "Turn a bit more to your left." : "Turn a bit more to your right.");
+                    return;
+                }
+                updateFaceDetected(true);
+                updateError("");
+                sideSeenStreakRef.current = Math.min(sideSeenStreakRef.current + 1, 4);
+                if (sideSeenStreakRef.current >= 2 && captureTimeoutRef.current === null && !captureLockRef.current) {
+                    captureTimeoutRef.current = window.setTimeout(()=>{
+                        captureTimeoutRef.current = null;
+                        if (isDetectingRef.current && !captureLockRef.current) {
+                            autoCapture();
+                        }
+                    }, 350);
+                }
+            }
+        } catch (err) {
+            console.error("Face detection loop error:", err);
+            updateFaceDetected(false);
+            updateError("We couldn't analyze the camera feed. Please try again.");
+        } finally{
+            detectInFlightRef.current = false;
+        }
+        if (isDetectingRef.current) {
+            rafRef.current = requestAnimationFrame(detectFace);
         }
     };
     const calculateEyeAspectRatio = (eye)=>{
@@ -558,15 +843,30 @@ function AutoCaptureFaceVerification({ onComplete, onCancel }) {
     const distance = (p1, p2)=>{
         return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
     };
-    const autoCapture = ()=>{
+    const autoCapture = (countFrom = CAPTURE_COUNTDOWN_SECONDS)=>{
         if (!videoRef.current || !canvasRef.current) return;
         if (captureLockRef.current) return;
         captureLockRef.current = true;
-        setCountdown(3);
-        const countdownInterval = setInterval(()=>{
+        if (captureTimeoutRef.current !== null) {
+            window.clearTimeout(captureTimeoutRef.current);
+            captureTimeoutRef.current = null;
+        }
+        setCountdown(countFrom);
+        if (countdownIntervalRef.current !== null) {
+            window.clearInterval(countdownIntervalRef.current);
+            countdownIntervalRef.current = null;
+        }
+        if (countFrom <= 0) {
+            capturePhoto();
+            return;
+        }
+        countdownIntervalRef.current = window.setInterval(()=>{
             setCountdown((prev)=>{
                 if (prev === 1) {
-                    clearInterval(countdownInterval);
+                    if (countdownIntervalRef.current !== null) {
+                        window.clearInterval(countdownIntervalRef.current);
+                        countdownIntervalRef.current = null;
+                    }
                     capturePhoto();
                     return null;
                 }
@@ -584,26 +884,31 @@ function AutoCaptureFaceVerification({ onComplete, onCancel }) {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         const ctx = canvas.getContext("2d");
-        if (!ctx) return;
+        if (!ctx) {
+            captureLockRef.current = false;
+            return;
+        }
         ctx.drawImage(video, 0, 0);
         canvas.toBlob((blob)=>{
             if (!blob) {
                 captureLockRef.current = false;
                 return;
             }
+            const stepIndex = currentStepRef.current;
+            const position = FACE_POSITIONS[stepIndex];
             const newPhotos = {
                 ...capturedPhotos,
-                [currentPosition.type]: blob
+                [position.type]: blob
             };
             setCapturedPhotos(newPhotos);
             // Move to next step or complete
-            if (currentStep < FACE_POSITIONS.length - 1) {
-                setCurrentStep(currentStep + 1);
-                setFaceDetected(false);
-                setBlinkDetected(false);
+            if (stepIndex < FACE_POSITIONS.length - 1) {
+                setCurrentStep(stepIndex + 1);
+                updateFaceDetected(false);
+                updateBlinkDetected(false);
             } else {
                 // All photos captured
-                setIsDetecting(false);
+                isDetectingRef.current = false;
                 stopCamera();
                 onComplete({
                     front: newPhotos.front,
@@ -620,30 +925,37 @@ function AutoCaptureFaceVerification({ onComplete, onCancel }) {
         };
         delete newPhotos[currentPosition.type];
         setCapturedPhotos(newPhotos);
-        setFaceDetected(false);
-        setBlinkDetected(false);
+        updateFaceDetected(false);
+        updateBlinkDetected(false);
+        blinkArmedRef.current = false;
+        blinkStartRef.current = null;
+        earSamplesRef.current = [];
+        closedFramesRef.current = 0;
+        openFramesRef.current = 0;
+        prevEarRef.current = null;
+        lastDropTimeRef.current = null;
         setCountdown(null);
         captureLockRef.current = false;
     };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
-        className: "p-6 max-w-2xl mx-auto",
+        className: "p-4 max-w-2xl mx-auto",
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "jsx-8a0b95dd702fb1f1" + " " + "space-y-6",
+                className: "jsx-8a0b95dd702fb1f1" + " " + "space-y-4",
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "jsx-8a0b95dd702fb1f1" + " " + "text-center",
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
-                                className: "jsx-8a0b95dd702fb1f1" + " " + "text-2xl font-bold mb-2",
+                                className: "jsx-8a0b95dd702fb1f1" + " " + "text-xl font-bold mb-1",
                                 children: "Face Verification"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                lineNumber: 255,
+                                lineNumber: 624,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                className: "jsx-8a0b95dd702fb1f1" + " " + "text-muted-foreground",
+                                className: "jsx-8a0b95dd702fb1f1" + " " + "text-sm text-muted-foreground",
                                 children: [
                                     "Step ",
                                     currentStep + 1,
@@ -655,31 +967,31 @@ function AutoCaptureFaceVerification({ onComplete, onCancel }) {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                lineNumber: 256,
+                                lineNumber: 625,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                        lineNumber: 254,
+                        lineNumber: 623,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "jsx-8a0b95dd702fb1f1" + " " + "flex gap-2 justify-center",
                         children: FACE_POSITIONS.map((pos, idx)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "jsx-8a0b95dd702fb1f1" + " " + `h-2 w-20 rounded-full transition-colors ${idx < currentStep ? "bg-green-500" : idx === currentStep ? "bg-blue-500" : "bg-gray-200"}`
+                                className: "jsx-8a0b95dd702fb1f1" + " " + `h-1.5 w-16 rounded-full transition-colors ${idx < currentStep ? "bg-green-500" : idx === currentStep ? "bg-blue-500" : "bg-gray-200"}`
                             }, pos.type, false, {
                                 fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                lineNumber: 265,
+                                lineNumber: 634,
                                 columnNumber: 13
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                        lineNumber: 263,
+                        lineNumber: 632,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "jsx-8a0b95dd702fb1f1" + " " + "relative aspect-video bg-black rounded-lg overflow-hidden",
+                        className: "jsx-8a0b95dd702fb1f1" + " " + "relative h-[240px] sm:h-[280px] bg-black rounded-lg overflow-hidden",
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("video", {
                                 ref: videoRef,
@@ -689,7 +1001,7 @@ function AutoCaptureFaceVerification({ onComplete, onCancel }) {
                                 className: "jsx-8a0b95dd702fb1f1" + " " + "w-full h-full object-cover mirror"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                lineNumber: 280,
+                                lineNumber: 649,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -698,15 +1010,15 @@ function AutoCaptureFaceVerification({ onComplete, onCancel }) {
                                     style: {
                                         boxShadow: "0 0 0 9999px rgba(0, 0, 0, 0.5)"
                                     },
-                                    className: "jsx-8a0b95dd702fb1f1" + " " + `w-64 h-80 border-4 rounded-full transition-colors ${faceDetected ? "border-green-500" : "border-white/50"}`
+                                    className: "jsx-8a0b95dd702fb1f1" + " " + `w-56 h-72 border-4 rounded-full transition-colors ${faceDetected ? "border-green-500" : "border-white/50"}`
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                    lineNumber: 290,
+                                    lineNumber: 659,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                lineNumber: 289,
+                                lineNumber: 658,
                                 columnNumber: 11
                             }, this),
                             countdown && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -716,12 +1028,12 @@ function AutoCaptureFaceVerification({ onComplete, onCancel }) {
                                     children: countdown
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                    lineNumber: 303,
+                                    lineNumber: 672,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                lineNumber: 302,
+                                lineNumber: 671,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -734,20 +1046,20 @@ function AutoCaptureFaceVerification({ onComplete, onCancel }) {
                                                 className: "h-4 w-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                                lineNumber: 313,
+                                                lineNumber: 682,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertDescription"], {
                                                 children: "Face detected"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                                lineNumber: 314,
+                                                lineNumber: 683,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                        lineNumber: 312,
+                                        lineNumber: 681,
                                         columnNumber: 15
                                     }, this),
                                     currentPosition.type === "front" && faceDetected && !blinkDetected && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Alert"], {
@@ -757,32 +1069,32 @@ function AutoCaptureFaceVerification({ onComplete, onCancel }) {
                                                 className: "h-4 w-4 animate-spin"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                                lineNumber: 320,
+                                                lineNumber: 689,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertDescription"], {
                                                 children: "Please blink"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                                lineNumber: 321,
+                                                lineNumber: 690,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                        lineNumber: 319,
+                                        lineNumber: 688,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                lineNumber: 310,
+                                lineNumber: 679,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                        lineNumber: 279,
+                        lineNumber: 648,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("canvas", {
@@ -790,7 +1102,7 @@ function AutoCaptureFaceVerification({ onComplete, onCancel }) {
                         className: "jsx-8a0b95dd702fb1f1" + " " + "hidden"
                     }, void 0, false, {
                         fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                        lineNumber: 327,
+                        lineNumber: 696,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Alert"], {
@@ -799,21 +1111,29 @@ function AutoCaptureFaceVerification({ onComplete, onCancel }) {
                                 className: "h-4 w-4"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                lineNumber: 331,
+                                lineNumber: 700,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertDescription"], {
-                                className: "font-medium",
+                                className: "text-sm font-medium",
                                 children: currentPosition.instruction
                             }, void 0, false, {
                                 fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                lineNumber: 332,
+                                lineNumber: 701,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                        lineNumber: 330,
+                        lineNumber: 699,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                        className: "jsx-8a0b95dd702fb1f1" + " " + "text-xs text-muted-foreground",
+                        children: "If auto-detect feels slow on your camera, you can use the manual capture button below for each angle."
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
+                        lineNumber: 706,
                         columnNumber: 9
                     }, this),
                     error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Alert"], {
@@ -823,25 +1143,37 @@ function AutoCaptureFaceVerification({ onComplete, onCancel }) {
                                 className: "h-4 w-4"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                lineNumber: 340,
+                                lineNumber: 713,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$alert$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AlertDescription"], {
                                 children: error
                             }, void 0, false, {
                                 fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                lineNumber: 341,
+                                lineNumber: 714,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                        lineNumber: 339,
+                        lineNumber: 712,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "jsx-8a0b95dd702fb1f1" + " " + "flex gap-3",
                         children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
+                                type: "button",
+                                onClick: ()=>autoCapture(1),
+                                variant: "secondary",
+                                className: "flex-1",
+                                disabled: countdown !== null,
+                                children: currentPosition.type === "front" ? "Capture Front Manually" : "Capture This Angle"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
+                                lineNumber: 720,
+                                columnNumber: 11
+                            }, this),
                             capturedPhotos[currentPosition.type] && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
                                 onClick: retakePhoto,
                                 variant: "outline",
@@ -849,57 +1181,60 @@ function AutoCaptureFaceVerification({ onComplete, onCancel }) {
                                 children: "Retake Photo"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                lineNumber: 348,
+                                lineNumber: 730,
                                 columnNumber: 13
                             }, this),
                             onCancel && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
-                                onClick: onCancel,
+                                onClick: ()=>{
+                                    stopCamera();
+                                    onCancel();
+                                },
                                 variant: "ghost",
                                 className: "flex-1",
                                 children: "Cancel"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                lineNumber: 353,
+                                lineNumber: 735,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                        lineNumber: 346,
+                        lineNumber: 719,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "jsx-8a0b95dd702fb1f1" + " " + "grid grid-cols-3 gap-3",
+                        className: "jsx-8a0b95dd702fb1f1" + " " + "grid grid-cols-3 gap-2",
                         children: FACE_POSITIONS.map((pos)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "jsx-8a0b95dd702fb1f1" + " " + `aspect-square rounded-lg border-2 flex items-center justify-center ${capturedPhotos[pos.type] ? "border-green-500 bg-green-50" : "border-gray-200 bg-gray-50"}`,
+                                className: "jsx-8a0b95dd702fb1f1" + " " + `h-16 rounded-lg border-2 flex items-center justify-center ${capturedPhotos[pos.type] ? "border-green-500 bg-green-50" : "border-gray-200 bg-gray-50"}`,
                                 children: capturedPhotos[pos.type] ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$check$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__CheckCircle2$3e$__["CheckCircle2"], {
-                                    className: "h-8 w-8 text-green-500"
+                                    className: "h-6 w-6 text-green-500"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                    lineNumber: 371,
+                                    lineNumber: 760,
                                     columnNumber: 17
                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                    className: "jsx-8a0b95dd702fb1f1" + " " + "text-sm text-muted-foreground",
+                                    className: "jsx-8a0b95dd702fb1f1" + " " + "text-xs text-muted-foreground",
                                     children: pos.label
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                    lineNumber: 373,
+                                    lineNumber: 762,
                                     columnNumber: 17
                                 }, this)
                             }, pos.type, false, {
                                 fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                                lineNumber: 362,
+                                lineNumber: 751,
                                 columnNumber: 13
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                        lineNumber: 360,
+                        lineNumber: 749,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-                lineNumber: 252,
+                lineNumber: 621,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$styled$2d$jsx$2f$style$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -909,7 +1244,7 @@ function AutoCaptureFaceVerification({ onComplete, onCancel }) {
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/doctor/AutoCaptureFaceVerification.tsx",
-        lineNumber: 251,
+        lineNumber: 620,
         columnNumber: 5
     }, this);
 }
@@ -1822,7 +2157,7 @@ function DoctorProfileCompletePage() {
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                 className: "text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent",
-                                children: "CareConnect"
+                                children: "PulseLink"
                             }, void 0, false, {
                                 fileName: "[project]/app/(doctor)/doctor/profile/complete/page.tsx",
                                 lineNumber: 480,
@@ -3500,32 +3835,21 @@ function DoctorProfileCompletePage() {
                 onOpenChange: setFaceCaptureOpen,
                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DialogContent"], {
                     className: "max-w-3xl p-0 border-0 bg-transparent shadow-none",
-                    "aria-labelledby": "face-verification-title",
-                    "aria-describedby": "face-verification-desc",
                     children: [
-                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DialogHeader"], {
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DialogTitle"], {
                             className: "sr-only",
-                            children: [
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DialogTitle"], {
-                                    id: "face-verification-title",
-                                    children: "Face Verification"
-                                }, void 0, false, {
-                                    fileName: "[project]/app/(doctor)/doctor/profile/complete/page.tsx",
-                                    lineNumber: 999,
-                                    columnNumber: 13
-                                }, this),
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DialogDescription"], {
-                                    id: "face-verification-desc",
-                                    children: "Auto-capture face verification with liveness check"
-                                }, void 0, false, {
-                                    fileName: "[project]/app/(doctor)/doctor/profile/complete/page.tsx",
-                                    lineNumber: 1000,
-                                    columnNumber: 13
-                                }, this)
-                            ]
-                        }, void 0, true, {
+                            children: "Face Verification"
+                        }, void 0, false, {
                             fileName: "[project]/app/(doctor)/doctor/profile/complete/page.tsx",
-                            lineNumber: 998,
+                            lineNumber: 996,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["DialogDescription"], {
+                            className: "sr-only",
+                            children: "Auto-capture face verification with liveness check"
+                        }, void 0, false, {
+                            fileName: "[project]/app/(doctor)/doctor/profile/complete/page.tsx",
+                            lineNumber: 997,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$doctor$2f$AutoCaptureFaceVerification$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -3533,7 +3857,7 @@ function DoctorProfileCompletePage() {
                             onCancel: ()=>setFaceCaptureOpen(false)
                         }, void 0, false, {
                             fileName: "[project]/app/(doctor)/doctor/profile/complete/page.tsx",
-                            lineNumber: 1004,
+                            lineNumber: 1000,
                             columnNumber: 11
                         }, this)
                     ]

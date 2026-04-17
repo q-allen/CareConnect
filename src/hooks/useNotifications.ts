@@ -6,10 +6,12 @@ import { useNotificationStore } from "@/store";
 import { useAuthStore } from "@/store";
 import { Notification } from "@/types";
 import { notificationService } from "@/services/notificationService";
+import { useIncomingCallStore } from "@/store/incomingCallStore";
 
 export function useNotifications() {
   const user = useAuthStore((s) => s.user);
   const { addNotification, setNotifications } = useNotificationStore();
+  const { setCall } = useIncomingCallStore();
   const wsRef = useRef<WebSocket | null>(null);
   const retryRef = useRef(0);
   const shouldReconnectRef = useRef(true);
@@ -49,13 +51,31 @@ export function useNotifications() {
             createdAt: payload.created_at,
           };
           addNotification(notif);
+
+          // Show incoming call overlay when doctor starts video
+          const data = payload.data ?? {};
+          if (
+            payload.notif_type === "appointment" &&
+            data.room_name &&
+            data.appointment_id
+          ) {
+            // Extract doctor name from message: "Dr. X has started your video consultation..."
+            const match = (payload.message as string)?.match(/^(Dr\.\s[^\s]+(?:\s[^\s]+)?)/);
+            const doctorName = match ? match[1] : "Your Doctor";
+            setCall({
+              appointmentId: String(data.appointment_id),
+              doctorName,
+              doctorSpecialty: "",
+              doctorAvatar:  undefined,
+            });
+          }
         } catch {
           // ignore malformed frames
         }
       };
 
       ws.onclose = (event) => {
-        if (shouldReconnectRef.current && retryRef.current < 5 && event.code !== 1000 && event.code !== 1001) {
+        if (shouldReconnectRef.current && retryRef.current < 5 && event.code !== 1000 && event.code !== 1001 && event.code !== 4001) {
           const delay = Math.min(30000, 1000 * 2 ** retryRef.current);
           retryRef.current += 1;
           reconnectTimerRef.current = setTimeout(connect, delay);

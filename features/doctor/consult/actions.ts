@@ -57,7 +57,7 @@ export async function sendLabRequest(input: SendLabInput): Promise<LabResult> {
     test_name: input.testName || 'Laboratory Test',
     test_type: 'Lab Request',
     notes: input.notes,
-    laboratory: 'CareConnect Partner Lab',
+    laboratory: 'PulseLink Partner Lab',
   });
   if (!result.success) {
     throw new Error(result.error || 'Failed to create lab request');
@@ -77,3 +77,4 @@ export async function sendMedicalCertificate(input: SendCertificateInput): Promi
   }
   return result.data;
 }
+

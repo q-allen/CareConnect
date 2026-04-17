@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { Doctor, ConsultationType, FamilyMember, TimeSlot } from '@/types';
 
 export interface PatientDetails {
-  // CareConnect Account section (pre-filled, read-only)
+  // PulseLink Account section (pre-filled, read-only)
   accountEmail: string;
   // Reason for consultation
   reasonForConsultation: string;
@@ -182,3 +182,4 @@ export const useBookingStore = create<BookingState>((set) => ({
     appointmentId: null,
   }),
 }));
+

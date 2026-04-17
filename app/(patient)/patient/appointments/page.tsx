@@ -311,7 +311,7 @@ export default function AppointmentsPage() {
                       onViewDetails={() => router.push(`/patient/appointments/${apt.id}`)}
                       onJoinVideo={() => router.push(`/patient/teleconsult/${apt.id}`)}
                       onViewDoctor={() => router.push(`/patient/doctors/${apt.doctorProfileId ?? apt.doctorId}`)}
-                      onReschedule={() => router.push(`/patient/book/${apt.doctorProfileId ?? apt.doctorId}`)}
+                      onReschedule={() => router.push(`/patient/appointments/${apt.id}`)}
                     />
                   ))
                 )}
@@ -618,7 +618,7 @@ function AppointmentCard({
                       <FileText className="h-4 w-4 mr-2" />View Records
                     </DropdownMenuItem>
                   )}
-                  {onReschedule && isUpcoming && appointment.status !== 'cancelled' && (
+                  {onReschedule && appointment.status === 'pending' && (
                     <DropdownMenuItem onClick={onReschedule}>
                       <RefreshCw className="h-4 w-4 mr-2" />Reschedule
                     </DropdownMenuItem>

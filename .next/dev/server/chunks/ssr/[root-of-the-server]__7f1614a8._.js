@@ -558,7 +558,7 @@ function useNotifications() {
                 }
             };
             ws.onclose = (event)=>{
-                if (shouldReconnectRef.current && retryRef.current < 5 && event.code !== 1000 && event.code !== 1001) {
+                if (shouldReconnectRef.current && retryRef.current < 5 && event.code !== 1000 && event.code !== 1001 && event.code !== 4001) {
                     const delay = Math.min(30000, 1000 * 2 ** retryRef.current);
                     retryRef.current += 1;
                     reconnectTimerRef.current = setTimeout(connect, delay);

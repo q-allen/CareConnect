@@ -78,6 +78,7 @@ export interface Doctor extends User {
   clinicLat?: number;
   clinicLng?: number;
   weeklySchedule?: Record<string, { start: string; end: string; consultation_types?: "online" | "in_clinic" | "both" }>;
+  signature?: string;
 }
 
 // Family Member (NowServing pattern: one account books for the whole family)

@@ -51,12 +51,15 @@ export default function FileCard({
 
   const effectiveUrl = pdfUrl || fileUrl;
 
-  // For prescriptions, always use the backend proxy to avoid Cloudinary CORS issues.
-  // For lab results / other files, fetch directly (no credentials needed).
+  // Use backend proxy for prescriptions, certificates, and lab results to avoid Cloudinary CORS issues.
   const fetchFile = async (): Promise<Blob> => {
     const base = getBaseUrl();
-    if (type === 'prescription') {
-      const res = await fetch(`${base}${API_ENDPOINTS.PRESCRIPTION_PDF(id)}`, { credentials: 'include' });
+    let proxyUrl: string | null = null;
+    if (type === 'prescription') proxyUrl = `${base}${API_ENDPOINTS.PRESCRIPTION_PDF(id)}`;
+    else if (type === 'certificate') proxyUrl = `${base}${API_ENDPOINTS.CERTIFICATE_PDF(id)}`;
+    else if (type === 'lab-result') proxyUrl = `${base}${API_ENDPOINTS.LAB_PDF(id)}`;
+    if (proxyUrl) {
+      const res = await fetch(proxyUrl, { credentials: 'include' });
       if (!res.ok) throw new Error(`${res.status}`);
       return res.blob();
     }
@@ -69,7 +72,7 @@ export default function FileCard({
 
   const handleDownload = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (type !== 'prescription' && !effectiveUrl) {
+    if (type !== 'prescription' && type !== 'certificate' && type !== 'lab-result' && !effectiveUrl) {
       toast({ title: 'No file available', description: 'The file has not been generated yet.', variant: 'destructive' });
       return;
     }
@@ -90,7 +93,7 @@ export default function FileCard({
 
   const handlePrint = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (type !== 'prescription' && !effectiveUrl) {
+    if (type !== 'prescription' && type !== 'certificate' && type !== 'lab-result' && !effectiveUrl) {
       toast({ title: 'No printable file', description: 'File not available for printing.', variant: 'destructive' });
       return;
     }
@@ -107,14 +110,17 @@ export default function FileCard({
 
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    // Share the backend proxy URL for prescriptions, direct URL for others
     const base = getBaseUrl();
     const shareUrl = type === 'prescription'
       ? `${base}${API_ENDPOINTS.PRESCRIPTION_PDF(id)}`
-      : (effectiveUrl?.startsWith('http') ? effectiveUrl : `${base}${effectiveUrl ?? ''}`) || window.location.href;
+      : type === 'certificate'
+        ? `${base}${API_ENDPOINTS.CERTIFICATE_PDF(id)}`
+        : type === 'lab-result'
+          ? `${base}${API_ENDPOINTS.LAB_PDF(id)}`
+          : (effectiveUrl?.startsWith('http') ? effectiveUrl : `${base}${effectiveUrl ?? ''}`) || window.location.href;
     try {
       if (navigator.share) {
-        await navigator.share({ title: 'CareConnect Document', url: shareUrl });
+        await navigator.share({ title: 'PulseLink Document', url: shareUrl });
         return;
       }
       await navigator.clipboard.writeText(shareUrl);
@@ -250,3 +256,4 @@ export default function FileCard({
     </motion.div>
   );
 }
+

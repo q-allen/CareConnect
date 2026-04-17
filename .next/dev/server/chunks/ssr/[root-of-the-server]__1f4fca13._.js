@@ -625,6 +625,8 @@ const API_ENDPOINTS = {
     DOCTOR_SLOT_DETAIL: (id)=>`/api/doctors/slots/${id}/`,
     DOCTOR_MY_SCHEDULE: "/api/doctors/my-schedule/",
     DOCTOR_PROFILE_COMPLETE: "/api/doctors/me/complete/",
+    DOCTOR_LIVENESS_SESSION: "/api/doctors/me/liveness/session/",
+    DOCTOR_LIVENESS_COMPLETE: "/api/doctors/me/liveness/complete/",
     DOCTOR_MY_PATIENTS: "/api/doctors/my-patients/",
     // Appointments
     APPOINTMENTS: "/api/appointments/",
@@ -647,6 +649,7 @@ const API_ENDPOINTS = {
     FOLLOW_UP_INVITATIONS: "/api/appointments/follow-up-invitations/",
     FOLLOW_UP_INVITATION_DETAIL: (id)=>`/api/appointments/follow-up-invitations/${id}/`,
     FOLLOW_UP_INVITATION_IGNORE: (id)=>`/api/appointments/follow-up-invitations/${id}/ignore/`,
+    APPOINTMENT_RESCHEDULE: (id)=>`/api/appointments/${id}/reschedule/`,
     TODAY_QUEUE: "/api/appointments/queue/today/",
     // Records
     PRESCRIPTIONS: "/api/records/prescriptions",
@@ -654,8 +657,10 @@ const API_ENDPOINTS = {
     PRESCRIPTION_PDF: (id)=>`/api/records/prescriptions/${id}/pdf/`,
     LAB_RESULTS: "/api/records/labs",
     LAB_DETAIL: (id)=>`/api/records/labs/${id}`,
+    LAB_PDF: (id)=>`/api/records/labs/${id}/pdf/`,
     CERTIFICATES: `${RECORDS_BASE}/certificates`,
     CERTIFICATE_DETAIL: (id)=>`${RECORDS_BASE}/certificates/${id}`,
+    CERTIFICATE_PDF: (id)=>`${RECORDS_BASE}/certificates/${id}/pdf/`,
     CERT_REQUESTS: `${RECORDS_BASE}/certificates/request`,
     CERT_REQUEST_APPROVE: (id)=>`${RECORDS_BASE}/certificates/request/${id}/approve`,
     CERT_REQUEST_REJECT: (id)=>`${RECORDS_BASE}/certificates/request/${id}/reject`,

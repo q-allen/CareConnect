@@ -220,7 +220,7 @@ export default function SignUpPage() {
         otp: otpDigits.join(""),
       });
       setUser(user);
-      toast({ title: "Account created!", description: "Welcome to CareConnect." });
+      toast({ title: "Account created!", description: "Welcome to PulseLink." });
       router.push("/patient");
     } catch (err) {
       toast({
@@ -254,7 +254,7 @@ export default function SignUpPage() {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur">
             <Activity className="h-5 w-5 text-white" />
           </div>
-          <span className="text-xl font-bold text-white tracking-tight">CareConnect</span>
+          <span className="text-xl font-bold text-white tracking-tight">PulseLink</span>
         </motion.div>
 
         {/* Hero copy */}
@@ -290,7 +290,7 @@ export default function SignUpPage() {
 
         {/* Footer note */}
         <p className="text-white/40 text-xs">
-          © {new Date().getFullYear()} CareConnect. All rights reserved.
+          © {new Date().getFullYear()} PulseLink. All rights reserved.
         </p>
       </div>
 
@@ -301,7 +301,7 @@ export default function SignUpPage() {
           <div className="flex h-9 w-9 items-center justify-center rounded-lg gradient-primary">
             <Activity className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-xl font-bold text-foreground">CareConnect</span>
+          <span className="text-xl font-bold text-foreground">PulseLink</span>
         </div>
 
         <motion.div

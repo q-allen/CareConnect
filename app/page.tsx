@@ -1,12 +1,13 @@
 "use client";
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { 
-  Calendar, 
-  FileText, 
-  Clock, 
-  Shield, 
+import {
+  Calendar,
+  FileText,
+  Clock,
+  Shield,
   Smartphone,
   CheckCircle2,
   ArrowRight,
@@ -14,54 +15,65 @@ import {
   CreditCard,
   Video,
   UserCheck,
-  ClipboardList,
-  KeyRound,
   Wallet,
-  Bell,
   Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { topSpecialties } from '@/data/specialtiesData';
+import { doctorService } from '@/services/doctorService';
+
+type SpecialtyCount = {
+  id: string;
+  name: string;
+  count: number;
+  isPlaceholder?: boolean;
+};
+
+const toSlug = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
 
 const features = [
   {
-    icon: Calendar,
-    title: 'Online Appointment Booking',
-    description: 'Book in-clinic or teleconsultation appointments with your doctor anytime — no phone calls needed.',
-  },
-  {
-    icon: Clock,
-    title: 'Real-Time Queue Tracking',
-    description: 'Monitor your live queue position and get notified when it is almost your turn, so you never have to wait in line.',
+    icon: UserCheck,
+    title: 'Licensed PRC Doctors',
+    description: 'Consult with verified PRC-licensed physicians across major specialties in the Philippines.',
   },
   {
     icon: Video,
-    title: 'Teleconsultation',
-    description: 'Consult your doctor via secure video call from the comfort of your home. Family members can be invited to join.',
+    title: 'Secure Video Consults',
+    description: 'Talk to your doctor from home through private, reliable video calls optimized for mobile.',
+  },
+  {
+    icon: Calendar,
+    title: 'Easy Online Booking',
+    description: 'Choose a schedule, select video or in-clinic, and confirm your appointment in minutes.',
+  },
+  {
+    icon: Clock,
+    title: 'Real-Time Queue Updates',
+    description: 'Track your live queue position and get notified when your turn is approaching.',
   },
   {
     icon: FileText,
     title: 'Digital Prescriptions',
-    description: 'Receive e-prescriptions after every consultation. Access and share them anytime from your health records.',
+    description: 'Receive e-prescriptions and consultation notes right after your visit.',
   },
   {
-    icon: Shield,
-    title: 'Secure Health Records',
-    description: 'All your consultation history, prescriptions, and medical documents are securely stored and accessible anytime.',
-  },
-  {
-    icon: Smartphone,
-    title: 'Email Notifications',
-    description: 'Get real-time updates on your appointment status, queue position, and consultation confirmations via email.',
+    icon: Wallet,
+    title: 'Flexible Payments',
+    description: 'Pay via GCash, credit/debit card, or cash on clinic depending on the doctor’s options.',
   },
 ];
 
 const stats = [
-  { value: 'Book', label: 'Appointments Online' },
-  { value: 'Track', label: 'Your Queue Live' },
-  { value: 'Consult', label: 'via Video Call' },
-  { value: 'Pay', label: 'via GCash or Card' },
+  { value: 'PRC', label: 'Licensed Doctors' },
+  { value: 'Live', label: 'Queue Updates' },
+  { value: 'Video', label: 'Secure Consults' },
+  { value: 'eRx', label: 'Digital Prescriptions' },
 ];
 
 const paymentMethods = [
@@ -74,36 +86,87 @@ const bookingSteps = [
   {
     step: 1,
     icon: UserCheck,
-    title: 'Select a Doctor',
-    description: 'Browse by specialty or search for a specific doctor. View their schedule, clinic, and consultation type.',
+    title: 'Create an Account or Log In',
+    description: 'Sign up in minutes or log in to continue your consultation journey.',
   },
   {
     step: 2,
-    icon: ClipboardList,
-    title: 'Fill Up the Form',
-    description: 'Indicate if you are a new or returning patient, select your preferred schedule, and complete the appointment form.',
+    icon: Users,
+    title: 'Browse Doctors',
+    description: 'Filter by specialty, consultation type, and schedule to find the right doctor.',
   },
   {
     step: 3,
-    icon: KeyRound,
-    title: 'Verify via OTP',
-    description: 'A one-time PIN will be sent to your registered email address to confirm your identity.',
+    icon: Calendar,
+    title: 'Book an Appointment',
+    description: 'Pick your preferred time and confirm your online or in-clinic visit.',
   },
   {
     step: 4,
-    icon: Wallet,
-    title: 'Pay Booking Fee',
-    description: "Pay via GCash, credit/debit card, or cash on clinic — depending on the doctor's accepted payment methods.",
-  },
-  {
-    step: 5,
-    icon: Bell,
-    title: 'Await Confirmation',
-    description: 'Your appointment status will be updated once confirmed by the clinic. You will be notified via email.',
+    icon: Video,
+    title: 'Consult via Video or Visit Clinic',
+    description: 'Meet your doctor securely online or attend the clinic as scheduled.',
   },
 ];
 
 export default function LandingPage() {
+  const [specialties, setSpecialties] = useState<SpecialtyCount[]>([]);
+  const [isSpecialtiesLoading, setIsSpecialtiesLoading] = useState(true);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadSpecialties = async () => {
+      setIsSpecialtiesLoading(true);
+      const response = await doctorService.getDoctors();
+      if (!isActive) return;
+
+      if (!response.success) {
+        setSpecialties([]);
+        setIsSpecialtiesLoading(false);
+        return;
+      }
+
+      const counts = new Map<string, number>();
+      for (const doctor of response.data ?? []) {
+        const isBookable = Boolean(doctor.isBookable || doctor.isVerified);
+        if (!isBookable) continue;
+        const name = doctor.specialty?.trim();
+        if (!name) continue;
+        counts.set(name, (counts.get(name) ?? 0) + 1);
+      }
+
+      const list = Array.from(counts.entries())
+        .map(([name, count]) => ({
+          id: toSlug(name),
+          name,
+          count,
+        }))
+        .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+
+      setSpecialties(list);
+      setIsSpecialtiesLoading(false);
+    };
+
+    loadSpecialties();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  const topSpecialties = specialties.slice(0, 7);
+  const placeholderCount = Math.max(0, 7 - topSpecialties.length);
+  const displaySpecialties: SpecialtyCount[] = [
+    ...topSpecialties,
+    ...Array.from({ length: placeholderCount }).map((_, index) => ({
+      id: `placeholder-${index + 1}`,
+      name: 'More specialties soon',
+      count: 0,
+      isPlaceholder: true,
+    })),
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
@@ -114,12 +177,15 @@ export default function LandingPage() {
               <div className="flex h-9 w-9 items-center justify-center rounded-lg gradient-primary">
                 <Activity className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold text-foreground">CareConnect</span>
+              <span className="text-xl font-bold text-foreground">PulseLink</span>
             </Link>
 
             <div className="hidden md:flex items-center gap-6">
               <a href="#specialties" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                 Specialties
+              </a>
+              <a href="#how-it-works" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                How It Works
               </a>
               <a href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                 Features
@@ -127,14 +193,14 @@ export default function LandingPage() {
             </div>
 
             <div className="flex items-center gap-3">
-              <Link href="/login">
+              <Link href="/signin">
                 <Button variant="ghost" size="sm">
                   Sign In
                 </Button>
               </Link>
-              <Link href="/login">
+              <Link href="/signup">
                 <Button size="sm" className="gradient-primary border-0">
-                  Get Started
+                  Sign Up Free
                 </Button>
               </Link>
             </div>
@@ -147,7 +213,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 gradient-hero opacity-5" />
         <div className="absolute top-1/4 -right-1/4 w-1/2 h-1/2 bg-primary/10 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 -left-1/4 w-1/2 h-1/2 bg-accent/10 rounded-full blur-3xl" />
-        
+
         <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center min-h-[calc(100vh-6rem)]">
             <motion.div
@@ -158,28 +224,28 @@ export default function LandingPage() {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
                 <CheckCircle2 className="h-4 w-4" />
-                <span>Online appointment booking for Filipino patients</span>
+                <span>Fast, secure online doctor consultations in the Philippines</span>
               </div>
-              
+
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
-                Healthcare at Your{' '}
-                <span className="text-gradient">Fingertips</span>
+                Talk to a Doctor from Home —{' '}
+                <span className="text-gradient">Anytime, Anywhere</span>
               </h1>
-              
+
               <p className="text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-8">
-                Book in-clinic or teleconsultation appointments, track your queue in real time, and receive digital prescriptions — all in one platform.
+                Easy booking, real-time queue tracking, secure video consultations, and digital prescriptions — all in one telemedicine platform.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Link href="/signin">
+                <Link href="/signup">
                   <Button size="lg" className="gradient-primary border-0 text-lg px-8 h-12 shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-shadow w-full sm:w-auto">
-                    Book Appointment
+                    Sign Up Free
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
                 <Link href="/signin">
                   <Button size="lg" variant="outline" className="text-lg px-8 h-12 w-full sm:w-auto">
-                    Find a Doctor
+                    Browse Doctors
                   </Button>
                 </Link>
               </div>
@@ -214,7 +280,7 @@ export default function LandingPage() {
                   alt="Doctor with patient"
                   className="relative rounded-3xl shadow-2xl object-cover w-full h-[600px]"
                 />
-                
+
                 {/* Floating Cards */}
                 <motion.div
                   animate={{ y: [0, -10, 0] }}
@@ -226,7 +292,7 @@ export default function LandingPage() {
                       <Calendar className="h-5 w-5 text-primary-foreground" />
                     </div>
                     <div>
-                      <div className="text-sm font-semibold">Appointment Booked!</div>
+                      <div className="text-sm font-semibold">Consultation Booked!</div>
                       <div className="text-xs text-muted-foreground">Confirmed • Today</div>
                     </div>
                   </div>
@@ -264,36 +330,68 @@ export default function LandingPage() {
             className="text-center mb-12"
           >
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              Top Specialties
+              Top Specialties for Online Consultations
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Browse and book appointments with doctors across all major medical specialties
+              Connect with doctors across the most in-demand specialties available on PulseLink
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4">
-            {topSpecialties.slice(0, 7).map((specialty, index) => (
-              <motion.div
-                key={specialty.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-              >
-                <Link href="/signin">
-                  <Card className="hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer">
-                    <CardContent className="p-4 text-center">
-                      <div className="h-12 w-12 rounded-xl gradient-primary flex items-center justify-center mx-auto mb-3">
-                        <Activity className="h-6 w-6 text-primary-foreground" />
-                      </div>
-                      <h3 className="text-sm font-semibold text-foreground mb-1">{specialty.name}</h3>
-                      <p className="text-xs text-muted-foreground">{specialty.count} doctors</p>
-                    </CardContent>
-                  </Card>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
+          {isSpecialtiesLoading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4">
+              {Array.from({ length: 7 }).map((_, index) => (
+                <Card key={`specialty-skeleton-${index}`} className="animate-pulse">
+                  <CardContent className="p-4 text-center">
+                    <div className="h-12 w-12 rounded-xl bg-primary/10 mx-auto mb-3" />
+                    <div className="h-3 w-24 bg-muted rounded mx-auto mb-2" />
+                    <div className="h-3 w-16 bg-muted/70 rounded mx-auto" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : topSpecialties.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4">
+              {displaySpecialties.map((specialty, index) => (
+                <motion.div
+                  key={specialty.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                >
+                  {specialty.isPlaceholder ? (
+                    <Card className="border-dashed border-border/70">
+                      <CardContent className="p-4 text-center">
+                        <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center mx-auto mb-3">
+                          <Activity className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                        <h3 className="text-sm font-semibold text-muted-foreground mb-1">{specialty.name}</h3>
+                        <p className="text-xs text-muted-foreground">Available soon</p>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <Link href="/signin">
+                      <Card className="hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer">
+                        <CardContent className="p-4 text-center">
+                          <div className="h-12 w-12 rounded-xl gradient-primary flex items-center justify-center mx-auto mb-3">
+                            <Activity className="h-6 w-6 text-primary-foreground" />
+                          </div>
+                          <h3 className="text-sm font-semibold text-foreground mb-1">{specialty.name}</h3>
+                          <p className="text-xs text-muted-foreground">
+                            {specialty.count} {specialty.count === 1 ? 'doctor' : 'doctors'}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center text-sm text-muted-foreground">
+              No active specialties yet. Please check back soon.
+            </div>
+          )}
 
           <div className="text-center mt-8">
             <Link href="/signin">
@@ -317,18 +415,18 @@ export default function LandingPage() {
             className="text-center mb-16"
           >
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              Booking Instructions
+              How Online Consultations Work
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Follow these simple steps to book your consultation on CareConnect
+              Follow these simple steps to consult with a licensed doctor on PulseLink
             </p>
           </motion.div>
 
           <div className="relative">
             {/* Connection Line */}
             <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-0.5 bg-border -translate-y-1/2" />
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-4">
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4">
               {bookingSteps.map((step, index) => (
                 <motion.div
                   key={step.step}
@@ -343,17 +441,17 @@ export default function LandingPage() {
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-sm font-bold w-7 h-7 rounded-full flex items-center justify-center shadow-md">
                       {step.step}
                     </div>
-                    
+
                     {/* Icon */}
                     <div className="h-16 w-16 rounded-2xl gradient-primary flex items-center justify-center mb-4 mt-2">
                       <step.icon className="h-8 w-8 text-primary-foreground" />
                     </div>
-                    
+
                     {/* Title */}
                     <h3 className="text-lg font-semibold text-foreground mb-2">
                       {step.title}
                     </h3>
-                    
+
                     {/* Description */}
                     <p className="text-sm text-muted-foreground leading-relaxed">
                       {step.description}
@@ -365,9 +463,9 @@ export default function LandingPage() {
           </div>
 
           <div className="text-center mt-12">
-            <Link href="/signin">
+            <Link href="/signup">
               <Button size="lg" className="gradient-primary border-0 shadow-lg shadow-primary/25">
-                Book Your Appointment
+                Start Your Online Consultation
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
@@ -386,10 +484,10 @@ export default function LandingPage() {
             className="text-center mb-16"
           >
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              Everything You Need in One Platform
+              Built for Fast and Trusted Telemedicine
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              CareConnect brings together appointment booking, queue tracking, teleconsultation, and digital prescriptions in one seamless experience.
+              From licensed doctors to secure video calls and digital prescriptions, everything is designed for online care.
             </p>
           </motion.div>
 
@@ -423,7 +521,7 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
             <h3 className="text-lg font-semibold text-foreground mb-2">Accepted Payment Methods</h3>
-            <p className="text-muted-foreground">Pay your booking fee conveniently through any of these channels</p>
+            <p className="text-muted-foreground">Pay your booking fee easily through any of these options</p>
           </div>
           <div className="flex flex-wrap justify-center gap-6">
             {paymentMethods.map((method) => (
@@ -449,22 +547,22 @@ export default function LandingPage() {
             <div className="absolute inset-0 bg-grid-white/10" />
             <div className="relative">
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary-foreground mb-3 sm:mb-4">
-                Ready to Take Control of Your Health?
+                Ready for Your Online Doctor Consultation?
               </h2>
               <p className="text-sm sm:text-base lg:text-lg text-primary-foreground/80 max-w-2xl mx-auto mb-6 sm:mb-8">
-                Join CareConnect — book appointments, track your queue, consult via video, and manage your health records all in one place.
+                Join PulseLink to book fast, consult via secure video, and receive digital prescriptions from licensed doctors.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                 <Link href="/signup">
                   <Button size="lg" variant="secondary" className="text-sm sm:text-base lg:text-lg px-6 sm:px-8 h-11 sm:h-12 w-full sm:w-auto">
-                    Get Started Free
+                    Sign Up Free
                     <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                   </Button>
                 </Link>
                 <Link href="/signin">
                   <Button size="lg" variant="outline" className="text-sm sm:text-base lg:text-lg px-6 sm:px-8 h-11 sm:h-12 border-primary-foreground/60 text-primary-foreground bg-primary-foreground/10 hover:bg-primary-foreground/20 w-full sm:w-auto">
                     <Users className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                    Sign In
+                    Browse Doctors
                   </Button>
                 </Link>
               </div>
@@ -480,9 +578,9 @@ export default function LandingPage() {
             <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg gradient-primary">
               <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground" />
             </div>
-            <span className="text-base sm:text-lg lg:text-xl font-bold text-foreground">CareConnect</span>
+            <span className="text-base sm:text-lg lg:text-xl font-bold text-foreground">PulseLink</span>
           </Link>
-          <p className="text-xs sm:text-sm text-muted-foreground">&copy; {new Date().getFullYear()} CareConnect. All rights reserved.</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">&copy; {new Date().getFullYear()} PulseLink. All rights reserved.</p>
           <a href="mailto:careconnect126@gmail.com" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors" title="careconnect126@gmail.com">
             <img src="/gmail.svg" alt="Gmail" className="h-4 w-4 sm:h-5 sm:w-5" />
             <span className="hidden sm:inline">careconnect126@gmail.com</span>

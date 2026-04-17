@@ -1179,6 +1179,40 @@ const doctorService = {
                 error: errorMsg
             };
         }
+    },
+    async createDoctorLivenessSession () {
+        try {
+            const data = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["api"].post(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].DOCTOR_LIVENESS_SESSION, {});
+            return {
+                data,
+                success: true
+            };
+        } catch (err) {
+            const errorMsg = err instanceof __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ApiError"] ? err.message : err?.message ?? "Failed to create face liveness session.";
+            return {
+                data: null,
+                success: false,
+                error: errorMsg
+            };
+        }
+    },
+    async completeDoctorLivenessSession (sessionId) {
+        try {
+            const data = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["api"].post(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].DOCTOR_LIVENESS_COMPLETE, {
+                session_id: sessionId
+            });
+            return {
+                data,
+                success: true
+            };
+        } catch (err) {
+            const errorMsg = err instanceof __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ApiError"] ? err.message : err?.message ?? "Failed to verify face liveness.";
+            return {
+                data: null,
+                success: false,
+                error: errorMsg
+            };
+        }
     }
 };
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
@@ -1526,7 +1560,7 @@ function DashboardLayout({ children }) {
                                                 opacity: 1
                                             },
                                             className: "text-xl font-bold text-foreground",
-                                            children: "CareConnect"
+                                            children: "PulseLink"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/layout/DashboardLayout.tsx",
                                             lineNumber: 192,
@@ -1766,7 +1800,7 @@ function DashboardLayout({ children }) {
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                         className: "text-xl font-bold text-foreground",
-                                                        children: "CareConnect"
+                                                        children: "PulseLink"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/layout/DashboardLayout.tsx",
                                                         lineNumber: 291,
@@ -2473,7 +2507,7 @@ function useNotifications() {
                     })["useNotifications.useEffect.connect"];
                     ws.onclose = ({
                         "useNotifications.useEffect.connect": (event)=>{
-                            if (shouldReconnectRef.current && retryRef.current < 5 && event.code !== 1000 && event.code !== 1001) {
+                            if (shouldReconnectRef.current && retryRef.current < 5 && event.code !== 1000 && event.code !== 1001 && event.code !== 4001) {
                                 const delay = Math.min(30000, 1000 * 2 ** retryRef.current);
                                 retryRef.current += 1;
                                 reconnectTimerRef.current = setTimeout(connect, delay);
@@ -2569,12 +2603,14 @@ var _s = __turbopack_context__.k.signature();
 function DoctorLayout({ children }) {
     _s();
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"])();
+    const pathname = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePathname"])();
     const user = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$store$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAuthStore"])({
         "DoctorLayout.useAuthStore[user]": (s)=>s.user
     }["DoctorLayout.useAuthStore[user]"]);
     const isLoading = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$store$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAuthStore"])({
         "DoctorLayout.useAuthStore[isLoading]": (s)=>s.isLoading
     }["DoctorLayout.useAuthStore[isLoading]"]);
+    const isProfileCompletion = pathname === '/doctor/profile/complete' || pathname?.startsWith('/doctor/profile/complete/');
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$useNotifications$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useNotifications"])();
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "DoctorLayout.useEffect": ()=>{
@@ -2585,23 +2621,40 @@ function DoctorLayout({ children }) {
         user,
         router
     ]);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "DoctorLayout.useEffect": ()=>{
+            if (isLoading || !user) return;
+            if (isProfileCompletion) return;
+            const needsCompletion = user.role === 'doctor' && user.doctorProfileComplete === false;
+            if (needsCompletion) router.replace('/doctor/profile/complete');
+        }
+    }["DoctorLayout.useEffect"], [
+        isLoading,
+        user,
+        isProfileCompletion,
+        router
+    ]);
     if (isLoading) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$page$2d$loader$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["PageLoader"], {}, void 0, false, {
         fileName: "[project]/app/(doctor)/layout.tsx",
-        lineNumber: 25,
+        lineNumber: 35,
         columnNumber: 25
     }, this);
     if (!user) return null;
+    if (isProfileCompletion) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+        children: children
+    }, void 0, false);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$layout$2f$DashboardLayout$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
         children: children
     }, void 0, false, {
         fileName: "[project]/app/(doctor)/layout.tsx",
-        lineNumber: 28,
+        lineNumber: 40,
         columnNumber: 10
     }, this);
 }
-_s(DoctorLayout, "U+WXw3NaITXyUshTWrH3DWrJnog=", false, function() {
+_s(DoctorLayout, "GxXtngNppDp4Wz0+f2pKairiNb0=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"],
+        __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePathname"],
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$store$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAuthStore"],
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$store$2f$index$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAuthStore"],
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$useNotifications$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useNotifications"]

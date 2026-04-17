@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import {
   User, Phone, Mail, MapPin, Edit2, Save, X,
   Star, Clock, Camera, Lock, CheckCircle, Stethoscope,
-  Building2, Languages, DollarSign, CalendarDays, Award, Plus, PenLine,
+  Building2, Languages, DollarSign, CalendarDays, Award, Plus,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -64,36 +64,6 @@ export default function DoctorProfilePage() {
 
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [uploadingSignature, setUploadingSignature] = useState(false);
-  const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
-
-  const handleSignatureChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    // Show local blob preview immediately for instant feedback
-    const blobUrl = URL.createObjectURL(file);
-    setSignaturePreview(blobUrl);
-    setUploadingSignature(true);
-    try {
-      const form = new FormData();
-      form.append('signature', file);
-      const res = await axiosClient.patch(API_ENDPOINTS.DOCTOR_PROFILE_COMPLETE, form, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      // Replace blob URL with the real server URL so it persists after refresh
-      const serverSigUrl: string | undefined = res.data?.signature;
-      if (serverSigUrl) setSignaturePreview(serverSigUrl);
-      toast({ title: 'Signature uploaded', description: 'Your e-signature will appear on new prescriptions.' });
-    } catch (err) {
-      const message = axios.isAxiosError(err)
-        ? ((err.response?.data as { detail?: string })?.detail ?? err.message)
-        : 'Failed to upload signature.';
-      toast({ title: 'Upload failed', description: message, variant: 'destructive' });
-      setSignaturePreview(null);
-    } finally {
-      setUploadingSignature(false);
-    }
-  };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -161,11 +131,6 @@ export default function DoctorProfilePage() {
         setProfile(buildProfileState(mapped));
         setSelectedServices(mapped.services ?? []);
         setSelectedHmos(mapped.hmoAccepted ?? []);
-        // Seed signature preview from existing profile data
-        const mappedWithSig = mapped as Doctor & { signature?: string };
-        if (mappedWithSig.signature) {
-          setSignaturePreview(mappedWithSig.signature);
-        }
         if (mapped.clinicLat && mapped.clinicLng) {
           setClinicLocation({
             address: mapped.clinicAddress ?? '',
@@ -440,59 +405,6 @@ export default function DoctorProfilePage() {
                       )}
                     </div>
                   )}
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* ── E-SIGNATURE ── */}
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <PenLine className="h-4 w-4 text-primary" /> E-Signature
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-xs text-muted-foreground">
-                    Upload a PNG with a transparent background. It will appear on all generated prescription PDFs.
-                  </p>
-                  <div className="flex items-center gap-4">
-                    <div className="w-48 h-20 border-2 border-dashed border-border rounded-xl flex items-center justify-center bg-muted/30 overflow-hidden shrink-0">
-                      {signaturePreview ? (
-                        <img
-                          src={signaturePreview}
-                          alt="E-Signature preview"
-                          className="max-h-full max-w-full object-contain p-2"
-                        />
-                      ) : (
-                        <span className="text-xs text-muted-foreground text-center px-2">No signature uploaded</span>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <label
-                        htmlFor="signature-upload"
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium cursor-pointer hover:bg-primary/90 transition-colors"
-                      >
-                        {uploadingSignature
-                          ? <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          : <Camera className="h-4 w-4" />}
-                        {uploadingSignature ? 'Uploading...' : 'Upload Signature'}
-                        <input
-                          id="signature-upload"
-                          type="file"
-                          accept="image/png,image/jpeg,image/webp"
-                          className="sr-only"
-                          onChange={handleSignatureChange}
-                          disabled={uploadingSignature}
-                        />
-                      </label>
-                      {signaturePreview && !uploadingSignature && (
-                        <div className="flex items-center gap-1.5 text-xs text-success">
-                          <CheckCircle className="h-3.5 w-3.5" /> Signature uploaded
-                        </div>
-                      )}
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
             </motion.div>

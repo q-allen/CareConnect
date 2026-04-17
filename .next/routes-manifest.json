@@ -22,17 +22,17 @@
     "afterFiles": [
       {
         "source": "/api/:path*",
-        "destination": "http://localhost:8000/api/:path*",
+        "destination": "http://127.0.0.1:8000/api/:path*",
         "regex": "^/api(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))?(?:/)?$"
       },
       {
         "source": "/ws/:path*",
-        "destination": "http://localhost:8000/ws/:path*",
+        "destination": "http://127.0.0.1:8000/ws/:path*",
         "regex": "^/ws(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))?(?:/)?$"
       },
       {
         "source": "/media/:path*",
-        "destination": "http://localhost:8000/media/:path*",
+        "destination": "http://127.0.0.1:8000/media/:path*",
         "regex": "^/media(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))?(?:/)?$"
       }
     ],
@@ -120,10 +120,16 @@
       "namedRegex": "^/doctor/appointments(?:/)?$"
     },
     {
-      "page": "/doctor/dashboard",
-      "regex": "^/doctor/dashboard(?:/)?$",
+      "page": "/doctor/earnings",
+      "regex": "^/doctor/earnings(?:/)?$",
       "routeKeys": {},
-      "namedRegex": "^/doctor/dashboard(?:/)?$"
+      "namedRegex": "^/doctor/earnings(?:/)?$"
+    },
+    {
+      "page": "/doctor/earnings/payout-request",
+      "regex": "^/doctor/earnings/payout\\-request(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/doctor/earnings/payout\\-request(?:/)?$"
     },
     {
       "page": "/doctor/lab-results",
@@ -316,6 +322,12 @@
       "regex": "^/signup(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/signup(?:/)?$"
+    },
+    {
+      "page": "/terms-and-conditions",
+      "regex": "^/terms\\-and\\-conditions(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/terms\\-and\\-conditions(?:/)?$"
     }
   ],
   "dataRoutes": [],

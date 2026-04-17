@@ -3,7 +3,7 @@
 /**
  * /doctor/earnings
  *
- * Doctor Earnings Dashboard — CareConnect
+ * Doctor Earnings Dashboard — PulseLink
  *
  * Shows:
  *   - Summary cards: Total Earnings, Commission Deducted, Available for Payout, Paid Out
@@ -129,7 +129,7 @@ export default function EarningsPage() {
         <Info className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
         <div className="text-sm text-blue-800 dark:text-blue-300">
           <span className="font-semibold">How commissions work: </span>
-          CareConnect takes a <span className="font-bold">15% platform fee</span> on every completed
+          PulseLink takes a <span className="font-bold">15% platform fee</span> on every completed
           online consultation. You keep <span className="font-bold">85%</span> of the fee.
           In-clinic consultations have <span className="font-bold">0% commission</span> — you keep 100%.
           Example: ₱800 online consult → ₱120 platform fee → <span className="font-bold">₱680 to you</span>.
@@ -348,3 +348,4 @@ export default function EarningsPage() {
     </div>
   );
 }
+

@@ -1,4 +1,5 @@
 import "./globals.css";
+import "@aws-amplify/ui-react/styles.css";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { Providers } from "./providers";
@@ -11,7 +12,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "CareConnect",
+  title: "PulseLink",
   description: "Healthcare at your fingertips.",
 };
 
@@ -33,3 +34,4 @@ export default function RootLayout({
     </html>
   );
 }
+

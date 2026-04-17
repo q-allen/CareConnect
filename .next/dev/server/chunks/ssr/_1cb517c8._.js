@@ -795,6 +795,40 @@ const doctorService = {
                 error: errorMsg
             };
         }
+    },
+    async createDoctorLivenessSession () {
+        try {
+            const data = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["api"].post(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].DOCTOR_LIVENESS_SESSION, {});
+            return {
+                data,
+                success: true
+            };
+        } catch (err) {
+            const errorMsg = err instanceof __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["ApiError"] ? err.message : err?.message ?? "Failed to create face liveness session.";
+            return {
+                data: null,
+                success: false,
+                error: errorMsg
+            };
+        }
+    },
+    async completeDoctorLivenessSession (sessionId) {
+        try {
+            const data = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["api"].post(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].DOCTOR_LIVENESS_COMPLETE, {
+                session_id: sessionId
+            });
+            return {
+                data,
+                success: true
+            };
+        } catch (err) {
+            const errorMsg = err instanceof __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["ApiError"] ? err.message : err?.message ?? "Failed to verify face liveness.";
+            return {
+                data: null,
+                success: false,
+                error: errorMsg
+            };
+        }
     }
 };
 }),
@@ -1067,7 +1101,7 @@ function DashboardLayout({ children }) {
                                                 opacity: 1
                                             },
                                             className: "text-xl font-bold text-foreground",
-                                            children: "CareConnect"
+                                            children: "PulseLink"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/layout/DashboardLayout.tsx",
                                             lineNumber: 192,
@@ -1307,7 +1341,7 @@ function DashboardLayout({ children }) {
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                         className: "text-xl font-bold text-foreground",
-                                                        children: "CareConnect"
+                                                        children: "PulseLink"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/layout/DashboardLayout.tsx",
                                                         lineNumber: 291,

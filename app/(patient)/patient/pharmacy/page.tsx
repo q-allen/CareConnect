@@ -153,20 +153,13 @@ export default function PharmacyPage() {
 
   // Delivery tracking state
   const [myOrders, setMyOrders] = useState<BackendOrder[]>([]);
-  const [ordersLoading, setOrdersLoading] = useState(false);
-  const [showOrders, setShowOrders] = useState(false);
+  const fromNotification = searchParams.get('orders') === '1';
+  const [ordersLoading, setOrdersLoading] = useState(fromNotification);
+  const [showOrders, setShowOrders] = useState(fromNotification);
 
   // Pre-fill banner: show when cart was populated from a prescription
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const showPrefillBanner = !!prescriptionId && !bannerDismissed;
-
-  // Auto-open orders panel when redirected from a notification
-  useEffect(() => {
-    if (searchParams.get('orders') === '1') {
-      setOrdersLoading(true);
-      setShowOrders(true);
-    }
-  }, []);
 
   // Load medicine catalogue
   useEffect(() => {

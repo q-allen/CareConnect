@@ -257,6 +257,14 @@ export const appointmentService = {
     return { data: mapReview(result), success: true };
   },
 
+  async rescheduleAppointment(id: string, date: string, time: string): Promise<ApiResponse<Appointment>> {
+    const result = await api.post<RawAppointment>(
+      API_ENDPOINTS.APPOINTMENT_RESCHEDULE(id),
+      { date, time },
+    );
+    return { data: mapAppointment(result), success: true, message: "Appointment rescheduled successfully" };
+  },
+
   async getUpcomingAppointments(): Promise<ApiResponse<Appointment[]>> {
     const data = await api.get<RawAppointment[]>(API_ENDPOINTS.APPOINTMENT_UPCOMING);
     return { data: data.map(mapAppointment), success: true };

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store';
 import { useNotifications } from '@/hooks/useNotifications';
 import { PageLoader } from '@/components/ui/page-loader';
+import IncomingCallOverlay from '@/components/patient/IncomingCallOverlay';
 
 interface PatientLayoutProps {
   children: ReactNode;
@@ -24,5 +25,10 @@ export default function PatientLayout({ children }: PatientLayoutProps) {
   if (isLoading) return <PageLoader />;
   if (!user) return null;
 
-  return children;
+  return (
+    <>
+      <IncomingCallOverlay />
+      {children}
+    </>
+  );
 }

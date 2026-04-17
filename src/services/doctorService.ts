@@ -41,6 +41,23 @@ export interface DoctorProfileCompletionResponse {
   face_left: string | null;
   face_right: string | null;
   is_face_verified: boolean;
+  face_verification_status?: string;
+  face_verification_error?: string;
+}
+
+export interface DoctorLivenessSessionResponse {
+  session_id: string;
+  region: string;
+  credentials: {
+    accessKeyId: string;
+    secretAccessKey: string;
+    sessionToken: string;
+    expiration: string;
+  };
+}
+
+export interface DoctorLivenessCompleteResponse extends DoctorProfileCompletionResponse {
+  session_id: string;
 }
 
 export interface DoctorSlot {
@@ -372,6 +389,38 @@ export const doctorService = {
         errorMsg = err.message;
       }
       return { data: null as unknown as DoctorProfileCompletionResponse, success: false, error: errorMsg };
+    }
+  },
+
+  async createDoctorLivenessSession(): Promise<ApiResponse<DoctorLivenessSessionResponse>> {
+    try {
+      const data = await api.post<DoctorLivenessSessionResponse>(
+        API_ENDPOINTS.DOCTOR_LIVENESS_SESSION,
+        {}
+      );
+      return { data, success: true };
+    } catch (err: unknown) {
+      const errorMsg = err instanceof ApiError
+        ? err.message
+        : (err as Error)?.message ?? "Failed to create face liveness session.";
+      return { data: null as unknown as DoctorLivenessSessionResponse, success: false, error: errorMsg };
+    }
+  },
+
+  async completeDoctorLivenessSession(
+    sessionId: string
+  ): Promise<ApiResponse<DoctorLivenessCompleteResponse>> {
+    try {
+      const data = await api.post<DoctorLivenessCompleteResponse>(
+        API_ENDPOINTS.DOCTOR_LIVENESS_COMPLETE,
+        { session_id: sessionId }
+      );
+      return { data, success: true };
+    } catch (err: unknown) {
+      const errorMsg = err instanceof ApiError
+        ? err.message
+        : (err as Error)?.message ?? "Failed to verify face liveness.";
+      return { data: null as unknown as DoctorLivenessCompleteResponse, success: false, error: errorMsg };
     }
   },
 };

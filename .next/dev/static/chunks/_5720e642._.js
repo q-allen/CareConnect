@@ -283,7 +283,7 @@ function SignInPage() {
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                 className: "text-xl font-bold text-white tracking-tight",
-                                children: "CareConnect"
+                                children: "PulseLink"
                             }, void 0, false, {
                                 fileName: "[project]/app/(auth)/signin/page.tsx",
                                 lineNumber: 84,
@@ -408,7 +408,7 @@ function SignInPage() {
                         children: [
                             "© ",
                             new Date().getFullYear(),
-                            " CareConnect. All rights reserved."
+                            " PulseLink. All rights reserved."
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/(auth)/signin/page.tsx",
@@ -443,7 +443,7 @@ function SignInPage() {
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                 className: "text-xl font-bold text-foreground",
-                                children: "CareConnect"
+                                children: "PulseLink"
                             }, void 0, false, {
                                 fileName: "[project]/app/(auth)/signin/page.tsx",
                                 lineNumber: 127,

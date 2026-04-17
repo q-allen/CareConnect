@@ -112,7 +112,7 @@ export default function PaymentStep({ onRetry }: PaymentStepProps) {
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">
             {selectedDoctor?.specialty}
-            {' · '}Payment is processed securely via CareConnect (PayMongo).
+            {' · '}Payment is processed securely via PulseLink (PayMongo).
             Your receipt will be emailed to you after payment.
           </p>
         </div>
@@ -280,3 +280,4 @@ export default function PaymentStep({ onRetry }: PaymentStepProps) {
     </div>
   );
 }
+

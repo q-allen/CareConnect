@@ -327,15 +327,15 @@ self.__SERVER_FILES_MANIFEST={
       "afterFiles": [
         {
           "source": "/api/:path*",
-          "destination": "http://localhost:8000/api/:path*"
+          "destination": "http://127.0.0.1:8000/api/:path*"
         },
         {
           "source": "/ws/:path*",
-          "destination": "http://localhost:8000/ws/:path*"
+          "destination": "http://127.0.0.1:8000/ws/:path*"
         },
         {
           "source": "/media/:path*",
-          "destination": "http://localhost:8000/media/:path*"
+          "destination": "http://127.0.0.1:8000/media/:path*"
         }
       ],
       "fallback": []

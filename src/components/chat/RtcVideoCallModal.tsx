@@ -19,7 +19,7 @@ export default function RtcVideoCallModal({
   displayName,
   onEnd,
 }: RtcVideoCallModalProps) {
-  const safeRoom = useMemo(() => sanitizeRoomName(roomName) || `careconnect-${doctor.id}`, [roomName, doctor.id]);
+  const safeRoom = useMemo(() => sanitizeRoomName(roomName) || `PulseLink-${doctor.id}`, [roomName, doctor.id]);
 
   return (
     <motion.div
@@ -44,3 +44,4 @@ export default function RtcVideoCallModal({
     </motion.div>
   );
 }
+

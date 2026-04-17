@@ -10,7 +10,7 @@
  *   Step 3 — Schedule
  *   Step 4 — Specialty
  *   Step 5 — Documents & Signature
- *   Step 6 — Face Verification (liveness + blink)
+ *   Step 6 — Face Verification (AWS liveness)
  *
  * Mandatory: doctors cannot leave this page or skip steps until
  * is_profile_complete = true.
@@ -40,10 +40,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import AutoCaptureFaceVerification from "@/components/doctor/AutoCaptureFaceVerification";
 import { useAuthStore } from "@/store";
 import { useToast } from "@/hooks/use-toast";
-import { doctorService, DoctorProfileCompletionData } from "@/services/doctorService";
+import AwsFaceLivenessVerification from "@/components/doctor/AwsFaceLivenessVerification";
+import {
+  doctorService,
+  DoctorLivenessCompleteResponse,
+  DoctorProfileCompletionData,
+} from "@/services/doctorService";
 import axiosClient from "@/services/axiosClient";
 import { API_ENDPOINTS } from "@/services/api";
 import { mapDoctorFromDetail } from "@/services/mappers";
@@ -144,18 +148,19 @@ export default function DoctorProfileCompletePage() {
   const prcInputRef = useRef<HTMLInputElement | null>(null);
 
   // Step 6 — Face Verification
-  const [faceFrontFile, setFaceFrontFile] = useState<File | null>(null);
-  const [faceLeftFile, setFaceLeftFile] = useState<File | null>(null);
-  const [faceRightFile, setFaceRightFile] = useState<File | null>(null);
   const [faceFrontPreview, setFaceFrontPreview] = useState("");
-  const [faceLeftPreview, setFaceLeftPreview] = useState("");
-  const [faceRightPreview, setFaceRightPreview] = useState("");
   const [isFaceVerified, setIsFaceVerified] = useState(false);
+  const [faceVerificationStatus, setFaceVerificationStatus] = useState("pending");
+  const [faceVerificationError, setFaceVerificationError] = useState("");
 
   const [faceCaptureOpen, setFaceCaptureOpen] = useState(false);
 
   // ── Pre-populate from existing profile ──────────────────────────────────
   useEffect(() => {
+    if (!user) {
+      setLoadingProfile(false);
+      return;
+    }
     const load = async () => {
       try {
         const res = await axiosClient.get(API_ENDPOINTS.DOCTOR_PROFILE_COMPLETE);
@@ -208,9 +213,9 @@ export default function DoctorProfileCompletePage() {
         if (signatureUrl) setSignaturePreview(toMediaUrl(signatureUrl));
         if (prcUrl) setPrcCardPreview(toMediaUrl(prcUrl));
         if (detail?.face_front) setFaceFrontPreview(toMediaUrl(detail.face_front));
-        if (detail?.face_left) setFaceLeftPreview(toMediaUrl(detail.face_left));
-        if (detail?.face_right) setFaceRightPreview(toMediaUrl(detail.face_right));
         if (detail?.is_face_verified !== undefined) setIsFaceVerified(Boolean(detail.is_face_verified));
+        if (detail?.face_verification_status) setFaceVerificationStatus(detail.face_verification_status);
+        if (detail?.face_verification_error) setFaceVerificationError(detail.face_verification_error);
 
         if (detail?.is_profile_complete) {
           setAllowLeave(true);
@@ -225,7 +230,7 @@ export default function DoctorProfileCompletePage() {
       }
     };
     load();
-  }, [router, setDoctorProfileComplete]);
+  }, [user, router, setDoctorProfileComplete]);
 
   // ── Block navigation away until profile is complete ──────────────────────
   useEffect(() => {
@@ -290,11 +295,8 @@ export default function DoctorProfileCompletePage() {
   // ── Validation ────────────────────────────────────────────────────────────
   const step2Valid = Boolean(clinicName.trim()) && Boolean(feeOnline || feeInPerson);
   const step4Valid = Boolean(specialty);
-  const step5Valid = Boolean(signatureFile || signaturePreview) && Boolean(prcCardFile || prcCardPreview);
-  const step6Valid = Boolean(faceFrontFile || faceFrontPreview)
-    && Boolean(faceLeftFile || faceLeftPreview)
-    && Boolean(faceRightFile || faceRightPreview)
-    && Boolean(isFaceVerified);
+  const step5Valid = Boolean(prcCardFile || prcCardPreview);
+  const step6Valid = Boolean(faceFrontPreview) && Boolean(isFaceVerified);
 
   const stepValidity: Record<number, boolean> = {
     1: true,
@@ -400,10 +402,11 @@ export default function DoctorProfileCompletePage() {
       if (prcCardFile) payload.prc_card_image = prcCardFile;
       ok = await saveStep(payload);
     } else {
+      if (!step6Valid) {
+        toast({ title: "Face verification required", description: "Please complete the liveness check before finishing.", variant: "destructive" });
+        return;
+      }
       ok = await saveStep({
-        face_front: faceFrontFile ?? undefined,
-        face_left:  faceLeftFile ?? undefined,
-        face_right: faceRightFile ?? undefined,
         is_profile_complete: true,
       });
       if (ok) {
@@ -437,24 +440,20 @@ export default function DoctorProfileCompletePage() {
     setSubInput("");
   };
 
-  const handleAutoCaptureComplete = (photos: { front: Blob; left: Blob; right: Blob }) => {
-    const ts = Date.now();
-    const frontFile = new File([photos.front], `face-front-${ts}.jpg`, { type: photos.front.type || "image/jpeg" });
-    const leftFile = new File([photos.left], `face-left-${ts}.jpg`, { type: photos.left.type || "image/jpeg" });
-    const rightFile = new File([photos.right], `face-right-${ts}.jpg`, { type: photos.right.type || "image/jpeg" });
-
-    setFaceFrontFile(frontFile);
-    setFaceLeftFile(leftFile);
-    setFaceRightFile(rightFile);
-    setFaceFrontPreview(URL.createObjectURL(frontFile));
-    setFaceLeftPreview(URL.createObjectURL(leftFile));
-    setFaceRightPreview(URL.createObjectURL(rightFile));
-    setIsFaceVerified(true);
+  const handleLivenessVerified = (result: DoctorLivenessCompleteResponse) => {
+    setFaceFrontPreview(toMediaUrl(result.face_front ?? ""));
+    setIsFaceVerified(Boolean(result.is_face_verified));
+    setFaceVerificationStatus(result.face_verification_status ?? "verified");
+    setFaceVerificationError(result.face_verification_error ?? "");
     setFaceCaptureOpen(false);
-    toast({ title: "Face capture complete", description: "Your photos were captured successfully." });
+    toast({
+      title: "Face verification complete",
+      description: "Your liveness check passed and your face matched your PRC card.",
+    });
   };
 
   const startFaceCapture = () => {
+    setFaceVerificationError("");
     setFaceCaptureOpen(true);
   };
 
@@ -477,7 +476,7 @@ export default function DoctorProfileCompletePage() {
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg">
             <Stethoscope className="h-6 w-6 text-primary-foreground" />
           </div>
-          <span className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">CareConnect</span>
+          <span className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">PulseLink</span>
         </div>
 
         {/* Header */}
@@ -829,12 +828,13 @@ export default function DoctorProfileCompletePage() {
                   <CardTitle className="text-lg flex items-center gap-2">
                     <FileImage className="h-5 w-5 text-primary" /> Documents & Signature
                   </CardTitle>
-                  <p className="text-xs text-muted-foreground mt-1">Required — uploads are mandatory</p>
+                  <p className="text-xs text-muted-foreground mt-1">PRC card is required — signature can be added later from your profile</p>
                 </CardHeader>
                 <CardContent className="space-y-5">
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2">
-                      <FileImage className="h-4 w-4 text-primary" /> E-Signature (PNG, transparent background) *
+                      <FileImage className="h-4 w-4 text-primary" /> E-Signature (PNG, transparent background)
+                      <span className="text-xs text-muted-foreground font-normal">(optional — can be added later)</span>
                     </Label>
                     <div className="flex items-center gap-4">
                       <div className="h-20 w-40 border rounded-md flex items-center justify-center bg-muted/30 overflow-hidden">
@@ -893,7 +893,7 @@ export default function DoctorProfileCompletePage() {
                   {!step5Valid && (
                     <div className="flex items-start gap-2 text-xs text-destructive">
                       <AlertTriangle className="h-3.5 w-3.5 mt-0.5" />
-                      Both E-signature (PNG) and PRC card photo are required to continue.
+                      PRC card photo is required to continue.
                     </div>
                   )}
                 </CardContent>
@@ -905,34 +905,36 @@ export default function DoctorProfileCompletePage() {
               <Card className="shadow-xl border-2">
                 <CardHeader className="pb-4 bg-gradient-to-br from-primary/5 to-transparent">
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <ScanFace className="h-5 w-5 text-primary" /> Face Verification (Liveness)
+                    <ScanFace className="h-5 w-5 text-primary" /> Face Verification
                   </CardTitle>
-                  <p className="text-xs text-muted-foreground mt-1">Required — auto-capture 3 angles + blink detection</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Your live photo will be matched against your PRC card to confirm your identity.
+                  </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {([
-                      { key: "front", label: "Front" , preview: faceFrontPreview },
-                      { key: "left",  label: "Left"  , preview: faceLeftPreview },
-                      { key: "right", label: "Right" , preview: faceRightPreview },
-                    ] as const).map((item) => (
-                      <div key={item.key} className="border rounded-lg p-3 space-y-2">
-                        <div className="text-sm font-medium">{item.label} Face</div>
-                        <div className="h-24 rounded-md border bg-muted/30 flex items-center justify-center overflow-hidden">
-                          {item.preview ? (
-                            <img src={item.preview} alt={`${item.label} face`} className="h-24 w-auto" />
-                          ) : (
-                            <span className="text-xs text-muted-foreground">No photo</span>
-                          )}
-                        </div>
+
+                  {/* Captured reference image */}
+                  <div className="flex flex-col items-center gap-3 p-4 border rounded-lg bg-muted/20">
+                    <p className="text-sm font-medium text-muted-foreground">Captured Photo</p>
+                    <div className="h-32 w-32 rounded-full border-4 border-primary/20 bg-muted/30 flex items-center justify-center overflow-hidden">
+                      {faceFrontPreview ? (
+                        <img src={faceFrontPreview} alt="Captured face" className="h-full w-full object-cover" />
+                      ) : (
+                        <ScanFace className="h-10 w-10 text-muted-foreground/40" />
+                      )}
+                    </div>
+                    {isFaceVerified && (
+                      <div className="flex items-center gap-1.5 text-emerald-600 text-xs font-medium">
+                        <Check className="h-3.5 w-3.5" /> Matched with PRC card
                       </div>
-                    ))}
+                    )}
                   </div>
 
+                  {/* Status + action */}
                   <div className="p-3 border rounded-lg flex items-start justify-between gap-3">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 text-sm font-medium">
-                        <ShieldCheck className="h-4 w-4 text-primary" /> Liveness Check
+                        <ShieldCheck className="h-4 w-4 text-primary" /> Identity Check
                         {isFaceVerified ? (
                           <Badge className="bg-emerald-600 text-white">Verified</Badge>
                         ) : (
@@ -940,19 +942,31 @@ export default function DoctorProfileCompletePage() {
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Auto-capture will take 3 angles and confirm a blink for liveness.
+                        AWS will run a live challenge then compare your face to your PRC card photo from Step 5.
                       </p>
+                      {faceVerificationStatus !== "pending" && (
+                        <p className="text-xs text-muted-foreground">
+                          Status: <span className="font-medium capitalize">{faceVerificationStatus.replace("_", " ")}</span>
+                        </p>
+                      )}
                     </div>
                     <Button type="button" variant={isFaceVerified ? "outline" : "default"} onClick={startFaceCapture}>
                       <ScanFace className="h-4 w-4 mr-2" />
-                      {isFaceVerified ? "Retake Verification" : "Start Face Verification"}
+                      {isFaceVerified ? "Retake" : "Start Verification"}
                     </Button>
                   </div>
 
-                  {!step6Valid && (
+                  {faceVerificationError && (
                     <div className="flex items-start gap-2 text-xs text-destructive">
                       <AlertTriangle className="h-3.5 w-3.5 mt-0.5" />
-                      Front, left, and right photos plus blink verification are required to finish.
+                      {faceVerificationError}
+                    </div>
+                  )}
+
+                  {!step6Valid && !faceVerificationError && (
+                    <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                      <AlertTriangle className="h-3.5 w-3.5 mt-0.5" />
+                      Complete the face verification before finishing your profile.
                     </div>
                   )}
                 </CardContent>
@@ -992,17 +1006,13 @@ export default function DoctorProfileCompletePage() {
       <Dialog open={faceCaptureOpen} onOpenChange={setFaceCaptureOpen}>
         <DialogContent
           className="max-w-3xl p-0 border-0 bg-transparent shadow-none"
-          aria-labelledby="face-verification-title"
-          aria-describedby="face-verification-desc"
         >
-          <DialogHeader className="sr-only">
-            <DialogTitle id="face-verification-title">Face Verification</DialogTitle>
-            <DialogDescription id="face-verification-desc">
-              Auto-capture face verification with liveness check
-            </DialogDescription>
-          </DialogHeader>
-          <AutoCaptureFaceVerification
-            onComplete={handleAutoCaptureComplete}
+          <DialogTitle className="sr-only">Face Verification</DialogTitle>
+          <DialogDescription className="sr-only">
+            AWS face verification with liveness check
+          </DialogDescription>
+          <AwsFaceLivenessVerification
+            onVerified={handleLivenessVerified}
             onCancel={() => setFaceCaptureOpen(false)}
           />
         </DialogContent>
@@ -1010,3 +1020,4 @@ export default function DoctorProfileCompletePage() {
     </div>
   );
 }
+

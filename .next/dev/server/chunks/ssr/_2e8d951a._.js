@@ -12,12 +12,6 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$webpack$2f$loaders$2f$next$2d$flight$2d$loader$2f$action$2d$validate$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/build/webpack/loaders/next-flight-loader/action-validate.js [app-rsc] (ecmascript)");
 ;
 const PAYMONGO_API_BASE = "https://api.paymongo.com/v1";
-// PayMongo checkout session supports: gcash, card, paymaya, brankas_bdo,
-// brankas_landbank, brankas_metrobank (brankas requires separate activation).
-// For test mode, use "card" as the bank-transfer equivalent.
-const BANK_METHODS = [
-    "card"
-];
 const getAuthHeader = ()=>{
     const secretKey = process.env.PAYMONGO_SECRET_KEY;
     if (!secretKey || secretKey.length < 10) {
@@ -41,7 +35,9 @@ async function createPaymongoCheckoutSession(input) {
             attributes: {
                 payment_method_types: input.method === "gcash" ? [
                     "gcash"
-                ] : BANK_METHODS,
+                ] : [
+                    "card"
+                ],
                 line_items: [
                     {
                         name: `Consultation with ${input.doctorName}`,

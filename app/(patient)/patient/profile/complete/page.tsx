@@ -152,7 +152,7 @@ export default function PatientProfileCompletePage() {
     if (!res.success) { toast({ title: "Error", description: res.error, variant: "destructive" }); return; }
     syncAuthFromBackend(res.data);
     setProfileComplete(true);
-    toast({ title: "Profile complete!", description: "Welcome to CareConnect." });
+    toast({ title: "Profile complete!", description: "Welcome to PulseLink." });
     router.replace("/patient");
   };
 
@@ -236,7 +236,7 @@ export default function PatientProfileCompletePage() {
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg">
             <Heart className="h-6 w-6 text-primary-foreground" />
           </div>
-          <span className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">CareConnect</span>
+          <span className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">PulseLink</span>
         </div>
 
         {/* Header */}
@@ -543,3 +543,4 @@ export default function PatientProfileCompletePage() {
     </div>
   );
 }
+

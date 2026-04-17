@@ -148,7 +148,7 @@ export default function PatientDetailsStep({ onValidationChange }: PatientDetail
     onValidationChange?.(errorMessages.length === 0, errorMessages);
   }, [patientDetails, bookingForSomeoneElse, onValidationChange]);
 
-  // Pre-fill ONLY CareConnect account email (read-only field)
+  // Pre-fill ONLY PulseLink account email (read-only field)
   useEffect(() => {
     if (user?.email && !patientDetails.accountEmail) {
       setPatientDetails({
@@ -192,12 +192,12 @@ export default function PatientDetailsStep({ onValidationChange }: PatientDetail
   return (
     <div className="space-y-6">
 
-      {/* ── Section 1: CareConnect Account ─────────────────────────────── */}
+      {/* ── Section 1: PulseLink Account ─────────────────────────────── */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <User className="h-4 w-4 text-primary" />
-            CareConnect Account
+            PulseLink Account
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -213,10 +213,10 @@ export default function PatientDetailsStep({ onValidationChange }: PatientDetail
               value={patientDetails.accountEmail}
               readOnly
               className="bg-muted/50 cursor-not-allowed text-muted-foreground"
-              aria-label="CareConnect account email (read-only)"
+              aria-label="PulseLink account email (read-only)"
             />
             <p className="text-xs text-muted-foreground">
-              This is the email linked to your CareConnect account.
+              This is the email linked to your PulseLink account.
             </p>
           </div>
         </CardContent>
@@ -427,3 +427,4 @@ export default function PatientDetailsStep({ onValidationChange }: PatientDetail
     </div>
   );
 }
+

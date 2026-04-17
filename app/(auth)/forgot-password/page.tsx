@@ -111,7 +111,7 @@ export default function ForgotPasswordPage() {
           <div className="flex h-9 w-9 items-center justify-center rounded-lg gradient-primary">
             <Activity className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-xl font-bold text-foreground">CareConnect</span>
+          <span className="text-xl font-bold text-foreground">PulseLink</span>
         </div>
 
         <div className="mb-6">
@@ -273,3 +273,4 @@ export default function ForgotPasswordPage() {
     </div>
   );
 }
+

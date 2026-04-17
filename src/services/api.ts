@@ -188,6 +188,8 @@ export const API_ENDPOINTS = {
   DOCTOR_SLOT_DETAIL:   (id: number | string) => `/api/doctors/slots/${id}/`,
   DOCTOR_MY_SCHEDULE:   "/api/doctors/my-schedule/",
   DOCTOR_PROFILE_COMPLETE: "/api/doctors/me/complete/",
+  DOCTOR_LIVENESS_SESSION: "/api/doctors/me/liveness/session/",
+  DOCTOR_LIVENESS_COMPLETE: "/api/doctors/me/liveness/complete/",
   DOCTOR_MY_PATIENTS:   "/api/doctors/my-patients/",
   // Appointments
   APPOINTMENTS:         "/api/appointments/",
@@ -210,6 +212,7 @@ export const API_ENDPOINTS = {
   FOLLOW_UP_INVITATIONS:       "/api/appointments/follow-up-invitations/",
   FOLLOW_UP_INVITATION_DETAIL: (id: number | string) => `/api/appointments/follow-up-invitations/${id}/`,
   FOLLOW_UP_INVITATION_IGNORE: (id: number | string) => `/api/appointments/follow-up-invitations/${id}/ignore/`,
+  APPOINTMENT_RESCHEDULE: (id: number | string) => `/api/appointments/${id}/reschedule/`,
   TODAY_QUEUE:          "/api/appointments/queue/today/",
   // Records
   PRESCRIPTIONS:        "/api/records/prescriptions",
@@ -217,8 +220,10 @@ export const API_ENDPOINTS = {
   PRESCRIPTION_PDF:     (id: number | string) => `/api/records/prescriptions/${id}/pdf/`,
   LAB_RESULTS:          "/api/records/labs",
   LAB_DETAIL:           (id: number | string) => `/api/records/labs/${id}`,
+  LAB_PDF:              (id: number | string) => `/api/records/labs/${id}/pdf/`,
   CERTIFICATES:         `${RECORDS_BASE}/certificates`,
   CERTIFICATE_DETAIL:   (id: number | string) => `${RECORDS_BASE}/certificates/${id}`,
+  CERTIFICATE_PDF:      (id: number | string) => `${RECORDS_BASE}/certificates/${id}/pdf/`,
   CERT_REQUESTS:        `${RECORDS_BASE}/certificates/request`,
   CERT_REQUEST_APPROVE: (id: number | string) => `${RECORDS_BASE}/certificates/request/${id}/approve`,
   CERT_REQUEST_REJECT:  (id: number | string) => `${RECORDS_BASE}/certificates/request/${id}/reject`,

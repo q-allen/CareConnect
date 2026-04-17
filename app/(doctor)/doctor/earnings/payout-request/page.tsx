@@ -3,7 +3,7 @@
 /**
  * /doctor/earnings/payout-request
  *
- * Payout Request Form — CareConnect
+ * Payout Request Form — PulseLink
  *
  * Doctor fills in:
  *   - Amount (validated against available earnings)
@@ -405,5 +405,6 @@ export default function PayoutRequestPage() {
     </div>
   );
 }
+
 
 

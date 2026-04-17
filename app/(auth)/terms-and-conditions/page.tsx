@@ -37,7 +37,7 @@ export default function TermsAndConditionsPage() {
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg">
             <Activity className="h-6 w-6 text-primary-foreground" />
           </div>
-          <span className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">CareConnect</span>
+          <span className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">PulseLink</span>
         </div>
 
         <div className="rounded-3xl border-2 bg-card shadow-2xl p-8 md:p-10">
@@ -55,23 +55,23 @@ export default function TermsAndConditionsPage() {
 
           <ScrollArea className="h-[450px] pr-4 rounded-2xl border-2 bg-gradient-to-br from-muted/40 to-muted/20 p-8 text-sm leading-relaxed shadow-inner">
             <div className="space-y-6">
-              <h2 className="text-lg font-semibold">CareConnect Doctor Terms and Conditions</h2>
+              <h2 className="text-lg font-semibold">PulseLink Doctor Terms and Conditions</h2>
 
               <div>
                 <h3 className="font-semibold mb-2">1. Medical Disclaimer &amp; Limitation of Liability</h3>
                 <p className="text-foreground/80">
-                  CareConnect is a technology platform only. We do not provide medical services, 
+                  PulseLink is a technology platform only. We do not provide medical services, 
                   diagnosis, treatment, or advice. All medical services are provided solely by 
                   independent licensed doctors. 
                 </p>
                 <p className="text-foreground/80 mt-3">
                   <strong>The doctor is solely and exclusively responsible</strong> for all 
                   medical decisions, diagnoses, prescriptions, and care given to the patient. 
-                  CareConnect is not liable for any error, negligence, malpractice, misdiagnosis, 
+                  PulseLink is not liable for any error, negligence, malpractice, misdiagnosis, 
                   or any harm resulting from the doctor’s services. 
                 </p>
                 <p className="text-foreground/80 mt-3 text-red-600 text-xs font-medium">
-                  By using this platform, you agree that CareConnect shall not be held liable 
+                  By using this platform, you agree that PulseLink shall not be held liable 
                   for any medical-related issues or claims arising from your consultation with any doctor.
                 </p>
               </div>
@@ -88,7 +88,7 @@ export default function TermsAndConditionsPage() {
               <div>
                 <h3 className="font-semibold mb-2">3. Platform Commission</h3>
                 <p className="text-foreground/80">
-                  CareConnect charges a 15% commission on all successful online and on-demand 
+                  PulseLink charges a 15% commission on all successful online and on-demand 
                   consultations. In-clinic consultations are commission-free.
                 </p>
               </div>
@@ -104,7 +104,7 @@ export default function TermsAndConditionsPage() {
               <div>
                 <h3 className="font-semibold mb-2">5. Account Termination</h3>
                 <p className="text-foreground/80">
-                  CareConnect reserves the right to suspend or terminate your account for 
+                  PulseLink reserves the right to suspend or terminate your account for 
                   violations of these terms, unprofessional conduct, or repeated patient complaints.
                 </p>
               </div>
@@ -126,9 +126,9 @@ export default function TermsAndConditionsPage() {
               htmlFor="agree"
               className="text-sm leading-tight cursor-pointer text-foreground/90"
             >
-              I have read and fully agree to the CareConnect Doctor Terms and Conditions. 
+              I have read and fully agree to the PulseLink Doctor Terms and Conditions. 
               I understand that I am solely responsible for all medical services I provide 
-              and that CareConnect is not liable for any medical outcomes.
+              and that PulseLink is not liable for any medical outcomes.
             </label>
           </div>
 
