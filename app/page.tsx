@@ -40,32 +40,32 @@ const features = [
   {
     icon: UserCheck,
     title: 'Licensed PRC Doctors',
-    description: 'Consult with verified PRC-licensed physicians across major specialties in the Philippines.',
+    description: 'Consult with verified, PRC-licensed physicians across major specialties.',
   },
   {
     icon: Video,
     title: 'Secure Video Consults',
-    description: 'Talk to your doctor from home through private, reliable video calls optimized for mobile.',
+    description: 'High-quality, private video calls from the comfort of your home.',
   },
   {
     icon: Calendar,
     title: 'Easy Online Booking',
-    description: 'Choose a schedule, select video or in-clinic, and confirm your appointment in minutes.',
+    description: 'Book appointments based on the doctor’s real-time availability.',
   },
   {
     icon: Clock,
     title: 'Real-Time Queue Updates',
-    description: 'Track your live queue position and get notified when your turn is approaching.',
+    description: 'Track your live queue position and get notified when it’s your turn.',
   },
   {
     icon: FileText,
     title: 'Digital Prescriptions',
-    description: 'Receive e-prescriptions and consultation notes right after your visit.',
+    description: 'Receive e-prescriptions and consultation notes instantly after your visit.',
   },
   {
     icon: Wallet,
     title: 'Flexible Payments',
-    description: 'Pay via GCash, credit/debit card, or cash on clinic depending on the doctor’s options.',
+    description: 'Pay securely via GCash, card, or cash directly at the clinic.',
   },
 ];
 
@@ -87,25 +87,25 @@ const bookingSteps = [
     step: 1,
     icon: UserCheck,
     title: 'Create an Account or Log In',
-    description: 'Sign up in minutes or log in to continue your consultation journey.',
+    description: 'Sign up or log in to start booking consultations with licensed doctors.',
   },
   {
     step: 2,
     icon: Users,
     title: 'Browse Doctors',
-    description: 'Filter by specialty, consultation type, and schedule to find the right doctor.',
+    description: 'Search and filter doctors by specialty and availability.',
   },
   {
     step: 3,
     icon: Calendar,
     title: 'Book an Appointment',
-    description: 'Pick your preferred time and confirm your online or in-clinic visit.',
+    description: 'Choose a date and time based on the doctor’s available schedule for online or in-clinic consultation.',
   },
   {
     step: 4,
     icon: Video,
-    title: 'Consult via Video or Visit Clinic',
-    description: 'Meet your doctor securely online or attend the clinic as scheduled.',
+    title: 'Consult with the Doctor',
+    description: 'Join a secure video call or visit the clinic on your scheduled time.',
   },
 ];
 
@@ -222,14 +222,19 @@ export default function LandingPage() {
               transition={{ duration: 0.6 }}
               className="text-center lg:text-left"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6"
+              >
                 <CheckCircle2 className="h-4 w-4" />
                 <span>Fast, secure online doctor consultations in the Philippines</span>
-              </div>
+              </motion.div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
-                Talk to a Doctor from Home —{' '}
-                <span className="text-gradient">Anytime, Anywhere</span>
+                Talk to a Licensed Doctor Online —{' '}
+                <span className="text-gradient">According to Their Schedule</span>
               </h1>
 
               <p className="text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-8">
@@ -258,6 +263,7 @@ export default function LandingPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
+                    whileHover={{ scale: 1.05, y: -5 }}
                     className="text-center"
                   >
                     <div className="text-2xl sm:text-3xl font-bold text-primary">{stat.value}</div>
@@ -330,7 +336,7 @@ export default function LandingPage() {
             className="text-center mb-12"
           >
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              Top Specialties for Online Consultations
+              Top Specialties for <span className="text-gradient">Online Consultations</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Connect with doctors across the most in-demand specialties available on PulseLink
@@ -415,7 +421,7 @@ export default function LandingPage() {
             className="text-center mb-16"
           >
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              How Online Consultations Work
+              How <span className="text-gradient">Online Consultations</span> Work
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Follow these simple steps to consult with a licensed doctor on PulseLink
@@ -426,7 +432,7 @@ export default function LandingPage() {
             {/* Connection Line */}
             <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-0.5 bg-border -translate-y-1/2" />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6">
               {bookingSteps.map((step, index) => (
                 <motion.div
                   key={step.step}
@@ -484,7 +490,7 @@ export default function LandingPage() {
             className="text-center mb-16"
           >
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              Built for Fast and Trusted Telemedicine
+              Built for Fast and <span className="text-gradient">Trusted Telemedicine</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               From licensed doctors to secure video calls and digital prescriptions, everything is designed for online care.

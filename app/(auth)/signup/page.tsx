@@ -238,13 +238,12 @@ export default function SignUpPage() {
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* ── LEFT PANEL ── */}
+      {/* LEFT PANEL - Eye-catching Visual */}
       <div className="hidden lg:flex lg:w-1/2 gradient-hero flex-col p-12 justify-between relative overflow-hidden">
-        {/* Decorative circles */}
         <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-white/5 blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full bg-white/5 blur-2xl pointer-events-none" />
 
-        {/* Logo */}
+      <div className="space-y-40">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -254,44 +253,28 @@ export default function SignUpPage() {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur">
             <Activity className="h-5 w-5 text-white" />
           </div>
-          <span className="text-xl font-bold text-white tracking-tight">PulseLink</span>
+          <span className="text-2xl font-bold text-white tracking-tight">PulseLink</span>
         </motion.div>
 
-        {/* Hero copy */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="relative space-y-6"
+          className="space-y-6"
         >
-          <h1 className="text-4xl font-bold text-white leading-tight">
-            Healthcare,<br />made simple.
+          <h1 className="text-5xl font-bold text-white leading-tight">
+            Talk to a doctor.<br />
+            <span className="text-white/90">Right from home.</span>
           </h1>
-          <p className="text-white/70 text-base leading-relaxed max-w-xs">
-            Book appointments, consult with trusted doctors, and manage your health — all in one place.
+          <p className="text-white/70 text-lg max-w-xs">
+            Secure video consultations, real-time queue updates, and digital prescriptions — all in one place.
           </p>
-
-          {/* Feature pills */}
-          <div className="flex flex-col gap-3 pt-2">
-            {[
-              { icon: <CheckCircle2 className="h-4 w-4" />, label: "Instant appointment booking" },
-              { icon: <ShieldCheck className="h-4 w-4" />, label: "Verified doctors & specialists" },
-              { icon: <CheckCircle2 className="h-4 w-4" />, label: "Medicine delivered to your door" },
-            ].map((feat) => (
-              <div key={feat.label} className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/15 text-white shrink-0">
-                  {feat.icon}
-                </div>
-                <span className="text-sm text-white/85">{feat.label}</span>
-              </div>
-            ))}
-          </div>
         </motion.div>
 
-        {/* Footer note */}
         <p className="text-white/40 text-xs">
           © {new Date().getFullYear()} PulseLink. All rights reserved.
         </p>
+        </div>
       </div>
 
       {/* ── RIGHT PANEL ── */}
