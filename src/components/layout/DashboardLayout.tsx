@@ -70,6 +70,7 @@ const navItems: Record<Exclude<UserRole, 'admin'>, NavItem[]> = {
     { label: 'Messages',     href: '/doctor/messages',       icon: MessageCircle },
     { label: 'Prescriptions',href: '/doctor/prescriptions',  icon: FileText },
     { label: 'Lab Results',   href: '/doctor/lab-results',    icon: FlaskConical },
+    { label: 'Cert Requests', href: '/doctor/certificate-requests', icon: FileText },
     { label: 'Earnings',      href: '/doctor/earnings',       icon: TrendingUp },
   ],
 };

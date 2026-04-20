@@ -74,4 +74,35 @@ export const medicalRecordsService = {
     const result = await api.post<any>(API_ENDPOINTS.CERTIFICATES, data);
     return { data: mapMedicalCertificate(result), success: true, message: "Medical certificate created" };
   },
+
+  // Certificate Requests
+  async getCertificateRequests(): Promise<ApiResponse<any[]>> {
+    const data = await api.get<any[]>(API_ENDPOINTS.CERT_REQUESTS);
+    return { data, success: true };
+  },
+
+  async requestCertificate(data: {
+    doctor_id: string;
+    appointment_id?: string;
+    purpose: string;
+    notes?: string;
+  }): Promise<ApiResponse<any>> {
+    const result = await api.post<any>(API_ENDPOINTS.CERT_REQUESTS, data);
+    return { data: result, success: true, message: "Certificate request submitted" };
+  },
+
+  async approveCertificateRequest(id: string, data: {
+    diagnosis: string;
+    rest_days: number;
+    valid_from: string;
+    valid_until: string;
+  }): Promise<ApiResponse<any>> {
+    const result = await api.post<any>(API_ENDPOINTS.CERT_REQUEST_APPROVE(id), data);
+    return { data: result, success: true, message: "Certificate approved" };
+  },
+
+  async rejectCertificateRequest(id: string): Promise<ApiResponse<any>> {
+    const result = await api.post<any>(API_ENDPOINTS.CERT_REQUEST_REJECT(id), {});
+    return { data: result, success: true, message: "Certificate request rejected" };
+  },
 };

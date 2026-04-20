@@ -46,6 +46,8 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { api, API_ENDPOINTS, getBaseUrl } from "@/services/api";
 import { mapAppointmentStatus } from "@/services/mappers";
 
+import { RequestCertificateDialog } from "@/components/patient/RequestCertificateDialog";
+
 // ── Star picker component ─────────────────────────────────────────────────────
 // NowServing-style: clickable stars, hover preview, required before submit.
 function StarPicker({
@@ -472,6 +474,8 @@ export default function PatientAppointmentDetailPage() {
   const [isCancelling, setIsCancelling] = useState(false);
   // Reschedule dialog state
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
+  // Request certificate dialog state
+  const [showCertDialog, setShowCertDialog] = useState(false);
   const reviewRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
 
@@ -1236,6 +1240,43 @@ export default function PatientAppointmentDetailPage() {
           )}
         </AnimatePresence>
 
+        {/* Request Certificate CTA */}
+        <AnimatePresence>
+          {isCompleted && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+            >
+              <Card className="border-blue-300 overflow-hidden">
+                <div className="h-1 w-full bg-gradient-to-r from-blue-400 to-indigo-400" />
+                <CardContent className="p-5 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="h-11 w-11 rounded-xl bg-blue-100 dark:bg-blue-800 flex items-center justify-center shrink-0 shadow-sm">
+                        <FileText className="h-5 w-5 text-blue-600 dark:text-blue-300" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-blue-900 dark:text-blue-100">Need a medical certificate?</p>
+                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                          Request for sick leave, fitness to work, or school excuse.
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      className="gap-2 bg-blue-600 hover:bg-blue-700 text-white shrink-0 w-full sm:w-auto shadow-sm"
+                      onClick={() => setShowCertDialog(true)}
+                    >
+                      <FileText className="h-4 w-4" />
+                      Request Certificate
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* ── E-Prescription ── */}
         {(prescriptionDoc || prescriptionPdfUrl || loadingPdf) && (
           <Card className="overflow-hidden">
@@ -1445,6 +1486,17 @@ export default function PatientAppointmentDetailPage() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Request Certificate Dialog */}
+        {appointment.doctor && (
+          <RequestCertificateDialog
+            open={showCertDialog}
+            onClose={() => setShowCertDialog(false)}
+            doctorId={appointment.doctorId}
+            appointmentId={appointment.id}
+            doctorName={appointment.doctor.name ?? "Doctor"}
+          />
+        )}
       </div>
     </DashboardLayout>
   );

@@ -589,7 +589,7 @@ export default function LandingPage() {
           <p className="text-xs sm:text-sm text-muted-foreground">&copy; {new Date().getFullYear()} PulseLink. All rights reserved.</p>
           <a href="mailto:careconnect126@gmail.com" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors" title="careconnect126@gmail.com">
             <img src="/gmail.svg" alt="Gmail" className="h-4 w-4 sm:h-5 sm:w-5" />
-            <span className="hidden sm:inline">careconnect126@gmail.com</span>
+            <span className="hidden sm:inline">pulselink99@gmail.com</span>
           </a>
         </div>
       </footer>

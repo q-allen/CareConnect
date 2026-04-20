@@ -1,6 +1,11 @@
 {
   "/(auth)/signin/page": "app/(auth)/signin/page.js",
-  "/(auth)/signup/page": "app/(auth)/signup/page.js",
+  "/(doctor)/doctor/appointments/page": "app/(doctor)/doctor/appointments/page.js",
   "/(doctor)/doctor/page": "app/(doctor)/doctor/page.js",
+  "/(doctor)/doctor/schedule/page": "app/(doctor)/doctor/schedule/page.js",
+  "/(patient)/patient/appointments/page": "app/(patient)/patient/appointments/page.js",
+  "/(patient)/patient/book/[doctorId]/page": "app/(patient)/patient/book/[doctorId]/page.js",
+  "/(patient)/patient/doctors/page": "app/(patient)/patient/doctors/page.js",
+  "/(patient)/patient/page": "app/(patient)/patient/page.js",
   "/page": "app/page.js"
 }

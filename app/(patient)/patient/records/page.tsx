@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FileText, FlaskConical, Award, Search, Shield, RefreshCw,
-  FolderOpen, CalendarDays, Sparkles, ArrowRight, Pill, File,
+  FolderOpen, CalendarDays, Sparkles, ArrowRight, Pill, File, Upload, Loader2,
 } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import { useAuthStore } from '@/store';
 import { medicalRecordsService } from '@/services/medicalRecordsService';
 import { Prescription, LabResult, MedicalCertificate } from '@/types';
@@ -93,6 +95,12 @@ export default function MedicalRecordsPage() {
   const [previewLab, setPreviewLab] = useState<LabResult | null>(null);
   const [previewCert, setPreviewCert] = useState<MedicalCertificate | null>(null);
 
+  // Upload dialog state
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [selectedLab, setSelectedLab] = useState<LabResult | null>(null);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+
   const fetchRecords = useCallback(async () => {
     if (!user) return;
     setLoading(true);
@@ -159,6 +167,34 @@ export default function MedicalRecordsPage() {
   };
 
   const handleFindDoctor = () => { router.push('/patient/doctors'); };
+
+  const openUploadDialog = (lab: LabResult, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedLab(lab);
+    setUploadFile(null);
+    setUploadOpen(true);
+  };
+
+  const handleUploadResults = async () => {
+    if (!selectedLab || !uploadFile) {
+      toast({ title: 'Please select a file', variant: 'destructive' });
+      return;
+    }
+    setUploading(true);
+    try {
+      const res = await medicalRecordsService.uploadLabResults(selectedLab.id, uploadFile);
+      if (!res.success) throw new Error('Upload failed');
+      toast({ title: 'Results uploaded', description: 'Your doctor has been notified.' });
+      setUploadOpen(false);
+      setSelectedLab(null);
+      setUploadFile(null);
+      fetchRecords();
+    } catch {
+      toast({ title: 'Upload failed', description: 'Please try again.', variant: 'destructive' });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const statsCards = [
     {
@@ -355,24 +391,37 @@ export default function MedicalRecordsPage() {
                   />
                 ))}
                 {filtered.labResults.map((lab, i) => (
-                  <FileCard
-                    key={lab.id}
-                    id={lab.id}
-                    type="lab-result"
-                    title={lab.testName}
-                    description={`${lab.testType} · ${lab.status === 'completed' ? 'Results available' : 'Pending results'}`}
-                    doctorName={lab.doctor?.name || 'Physician'}
-                    doctorSpecialty={lab.doctor?.specialty || ''}
-                    doctorAvatar={lab.doctor?.avatar}
-                    date={lab.date}
-                    fileUrl={lab.fileUrl}
-                    statusBadge={{
-                      label: lab.status,
-                      variant: lab.status === 'completed' ? 'default' : 'secondary',
-                    }}
-                    index={filtered.prescriptions.length + i}
-                    onClick={() => openPreview('lab-result', lab)}
-                  />
+                  <div key={lab.id} className="relative">
+                    <FileCard
+                      id={lab.id}
+                      type="lab-result"
+                      title={lab.testName}
+                      description={`${lab.testType} · ${lab.status === 'completed' ? 'Results available' : 'Pending results'}`}
+                      doctorName={lab.doctor?.name || 'Physician'}
+                      doctorSpecialty={lab.doctor?.specialty || ''}
+                      doctorAvatar={lab.doctor?.avatar}
+                      date={lab.date}
+                      fileUrl={lab.fileUrl}
+                      statusBadge={{
+                        label: lab.status,
+                        variant: lab.status === 'completed' ? 'default' : 'secondary',
+                      }}
+                      index={filtered.prescriptions.length + i}
+                      onClick={() => openPreview('lab-result', lab)}
+                    />
+                    {lab.status === 'pending' && (
+                      <div className="absolute top-4 right-4">
+                        <Button
+                          size="sm"
+                          className="gap-1.5"
+                          onClick={(e) => openUploadDialog(lab, e)}
+                        >
+                          <Upload className="h-3.5 w-3.5" />
+                          Upload Results
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 ))}
                 {filtered.certificates.map((cert, i) => (
                   <FileCard
@@ -425,24 +474,37 @@ export default function MedicalRecordsPage() {
               <EmptyState type="lab-results" onFindDoctor={handleFindDoctor} />
             ) : (
               filtered.labResults.map((lab, i) => (
-                <FileCard
-                  key={lab.id}
-                  id={lab.id}
-                  type="lab-result"
-                  title={lab.testName}
-                  description={`${lab.testType} · ${lab.status === 'completed' ? 'Results available' : 'Pending results'}`}
-                  doctorName={lab.doctor?.name || 'Physician'}
-                  doctorSpecialty={lab.doctor?.specialty || ''}
-                  doctorAvatar={lab.doctor?.avatar}
-                  date={lab.date}
-                  fileUrl={lab.fileUrl}
-                  statusBadge={{
-                    label: lab.status,
-                    variant: lab.status === 'completed' ? 'default' : 'secondary',
-                  }}
-                  index={i}
-                  onClick={() => openPreview('lab-result', lab)}
-                />
+                <div key={lab.id} className="relative">
+                  <FileCard
+                    id={lab.id}
+                    type="lab-result"
+                    title={lab.testName}
+                    description={`${lab.testType} · ${lab.status === 'completed' ? 'Results available' : 'Pending results'}`}
+                    doctorName={lab.doctor?.name || 'Physician'}
+                    doctorSpecialty={lab.doctor?.specialty || ''}
+                    doctorAvatar={lab.doctor?.avatar}
+                    date={lab.date}
+                    fileUrl={lab.fileUrl}
+                    statusBadge={{
+                      label: lab.status,
+                      variant: lab.status === 'completed' ? 'default' : 'secondary',
+                    }}
+                    index={i}
+                    onClick={() => openPreview('lab-result', lab)}
+                  />
+                  {lab.status === 'pending' && (
+                    <div className="absolute top-4 right-4">
+                      <Button
+                        size="sm"
+                        className="gap-1.5"
+                        onClick={(e) => openUploadDialog(lab, e)}
+                      >
+                        <Upload className="h-3.5 w-3.5" />
+                        Upload Results
+                      </Button>
+                    </div>
+                  )}
+                </div>
               ))
             )}
           </TabsContent>
@@ -495,6 +557,59 @@ export default function MedicalRecordsPage() {
         labResult={previewLab}
         certificate={previewCert}
       />
+
+      {/* Upload Dialog */}
+      <Dialog open={uploadOpen} onOpenChange={(v) => { if (!uploading) setUploadOpen(v); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FlaskConical className="h-5 w-5 text-success" />
+              Upload Lab Results
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedLab && (
+            <div className="space-y-4">
+              <div className="rounded-lg bg-secondary/50 p-3 text-sm">
+                <p className="font-semibold">{selectedLab.testName}</p>
+                <p className="text-xs text-muted-foreground">{selectedLab.testType}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Requested by: {selectedLab.doctor?.name || 'Doctor'}
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted-foreground">
+                  Lab Result File (PDF, image) *
+                </label>
+                <Input
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  onChange={(e) => setUploadFile(e.target.files?.[0] ?? null)}
+                  disabled={uploading}
+                />
+                {uploadFile && (
+                  <p className="text-xs text-success mt-1">{uploadFile.name} selected</p>
+                )}
+              </div>
+
+              <div className="rounded-lg bg-primary/5 p-3 text-xs text-muted-foreground">
+                <p>💡 Upload the lab results you received from the laboratory. Your doctor will be notified once uploaded.</p>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setUploadOpen(false)} disabled={uploading}>
+              Cancel
+            </Button>
+            <Button onClick={handleUploadResults} disabled={uploading || !uploadFile} className="gap-2">
+              {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              {uploading ? 'Uploading...' : 'Upload & Notify Doctor'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
