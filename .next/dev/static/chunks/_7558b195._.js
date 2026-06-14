@@ -442,6 +442,17 @@ const appointmentService = {
             success: true
         };
     },
+    async rescheduleAppointment (id, date, time) {
+        const result = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["api"].post(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].APPOINTMENT_RESCHEDULE(id), {
+            date,
+            time
+        });
+        return {
+            data: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$mappers$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["mapAppointment"])(result),
+            success: true,
+            message: "Appointment rescheduled successfully"
+        };
+    },
     async getUpcomingAppointments () {
         const data = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["api"].get(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].APPOINTMENT_UPCOMING);
         return {
@@ -2606,6 +2617,38 @@ const medicalRecordsService = {
             success: true,
             message: "Medical certificate created"
         };
+    },
+    // Certificate Requests
+    async getCertificateRequests () {
+        const data = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["api"].get(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].CERT_REQUESTS);
+        return {
+            data,
+            success: true
+        };
+    },
+    async requestCertificate (data) {
+        const result = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["api"].post(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].CERT_REQUESTS, data);
+        return {
+            data: result,
+            success: true,
+            message: "Certificate request submitted"
+        };
+    },
+    async approveCertificateRequest (id, data) {
+        const result = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["api"].post(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].CERT_REQUEST_APPROVE(id), data);
+        return {
+            data: result,
+            success: true,
+            message: "Certificate approved"
+        };
+    },
+    async rejectCertificateRequest (id) {
+        const result = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["api"].post(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["API_ENDPOINTS"].CERT_REQUEST_REJECT(id), {});
+        return {
+            data: result,
+            success: true,
+            message: "Certificate request rejected"
+        };
     }
 };
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
@@ -2654,7 +2697,7 @@ async function sendLabRequest(input) {
         test_name: input.testName || 'Laboratory Test',
         test_type: 'Lab Request',
         notes: input.notes,
-        laboratory: 'CareConnect Partner Lab'
+        laboratory: 'PulseLink Partner Lab'
     });
     if (!result.success) {
         throw new Error(result.error || 'Failed to create lab request');

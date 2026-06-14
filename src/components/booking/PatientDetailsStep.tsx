@@ -258,7 +258,7 @@ export default function PatientDetailsStep({ onValidationChange }: PatientDetail
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <User className="h-4 w-4 text-primary" />
-            {bookingForSomeoneElse ? "Patient Information" : "Your Information"}
+            {bookingForSomeoneElse ? "Patient Information" : "Patient Information"}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">

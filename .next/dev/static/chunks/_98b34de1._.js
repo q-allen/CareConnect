@@ -425,7 +425,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 /**
  * /doctor/earnings
  *
- * Doctor Earnings Dashboard — CareConnect
+ * Doctor Earnings Dashboard — PulseLink
  *
  * Shows:
  *   - Summary cards: Total Earnings, Commission Deducted, Available for Payout, Paid Out
@@ -679,14 +679,14 @@ function EarningsPage() {
                                 lineNumber: 131,
                                 columnNumber: 11
                             }, this),
-                            "CareConnect takes a ",
+                            "PulseLink takes a ",
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                 className: "font-bold",
                                 children: "15% platform fee"
                             }, void 0, false, {
                                 fileName: "[project]/app/(doctor)/doctor/earnings/page.tsx",
                                 lineNumber: 132,
-                                columnNumber: 31
+                                columnNumber: 29
                             }, this),
                             " on every completed online consultation. You keep ",
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {

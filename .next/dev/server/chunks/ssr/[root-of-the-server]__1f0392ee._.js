@@ -261,7 +261,7 @@ function TermsAndConditionsPage() {
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                             className: "text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent",
-                            children: "CareConnect"
+                            children: "PulseLink"
                         }, void 0, false, {
                             fileName: "[project]/app/(auth)/terms-and-conditions/page.tsx",
                             lineNumber: 40,
@@ -330,7 +330,7 @@ function TermsAndConditionsPage() {
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
                                         className: "text-lg font-semibold",
-                                        children: "CareConnect Doctor Terms and Conditions"
+                                        children: "PulseLink Doctor Terms and Conditions"
                                     }, void 0, false, {
                                         fileName: "[project]/app/(auth)/terms-and-conditions/page.tsx",
                                         lineNumber: 58,
@@ -348,7 +348,7 @@ function TermsAndConditionsPage() {
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                 className: "text-foreground/80",
-                                                children: "CareConnect is a technology platform only. We do not provide medical services, diagnosis, treatment, or advice. All medical services are provided solely by independent licensed doctors."
+                                                children: "PulseLink is a technology platform only. We do not provide medical services, diagnosis, treatment, or advice. All medical services are provided solely by independent licensed doctors."
                                             }, void 0, false, {
                                                 fileName: "[project]/app/(auth)/terms-and-conditions/page.tsx",
                                                 lineNumber: 62,
@@ -364,7 +364,7 @@ function TermsAndConditionsPage() {
                                                         lineNumber: 68,
                                                         columnNumber: 19
                                                     }, this),
-                                                    " for all medical decisions, diagnoses, prescriptions, and care given to the patient. CareConnect is not liable for any error, negligence, malpractice, misdiagnosis, or any harm resulting from the doctor’s services."
+                                                    " for all medical decisions, diagnoses, prescriptions, and care given to the patient. PulseLink is not liable for any error, negligence, malpractice, misdiagnosis, or any harm resulting from the doctor’s services."
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/(auth)/terms-and-conditions/page.tsx",
@@ -373,7 +373,7 @@ function TermsAndConditionsPage() {
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                 className: "text-foreground/80 mt-3 text-red-600 text-xs font-medium",
-                                                children: "By using this platform, you agree that CareConnect shall not be held liable for any medical-related issues or claims arising from your consultation with any doctor."
+                                                children: "By using this platform, you agree that PulseLink shall not be held liable for any medical-related issues or claims arising from your consultation with any doctor."
                                             }, void 0, false, {
                                                 fileName: "[project]/app/(auth)/terms-and-conditions/page.tsx",
                                                 lineNumber: 73,
@@ -421,7 +421,7 @@ function TermsAndConditionsPage() {
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                 className: "text-foreground/80",
-                                                children: "CareConnect charges a 15% commission on all successful online and on-demand consultations. In-clinic consultations are commission-free."
+                                                children: "PulseLink charges a 15% commission on all successful online and on-demand consultations. In-clinic consultations are commission-free."
                                             }, void 0, false, {
                                                 fileName: "[project]/app/(auth)/terms-and-conditions/page.tsx",
                                                 lineNumber: 90,
@@ -469,7 +469,7 @@ function TermsAndConditionsPage() {
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                 className: "text-foreground/80",
-                                                children: "CareConnect reserves the right to suspend or terminate your account for violations of these terms, unprofessional conduct, or repeated patient complaints."
+                                                children: "PulseLink reserves the right to suspend or terminate your account for violations of these terms, unprofessional conduct, or repeated patient complaints."
                                             }, void 0, false, {
                                                 fileName: "[project]/app/(auth)/terms-and-conditions/page.tsx",
                                                 lineNumber: 106,
@@ -515,7 +515,7 @@ function TermsAndConditionsPage() {
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
                                     htmlFor: "agree",
                                     className: "text-sm leading-tight cursor-pointer text-foreground/90",
-                                    children: "I have read and fully agree to the CareConnect Doctor Terms and Conditions. I understand that I am solely responsible for all medical services I provide and that CareConnect is not liable for any medical outcomes."
+                                    children: "I have read and fully agree to the PulseLink Doctor Terms and Conditions. I understand that I am solely responsible for all medical services I provide and that PulseLink is not liable for any medical outcomes."
                                 }, void 0, false, {
                                     fileName: "[project]/app/(auth)/terms-and-conditions/page.tsx",
                                     lineNumber: 125,

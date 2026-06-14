@@ -3889,7 +3889,7 @@ function PatientDetailsStep({ onValidationChange }) {
                                     lineNumber: 260,
                                     columnNumber: 13
                                 }, this),
-                                bookingForSomeoneElse ? "Patient Information" : "Your Information"
+                                bookingForSomeoneElse ? "Patient Information" : "Patient Information"
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/booking/PatientDetailsStep.tsx",
